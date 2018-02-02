@@ -16,14 +16,14 @@ $ pip3 install zmail
 
 - ### Send your mail
 
-```
+```python
 import zmail
 mail_content = {
     'subject': 'Success!',  # Anything you want.
     'from': '',  # Better be '' as default, zmail will handle it automatically.
-    'to': 'zmail_user',  # Anything you want.
+    'to': '',  # Better be '' as default, zmail will handle it automatically.
     'content': 'This message from zmail!',  # Anything you want.
-    'attachments': '/Users/zyh/Documents/GitHub/zmail/test/t.zip',  # Absolute path will be better.
+    'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 
 mail = zmail.encode_mail(mail_content)
@@ -37,10 +37,14 @@ server.send_mail('yourfriend@example.com', mail)
 
 The mail server you are using must be in this list, or you provide the server address and it's port.
 
-| Server address | Send | Get  |
-| -------------- | ---- | ---- |
-| @163.com       | ✓    |      |
-| @qq.com        | ✓    |      |
+| Server address | Send mail | Pull mail |
+| -------------- | --------- | --------- |
+| @163.com       | ✓         |           |
+| @qq.com        | ✓         |           |
+| @126.com       | ✓         |           |
+| @yeah.net      | ✓         |           |
+| @gmail.com     |           |           |
+|                |           |           |
 
 ## To do
 

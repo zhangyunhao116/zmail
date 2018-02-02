@@ -30,7 +30,7 @@ class MailServer:
         """"Send email."""
         type_check(MIMEMultipart, message)
 
-        self._message_header_fix(message, self.user)
+        self._message_add_from(message, self.user)
 
         recipients = make_iterable(recipients)
 
@@ -42,6 +42,7 @@ class MailServer:
                 server.set_debuglevel(__level__)
             server.login(self.user, self.password)
             for recipient in recipients:
+                self._message_add_to(message, recipient)
                 server.sendmail(self.user, recipient, message.as_string())
 
     def get_mail(self):
@@ -60,7 +61,13 @@ class MailServer:
         print(server.retr(4))
 
     @staticmethod
-    def _message_header_fix(message, sender_address):
+    def _message_add_from(message, sender_address):
         """Add 'From' header automatically to avoid server reject the mail."""
         if message['From'] is None:
             message['From'] = '{}<{}>'.format(sender_address.split('@')[0], sender_address)
+
+    @staticmethod
+    def _message_add_to(message, recipient_address):
+        """Add 'To' header automatically to avoid server reject the mail."""
+        if message['To'] is None:
+            message['To'] = '{}<{}>'.format(recipient_address.split('@')[0], recipient_address)

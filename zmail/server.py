@@ -5,17 +5,21 @@ This module provides a MailServer object to communicate with mail server.
 """
 
 import smtplib
+import poplib
 import logging
 
 from email.mime.multipart import MIMEMultipart
+
 from .utils import type_check, make_iterable
 from .info import get_supported_server_info
+from .settings import __level__, __status__
 
 logger = logging.getLogger('zmail')
 
 
 class MailServer:
     """This object communicate with server directly."""
+
     def __init__(self, user, password):
         type_check(str, user, password)
 
@@ -32,12 +36,28 @@ class MailServer:
 
         host, port = get_supported_server_info(self.user, 'smtp')
 
-        logger.info('Login into server %s:%s', host, port)
+        logger.info('Prepare login into {}:{}.'.format(host, port))
         with smtplib.SMTP_SSL(host, port) as server:
-            server.set_debuglevel(logger.level)
+            if __status__ == 'dev':
+                server.set_debuglevel(__level__)
             server.login(self.user, self.password)
             for recipient in recipients:
                 server.sendmail(self.user, recipient, message.as_string())
+
+    def get_mail(self):
+        """Get mail.using POP3 protocol."""
+        host, port = get_supported_server_info(self.user, 'pop3')
+
+        server = poplib.POP3_SSL(host, port)
+
+        if __status__ == 'dev':
+            server.set_debuglevel(__level__)
+
+        logger.info('Prepare login into {}:{}.'.format(host, port))
+        server.user(self.user)
+        server.pass_(self.password)
+
+        print(server.retr(4))
 
     @staticmethod
     def _message_header_fix(message, sender_address):

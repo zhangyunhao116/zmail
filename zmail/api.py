@@ -1,3 +1,9 @@
+"""
+zmail.api
+~~~~~~~~~~~~
+This module implements the zmail API.
+"""
+
 from .message import MailMessage
 from .server import MailServer
 
@@ -7,7 +13,7 @@ def encode_mail(message):
     return MailMessage().encode(message)
 
 
-def decode_mail(message):
+def decode_mail():
     """A shortcut to convert a MIME string to a dict."""
     return MailMessage().decode()
 

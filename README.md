@@ -9,7 +9,7 @@ Zmail allows you to send and get email as possible as it can be.There is no need
 ## Installation 
 
 ```
-$ pip3 install zamil
+$ pip3 install zmail
 ```
 
 ## Examples

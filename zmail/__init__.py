@@ -1,5 +1,11 @@
+"""
+zmail.__init__
+~~~~~~~~~~~~
+Zmail allows you to send and get email as possible as it can be.
+
+"""
 import logging
-from .api import *
+from .api import encode_mail, decode_mail, server
 
 __status__ = 'publish'
 

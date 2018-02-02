@@ -1,3 +1,8 @@
+"""
+zmail.message
+~~~~~~~~~~~~
+This module provides a MailMessage object to handles MIME object.
+"""
 import os
 import mimetypes
 import logging
@@ -15,11 +20,11 @@ logger = logging.getLogger('zmail')
 
 
 class MailMessage:
+    """This object handles MIME object."""
     _basic = ('From', 'To', 'Subject')
 
     def __init__(self):
         logger.info('Initiate MailMessage.')
-        pass
 
     def encode(self, message):
         """Convert a dict to a MIME obj."""
@@ -48,7 +53,7 @@ class MailMessage:
         if 'attachments' in message:
             attachments = make_iterable(message['attachments'])
             for attachment in attachments:
-                logger.info('Loading {}'.format(attachment))
+                logger.info('Loading %s', attachment)
                 attachment = get_abs_path(attachment)
                 part = self._get_attachment_part(attachment)
                 msg.attach(part)
@@ -63,10 +68,10 @@ class MailMessage:
     def _get_attachment_part(file):
         """According to file-type return a prepared attachment part."""
         name = os.path.split(file)[1]
-        file_type, encoding = mimetypes.guess_type(name)
+        file_type = mimetypes.guess_type(name)[0]
 
         if file_type is None:
-            logger.warning('Could not guess {} type, use application type instead.'.format(file))
+            logger.warning('Could not guess %s type, use application type instead.', file)
             file_type = 'application/octet-stream'
 
         main_type, sub_type = file_type.split('/')

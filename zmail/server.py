@@ -1,3 +1,9 @@
+"""
+zmail.server
+~~~~~~~~~~~~
+This module provides a MailServer object to communicate with mail server.
+"""
+
 import smtplib
 import logging
 
@@ -9,6 +15,7 @@ logger = logging.getLogger('zmail')
 
 
 class MailServer:
+    """This object communicate with server directly."""
     def __init__(self, user, password):
         type_check(str, user, password)
 
@@ -25,7 +32,7 @@ class MailServer:
 
         host, port = get_supported_server_info(self.user, 'smtp')
 
-        logger.info('Login into server {}:{}'.format(host, port))
+        logger.info('Login into server %s:%s', host, port)
         with smtplib.SMTP_SSL(host, port) as server:
             server.set_debuglevel(logger.level)
             server.login(self.user, self.password)

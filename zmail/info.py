@@ -1,4 +1,9 @@
 """
+zmail.info
+~~~~~~~~~~~~
+This module provide supported server information.
+
+
 'Server_provider_address':{
     'protocol':('protocol_server_address', ssl_port,none_ssl_port),
 }
@@ -27,7 +32,5 @@ def get_supported_server_info(mail_address, protocol, ssl=True):
             protocol_info = server_info[protocol]
             if ssl:
                 return protocol_info[0], protocol_info[1]
-            else:
-                return protocol_info[0], protocol_info[2]
-    else:
-        raise Exception('{} is not supported now,or get a wrong mail address.'.format(mail_address))
+            return protocol_info[0], protocol_info[2]
+    raise Exception('{} is not supported now,or get a wrong mail address.'.format(mail_address))

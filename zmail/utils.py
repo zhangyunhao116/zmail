@@ -1,3 +1,9 @@
+"""
+zmail.utils
+~~~~~~~~~~~~
+This module contains some useful function power zmail.
+"""
+
 import os
 
 
@@ -23,5 +29,4 @@ def make_iterable(obj):
     """Get a iterable obj."""
     if isinstance(obj, (tuple, list)):
         return obj
-    else:
-        return obj,
+    return obj,

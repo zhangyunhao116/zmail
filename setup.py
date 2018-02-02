@@ -1,3 +1,6 @@
+import os
+import sys
+
 from setuptools import setup, find_packages
 
 PROJECT_NAME = 'zmail'
@@ -23,3 +26,4 @@ setup(
     include_package_data=True,
 
 )
+

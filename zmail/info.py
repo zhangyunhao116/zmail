@@ -11,13 +11,29 @@ This module provide supported server information.
 supported_server = {
     '163.com': {
         'smtp': ('smtp.163.com', 994, 25),
-        'pop3': ('pop3.163.com', 995, 110),
+        'pop3': ('pop.163.com', 995, 110),
         'imap': ('imap.163.com', 993, 143)
+
+    },
+    '126.com': {
+        'smtp': ('smtp.126.com', 994, 25),
+        'pop3': ('pop.126.com', 995, 110),
+        'imap': ('imap.126.com', 993, 143)
+
+    },
+    'yeah.net': {
+        'smtp': ('smtp.yeah.net', 994, 25),
+        'pop3': ('pop.yeah.net', 995, 110),
+        'imap': ('imap.yeah.net', 993, 143)
 
     },
     'qq.com': {
         'smtp': ('smtp.qq.com', 25),
         'pop3': ('pop.qq.com', 995),
+    },
+    'gmail.com': {
+        'smtp': ('smtp.gmail.com', 465, 443),
+        'pop3': ('pop.gmail.com', 995),
     },
 }
 

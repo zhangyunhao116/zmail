@@ -1,0 +1,7 @@
+include zmail
+include LICENSE
+include setup.py
+include *.md
+
+exclude test
+exclude test.py

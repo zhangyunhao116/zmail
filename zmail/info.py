@@ -35,6 +35,10 @@ supported_server = {
         'smtp': ('smtp.gmail.com', 465, 443),
         'pop3': ('pop.gmail.com', 995),
     },
+    'sina.com': {
+        'smtp': ('smtp.sina.com', 465),
+        'pop3': ('pop.sina.com', 995),
+    },
 }
 
 
@@ -49,4 +53,10 @@ def get_supported_server_info(mail_address, protocol, ssl=True):
             if ssl:
                 return protocol_info[0], protocol_info[1]
             return protocol_info[0], protocol_info[2]
-    raise Exception('{} is not supported now,or get a wrong mail address.'.format(mail_address))
+    else:
+        if protocol == 'smtp' and ssl:
+            return 'smtp.' + provider, 465
+        elif protocol == 'pop3' and ssl:
+            return 'pop.' + provider, 995
+
+        raise Exception('{} is not supported now,or get a wrong mail address.'.format(mail_address))

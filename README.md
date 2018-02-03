@@ -8,9 +8,46 @@ Zmail allows you to send and get email as possible as it can be.There is no need
 
 ## Installation 
 
+Zmail only running in python3 without other modules required. **Do not support python2**.
+
+### Option 1:Install via pip（Better）
+
 ```
 $ pip3 install zmail
 ```
+
+or
+
+```
+$ pip install zmail
+```
+
+If that,means your pip is also work for python3.
+
+### Option 2:Download from Github
+
+You can download the master branch of zmail,unzip it ,and do
+
+```
+$ python3 setup.py install
+```
+
+## Features
+
+- Automatically look for server address and it's port.
+- Automatically convert a python dict to MIME object(with attachments).
+- Automatically add mail header to avoid server reject your mail.
+- Easily custom your mail header.
+- Only require python >= 3.5 ,you can embed it in your project without other module required.
+
+## Usage
+
+Before using it, please ensure:
+
+- Using python3
+- Open SMTP/POP3 function in your mail
+
+Now,all you need to do is just import zmail.
 
 ## Examples
 
@@ -28,23 +65,26 @@ mail_content = {
 
 mail = zmail.encode_mail(mail_content)
 
-server = zmail.server(user='yourmail@example.com', password='yourpassword')
+server = zmail.server('yourmail@example.com, 'yourpassword')
 
 server.send_mail('yourfriend@example.com', mail)
 ```
 
 ## Supported mail server
 
-The mail server you are using must be in this list, or you provide the server address and it's port.
+The mail server in this list have been tested and approved.
 
-| Server address | Send mail | Pull mail |
-| -------------- | --------- | --------- |
-| @163.com       | ✓         |           |
-| @qq.com        | ✓         |           |
-| @126.com       | ✓         |           |
-| @yeah.net      | ✓         |           |
-| @gmail.com     |           |           |
-|                |           |           |
+**If your mail server not in it , don't worry , zmail will handle it automatically.If there any problems in use, pls tell me in the github. ** 
+
+| Server address | Send mail | Pull mail | Remarks      |
+| -------------- | --------- | --------- | ------------ |
+| @163.com       | ✓         |           |              |
+| @qq.com        | ✓         |           |              |
+| @126.com       | ✓         |           |              |
+| @yeah.net      | ✓         |           |              |
+| @gmail.com     |           |           | TimeOutError |
+| @sina.com      | ✓         |           |              |
+|                |           |           |              |
 
 ## To do
 

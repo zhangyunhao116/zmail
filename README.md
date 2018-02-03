@@ -76,6 +76,7 @@ The mail server in this list have been tested and approved.
 
 **If your mail server not in it , don't worry , zmail will handle it automatically.If there any problems in use, pls tell me in the github. ** 
 
+
 | Server address | Send mail | Pull mail | Remarks      |
 | -------------- | --------- | --------- | ------------ |
 | @163.com       | ✓         |           |              |

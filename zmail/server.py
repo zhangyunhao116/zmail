@@ -12,7 +12,7 @@ from email.mime.multipart import MIMEMultipart
 
 from .utils import type_check, make_iterable
 from .info import get_supported_server_info
-from .settings import __level__, __status__
+from .settings import __level__, __status__, __local__
 
 logger = logging.getLogger('zmail')
 
@@ -37,7 +37,7 @@ class MailServer:
         host, port = get_supported_server_info(self.user, 'smtp')
 
         logger.info('Prepare login into {}:{}.'.format(host, port))
-        with smtplib.SMTP_SSL(host, port) as server:
+        with smtplib.SMTP_SSL(host, port, local_hostname=__local__) as server:
             if __status__ == 'dev':
                 server.set_debuglevel(__level__)
             server.login(self.user, self.password)

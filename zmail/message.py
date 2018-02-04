@@ -50,7 +50,7 @@ class MailMessage:
         msg.attach(MIMEText('%s' % message['content'], 'plain', 'utf-8'))
 
         # Set attachments.
-        if 'attachments' in message:
+        if 'attachments' in message and message['attachments']:
             attachments = make_iterable(message['attachments'])
             for attachment in attachments:
                 logger.info('Loading %s', attachment)

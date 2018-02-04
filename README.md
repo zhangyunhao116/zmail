@@ -36,7 +36,7 @@ $ python3 setup.py install
 
 - Automatically look for server address and it's port.
 - Automatically convert a python dict to MIME object(with attachments).
-- Automatically add mail header to avoid server reject your mail.
+- Automatically add mail header and local name to avoid server reject your mail.
 - Easily custom your mail header.
 - Only require python >= 3.5 ,you can embed it in your project without other module required.
 
@@ -47,7 +47,7 @@ Before using it, please ensure:
 - Using python3
 - Open SMTP/POP3 function in your mail
 
-Now,all you need to do is just import zmail.
+Then,all you need to do is just import zmail.
 
 ## Examples
 

@@ -58,7 +58,6 @@ class MailServer:
         server.user(self.user)
         server.pass_(self.password)
 
-        print(server.retr(4))
 
     @staticmethod
     def _message_add_from(message, sender_address):

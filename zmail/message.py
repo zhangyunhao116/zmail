@@ -43,7 +43,7 @@ class MailMessage:
 
         # Set extra parameters.
         for k in message:
-            if k.capitalize() not in self._basic and k != 'attachments':
+            if k.capitalize() not in self._basic and k not in ('attachments', 'content'):
                 msg[k] = message[k]
 
         # Set mail content.

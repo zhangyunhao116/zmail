@@ -57,8 +57,6 @@ Then,all you need to do is just import zmail.
 import zmail
 mail_content = {
     'subject': 'Success!',  # Anything you want.
-    'from': '',  # Better be '' as default, zmail will handle it automatically.
-    'to': '',  # Better be '' as default, zmail will handle it automatically.
     'content': 'This message from zmail!',  # Anything you want.
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
@@ -78,15 +76,15 @@ The mail server in this list have been tested and approved.
 
 
 
-| Server address | Send mail | Pull mail | Remarks      |
-| -------------- | --------- | --------- | ------------ |
-| @163.com       | ✓         |           |              |
-| @qq.com        | ✓         |           |              |
-| @126.com       | ✓         |           |              |
-| @yeah.net      | ✓         |           |              |
-| @gmail.com     |           |           | TimeOutError |
-| @sina.com      | ✓         |           |              |
-|                |           |           |              |
+| Server address | Send mail | Pull mail | Remarks                   |
+| -------------- | --------- | --------- | ------------------------- |
+| @163.com       | ✓         |           |                           |
+| @qq.com        | ✓         |           |                           |
+| @126.com       | ✓         |           |                           |
+| @yeah.net      | ✓         |           |                           |
+| @gmail.com     | ✓         |           | Need app private password |
+| @sina.com      | ✓         |           |                           |
+|                |           |           |                           |
 
 
 

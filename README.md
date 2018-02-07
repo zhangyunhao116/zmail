@@ -4,11 +4,11 @@
 [![platform](https://img.shields.io/badge/python-3.5-green.svg)]()
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)]()
 
-Zmail allows you to send and get email as possible as it can be.There is no need to check server address or make your own MIME string.With zmail, you only need to care about your mail's content.
+Zmail allows you to send and get emails as possible as it can be in python.There is no need to check server address or make your own MIME string.With zmail, you only need to care about your mail content.
 
 ## Installation 
 
-Zmail only running in python3 without other modules required. **Do not support python2**.
+Zmail only running in python3 without third-party modules required. **Do not support python2**.
 
 ### Option 1:Install via pip（Better）
 
@@ -45,7 +45,7 @@ $ python3 setup.py install
 Before using it, please ensure:
 
 - Using python3
-- Open SMTP/POP3 function in your mail
+- Open SMTP/POP3 function in your mail (For **@163.com** and **@gmail.com** you need to set your app private password)
 
 Then,all you need to do is just import zmail.
 
@@ -78,7 +78,7 @@ The mail server in this list have been tested and approved.
 
 | Server address | Send mail | Pull mail | Remarks                   |
 | -------------- | --------- | --------- | ------------------------- |
-| @163.com       | ✓         |           |                           |
+| @163.com       | ✓         |           | Need app private password |
 | @qq.com        | ✓         |           |                           |
 | @126.com       | ✓         |           |                           |
 | @yeah.net      | ✓         |           |                           |

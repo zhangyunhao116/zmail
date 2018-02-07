@@ -14,14 +14,14 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='zmail',
-    version='0.0.3',
+    version='0.0.4',
 
     author='ZYunH',
     author_email='workvl@163.com',
 
-    description='None',
-    long_description='None',
-    keywords='',
+    description='Zmail allows you to send and get emails as possible as it can be in python',
+    long_description='Zmail allows you to send and get emails as possible as it can be in python.There is no need to check server address or make your own MIME string.With zmail, you only need to care about your mail content.',
+    keywords='email python3 package',
 
     url='https://github.com/ZYunH/zmail',
     license="MIT Licence",

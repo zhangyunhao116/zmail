@@ -9,8 +9,6 @@ A standard mail content for zmail.it's a dict :
 ```python
 ZMAIL = {
     'subject': 'From zmail server',  # Anything you want.
-    'from': '',  # Better be '' as default, zmail will handle it automatically.
-    'to': '',  # Better be '' as default, zmail will handle it automatically.
     'content': 'This message from zmail!',  # Anything you want.
     'attachments': '',  # Absolute path will be better.
 }
@@ -21,7 +19,7 @@ you can make your mail use this standard mail ,but rewrite it's content and subj
 ```
 mymail = zmail.ZMAIL
 myail['subject'] = 'Hello zmail'
-mymail['content'] = 'Well '
+mymail['content'] = 'Hava a nice day.'
 ```
 
 if you want to add some attachments, do 

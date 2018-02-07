@@ -34,9 +34,9 @@ $ python3 setup.py install
 
 ## Features
 
-- Automatically look for server address and it's port.
-- Automatically convert a python dict to MIME object(with attachments).
-- Automatically add mail header and local name to avoid server reject your mail.
+- Automatic look for server address and it's port.
+- Automatic convert a python dict to MIME object(with attachments).
+- Automatic add mail header and local name to avoid server reject your mail.
 - Easily custom your mail header.
 - Only require python >= 3.5 ,you can embed it in your project without other module required.
 

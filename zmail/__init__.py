@@ -19,7 +19,7 @@ logger.setLevel(__level__)
 
 # A standard zmail dict.
 ZMAIL = {
-    'subject': 'Success!',  # Anything you want.
+    'subject': 'From zmail server',  # Anything you want.
     'from': '',  # Better be '' as default, zmail will handle it automatically.
     'to': '',  # Better be '' as default, zmail will handle it automatically.
     'content': 'This message from zmail!',  # Anything you want.

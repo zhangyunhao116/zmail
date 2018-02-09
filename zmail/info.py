@@ -1,7 +1,7 @@
 """
 zmail.info
 ~~~~~~~~~~~~
-This module provide supported server information.
+This module provide supported server information and some constants.
 
 
 'Server_provider_address':{
@@ -39,6 +39,21 @@ supported_server = {
         'smtp': ('smtp.sina.com', 465, True),
         'pop3': ('pop.sina.com', 995, True),
     },
+}
+
+__month__ = {
+    'Jan': 1,
+    'Feb': 2,
+    'Mar': 3,
+    'Apr': 4,
+    'May': 5,
+    'Jun': 6,
+    'Jul': 7,
+    'Aug': 8,
+    'Sep': 9,
+    'Oct': 10,
+    'Nov': 11,
+    'Dec': 12,
 }
 
 

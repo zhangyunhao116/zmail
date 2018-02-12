@@ -55,21 +55,22 @@ class MailServer:
         """Get a mail from mailbox."""
         server = self._init_pop3()
 
-        mail = server.get_mail(which)[1]
+        header, body = server.get_mail(which)
+
         server.logout()
 
-        return mail_decode(mail)
+        return mail_decode(header, body, which)
 
     def get_latest(self):
         """Get latest mail in mailbox."""
         server = self._init_pop3()
 
         latest_num = server.stat()[0]
+        header, body = server.get_mail(latest_num)
 
-        latest_mail = server.get_mail(latest_num)[1]
         server.logout()
 
-        return mail_decode(latest_mail)
+        return mail_decode(header, body, latest_num)
 
     def get_all_info(self):
         """Get all mails information.include(subject,from,to,date)"""
@@ -99,7 +100,7 @@ class SMTPServer:
 
     def send_ssl(self, recipients, message, timeout):
         with smtplib.SMTP_SSL(self.host, self.port, __local__, timeout=timeout) as server:
-            if __status__ == 'dev':
+            if __status__ == 'dev_a':
                 server.set_debuglevel(__level__)
             server.login(self.user, self.password)
             for recipient in recipients:
@@ -108,7 +109,7 @@ class SMTPServer:
 
     def send(self, recipients, message, timeout, tls=True):
         with smtplib.SMTP(self.host, self.port, __local__, timeout=timeout) as server:
-            if __status__ == 'dev':
+            if __status__ == 'dev_a':
                 server.set_debuglevel(__level__)
             if tls:
                 server.ehlo()
@@ -127,7 +128,7 @@ class POP3Server:
 
         self.pop3 = poplib.POP3_SSL(host, port) if ssl else poplib.POP3(host, port)
 
-        if __status__ == 'dev':
+        if __status__ == 'dev_a':
             self.pop3.set_debuglevel(__level__)
 
         if tls and ssl is False:
@@ -158,8 +159,14 @@ class POP3Server:
         return self.pop3.stat()
 
     def get_mail(self, which):
-        """Get a mail by its id."""
-        return self.pop3.retr(which)
+        """Get a mail by its id.
+        ：:return (header,body)
+        """
+        header = self.pop3.top(which, 0)[1]
+
+        body = self.pop3.retr(which)[1][len(header):]
+
+        return header, body
 
     def get_header(self, which):
         """Use 'top' to get mail headers."""

@@ -39,6 +39,11 @@ supported_server = {
         'smtp': ('smtp.sina.com', 465, True),
         'pop3': ('pop.sina.com', 995, True),
     },
+    'outlook.com': {
+        'smtp': ('smtp-mail.outlook.com', 587, False),
+        'pop3': ('pop.outlook.com', 995, True),
+    },
+
 }
 
 
@@ -51,8 +56,7 @@ def get_supported_server_info(mail_address, protocol):
         if protocol in server_info:
             return server_info[protocol]
 
-    else:
-        if protocol == 'smtp':
-            return 'smtp.' + provider, 465, True
-        elif protocol == 'pop3':
-            return 'pop.' + provider, 995, True
+    if protocol == 'smtp':
+        return 'smtp.' + provider, 465, True
+    elif protocol == 'pop3':
+        return 'pop3.' + provider, 995, True

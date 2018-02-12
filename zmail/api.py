@@ -4,20 +4,19 @@ zmail.api
 This module implements the zmail API.
 """
 
-from .message import MailMessage
 from .server import MailServer
 
 
-def encode_mail(message):
-    """A shortcut to convert a dict to a MIME obj."""
-    return MailMessage().encode(message)
-
-
-def decode_mail():
-    """A shortcut to convert a MIME string to a dict."""
-    return MailMessage().decode()
-
-
 def server(user, password):
-    """A shortcut to use MailServer."""
+    """A shortcut to use MailServer.
+
+    SMTP:
+        server.send_mail([recipient,], mail)
+
+    POP3:
+        server.get_mail(which)
+        server.get_mails(subject, from, after, before)
+        server.get_latest()
+        server.get_all_info()
+    """
     return MailServer(user, password)

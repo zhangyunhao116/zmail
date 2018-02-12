@@ -286,26 +286,11 @@ def multiple_part_decode(body_as_string, boundary):
                 # Line is a part of header.
                 part += line
 
-        # Is text/plain.
-        if headers['Content-Type'].find('text/plain') == 0:
-            logger.info('Parse text/plain part,coding:{}'.format(headers['Content-Transfer-Encoding']))
-            is_body = False
-            coding = headers['Content-Transfer-Encoding']
-            for line in p:
-                if line == '':
-                    is_body = True
-                    continue
-                if is_body:
-                    if coding == 'base64':
-                        content.append(base64.b64decode(line).decode())
-                    else:
-                        content.append(line)
-
         # Is attachment.
-        elif headers.get('Content-Disposition', default='').find('attachment') == 0:
+        if headers.get('Content-Disposition') and headers['Content-Disposition'].find('attachment') == 0:
             attachment = []
             coding = headers['Content-Transfer-Encoding']
-            filename = re.findall(r'attachment; filename="?(.+)"?', headers['Content-Disposition'])[0]
+            filename = re.findall(r'attachment;\s?filename="?(.+)"?', headers['Content-Disposition'])[0]
             # Fix "
             if filename[0] == '"':
                 filename = filename[1:]
@@ -323,7 +308,22 @@ def multiple_part_decode(body_as_string, boundary):
                         attachment.append(base64.b64decode(line).decode())
                     else:
                         attachment.append(line)
-                attachments.append(attachment)
+            attachments.append(attachment)
+
+        # Is text/plain.
+        elif headers['Content-Type'].find('text/plain') == 0:
+            logger.info('Parse text/plain part,coding:{}'.format(headers['Content-Transfer-Encoding']))
+            is_body = False
+            coding = headers['Content-Transfer-Encoding']
+            for line in p:
+                if line == '':
+                    is_body = True
+                    continue
+                if is_body:
+                    if coding == 'base64':
+                        content.append(base64.b64decode(line).decode())
+                    else:
+                        content.append(line)
 
     return parts, content, attachments
 

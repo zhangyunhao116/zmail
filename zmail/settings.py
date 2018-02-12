@@ -4,7 +4,7 @@ zmail.settings
 This module contains some settings for zmail running or test.
 """
 
-__status__ = 'dev'
+__status__ = 'publish'
 
 __local__ = 'zmail.local'
 

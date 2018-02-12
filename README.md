@@ -61,6 +61,8 @@ mail_content = {
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 
+mail = zmail.encode_mail(mail_content)
+
 server = zmail.server('yourmail@example.com, 'yourpassword')
 
 server.send_mail('yourfriend@example.com', mail)
@@ -74,16 +76,18 @@ The mail server in this list have been tested and approved.
 
 
 
-| Server address | Send mail | Retrieve mail | Remarks                        |
-| -------------- | --------- | ------------- | ------------------------------ |
-| @163.com       | ✓         | ✓             | Need app private password      |
-| @qq.com        | ✓         | ✓             | POP3 need app private password |
-| @126.com       | ✓         | ✓             |                                |
-| @yeah.net      | ✓         | ✓             |                                |
-| @gmail.com     | ✓         | ✓             | Need app private password      |
-| @sina.com      | ✓         | ✓             |                                |
-| @outlook       | ✓         | ✓             |                                |
+| Server address | Send mail | Pull mail | Remarks                   |
+| -------------- | --------- | --------- | ------------------------- |
+| @163.com       | ✓         |           | Need app private password |
+| @qq.com        | ✓         |           |                           |
+| @126.com       | ✓         |           |                           |
+| @yeah.net      | ✓         |           |                           |
+| @gmail.com     | ✓         |           | Need app private password |
+| @sina.com      | ✓         |           |                           |
+|                |           |           |                           |
 
-## API Changes
 
-- Ver 0.0.5 ：Do not use zmail.encode(mail) before send your mail. Direct use server.send_mail('yourfriend@examample.com', mail_as_dict)
+
+## To do
+
+- [ ] Make get function using IMAP or POP3.

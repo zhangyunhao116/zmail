@@ -7,11 +7,6 @@ This module contains some useful function power zmail.
 import os
 
 
-def bytes_to_string(bytes_list):
-    """Decode a list of bytes-objects to a list of string-objects."""
-    return tuple(map(lambda x: x.decode(), bytes_list))
-
-
 def type_check(_types, *args):
     """Each args must be a type in _types or raise a TypeError."""
     for obj in args:
@@ -35,4 +30,3 @@ def make_iterable(obj):
     if isinstance(obj, (tuple, list)):
         return obj
     return obj,
-

@@ -72,11 +72,11 @@ class MailServer:
 
         return mail_decode(header, body, latest_num)
 
-    def get_all_info(self):
+    def get_info(self):
         """Get all mails information.include(subject,from,to,date)"""
         server = self._init_pop3()
 
-        result = server.get_all_info()
+        result = server.get_info()
 
         server.logout()
 
@@ -135,7 +135,7 @@ class POP3Server:
             self.pop3.stls()
         self.login()
 
-    def get_all_info(self):
+    def get_info(self):
         """Get all mails info. The result is the form [header_as_dict,...,] """
         num = self.stat()[0]
         result = []

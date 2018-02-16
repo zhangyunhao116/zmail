@@ -62,8 +62,9 @@ def mail_encode(message):
 
 def mail_decode(header_as_bytes, body_as_bytes, which):
     """Convert a MIME bytes list to dict."""
-    body_as_string = bytes_to_string(body_as_bytes)
+    # body_as_string = bytes_to_string(body_as_bytes)
     result = parse_header(header_as_bytes)
+
     for i in ('content', 'contents', 'attachments',):
         result.setdefault(i)
     content = None
@@ -75,10 +76,10 @@ def mail_decode(header_as_bytes, body_as_bytes, which):
     # Decode multi-part mail or one-part mail.
     if result['boundary']:
         logger.info('Decoding multi-part body.id:{},{}'.format(result['id'], result['boundary']))
-        body, content, attachments = multiple_part_decode(body_as_string, result['boundary'])
+        body, content, attachments = multiple_part_decode(body_as_bytes, result['boundary'])
     else:
         logger.info('Decoding one-part body.id:{}'.format(result['id']))
-        body = one_part_decode(body_as_string, result['content-type'])
+        body = one_part_decode(body_as_bytes, result['content-type'])
         if result['content-type'] == 'text/plain':
             result['content'] = body
 
@@ -244,7 +245,7 @@ def _fmt_date(date_list):
     return '{}-{}-{} {} {}'.format(year, month, day, times, time_zone)
 
 
-def multiple_part_decode(body_as_string, boundary):
+def multiple_part_decode(body_as_bytes, boundary):
     """Convert MIME body to content."""
     # Get part|content|attachments if possible.
     attachments = []
@@ -254,8 +255,8 @@ def multiple_part_decode(body_as_string, boundary):
     # Divide into multiple parts.
     is_part = False
     part = []
-    for i in body_as_string:
-        if i.find(boundary) > -1:
+    for i in body_as_bytes:
+        if i.find(boundary.encode()) > -1:
             is_part = True
             if part:
                 parts.append(part)
@@ -265,70 +266,72 @@ def multiple_part_decode(body_as_string, boundary):
         if is_part:
             part.append(i)
 
-    # Parse each part's header.
+    # Parse each parts.
     for p in parts:
         headers = {}
         header = ''
         part = ''
+        # Parse each part's header.
         for line in p:
             # Header boundary check.
-            if line == '':
+            if line == b'':
                 headers[header] = part
                 break
-
-            if re.fullmatch(r'.+: .+?', line):
+            if re.fullmatch(rb'.+:\s?.+?', line):
                 # Line is a header.
                 if part and header:
                     headers[header] = part
-                header = re.findall(r'(.+): ', line)[0]
-                part = line.split(header + ': ')[1]
+                header = re.findall(rb'(.+):\s?', line)[0].decode()
+                part = line.split(header.encode() + b':')[1]
             else:
                 # Line is a part of header.
                 part += line
-
         # Is attachment.
-        if headers.get('Content-Disposition') and headers['Content-Disposition'].find('attachment') == 0:
+        if headers.get('Content-Disposition') and headers['Content-Disposition'].find(b'attachment') == 0:
             attachment = []
             coding = headers['Content-Transfer-Encoding']
-            filename = re.findall(r'attachment;\s?filename="?(.+)"?', headers['Content-Disposition'])[0]
-            # Fix "
+            filename = re.findall(rb'attachment;\s?filename=(.+|".+")', headers['Content-Disposition'])[0]
+            filename = filename.decode()
+            # Fix " [could be improved]
             if filename[0] == '"':
                 filename = filename[1:]
             if filename[-1] == '"':
                 filename = filename[:-1]
-            attachment.append(filename)
+
+            attachment.append(filename + ';%s' % headers['Content-Type'].decode())
             # Add body.
             is_body = False
             for line in p:
-                if line == '':
+                if line == b'':
                     is_body = True
                     continue
                 if is_body:
-                    if coding == 'base64':
-                        attachment.append(base64.b64decode(line).decode())
+                    if coding.find(b'base64') > -1:
+                        attachment.append(base64.b64decode(line))
                     else:
                         attachment.append(line)
             attachments.append(attachment)
 
         # Is text/plain.
-        elif headers['Content-Type'].find('text/plain') == 0:
+        elif headers['Content-Type'].find(b'text/plain') > -1:
             logger.info('Parse text/plain part,coding:{}'.format(headers['Content-Transfer-Encoding']))
             is_body = False
             coding = headers['Content-Transfer-Encoding']
             for line in p:
-                if line == '':
+                if line == b'':
                     is_body = True
                     continue
                 if is_body:
-                    if coding == 'base64':
+                    if coding.find(b'base64') > -1:
                         content.append(base64.b64decode(line).decode())
                     else:
-                        content.append(line)
-
+                        content.append(line.decode())
     return parts, content, attachments
 
 
-def one_part_decode(body_as_string, content_type):
+def one_part_decode(body_as_bytes, content_type):
+    # [could be improved]
+    body_as_string = bytes_to_string(body_as_bytes)
     body = ''
 
     # Could't decode.

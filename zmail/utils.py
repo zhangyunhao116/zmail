@@ -36,3 +36,37 @@ def make_iterable(obj):
         return obj
     return obj,
 
+
+def get_attachment(mail, *args):
+    names = list(args)
+    names.reverse()
+    if mail['attachments']:
+        for attachment in mail['attachments']:
+            info = attachment[0].split(';')
+            name = info[0]
+            body_type = info[1]
+            is_text_file = True if body_type.find('text/plain') > -1 else False
+
+            try:
+                name = names.pop()
+            except IndexError:
+                pass
+
+            # Write file.
+            if not is_text_file:
+                # Binary file.
+                body = b''.join(attachment[1:])
+                with open(name, 'wb') as f:
+                    f.write(body)
+            else:
+                # Text file.
+                body = tuple(map(lambda x: x.decode() + '\r\n', attachment[1:]))
+                with open(name, 'w') as f:
+                    f.writelines(body)
+
+
+def show(mails):
+    mails = make_iterable(mails)
+    for mail in mails:
+        for k, v in mail.items():
+            print(k, v)

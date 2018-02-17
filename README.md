@@ -124,7 +124,7 @@ attachments None
 id 5
 ```
 
-**Mail structure**
+#### **Mail structure**
 
 - content-type: Mail content type
 - subject: Mail subject
@@ -137,7 +137,7 @@ id 5
 - attachments: None or [['attachment-name;Encoding','ATTACHMENT-DATA']...]
 - id: Mailbox id
 
-**Get attachment**
+#### **Get attachment**
 
 ```
 import zmail

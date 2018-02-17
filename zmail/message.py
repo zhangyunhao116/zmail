@@ -18,7 +18,7 @@ from email.mime.multipart import MIMEMultipart
 from email.encoders import encode_base64
 from email.header import decode_header
 
-from .utils import type_check, get_abs_path, make_iterable, bytes_to_string
+from .utils import type_check, get_abs_path, make_iterable, bytes_to_string, str_decode
 
 logger = logging.getLogger('zmail')
 
@@ -62,7 +62,7 @@ def mail_encode(message):
 
 def mail_decode(header_as_bytes, body_as_bytes, which):
     """Convert a MIME bytes list to dict."""
-    # body_as_string = bytes_to_string(body_as_bytes)
+
     result = parse_header(header_as_bytes)
 
     for i in ('content', 'contents', 'attachments',):
@@ -94,97 +94,76 @@ def mail_decode(header_as_bytes, body_as_bytes, which):
     return result
 
 
-def parse_header(header, _bytes=True, extra_header=None):
+def parse_header(mail_as_bytes, *args):
     """Parse mail header then return a dictionary include basic elements in email.
-    ['Subject: success!','Date:Fri, 09 Feb 2018 23:10:11 +0800 (CST)']
+
+    [b'Subject: success!',b'Date:Fri, 09 Feb 2018 23:10:11 +0800 (CST)']
     ---------->
     {'subject':'success!','date': '2018-2-09 23:10:11 +0800'}
 
-    Basic headers(must): 'Subject', 'Date', 'From', 'To', 'Content-Type'
+    Basic headers(must): 'Subject', 'Date', 'From', 'To', 'Content-Type' , 'boundary'
 
-    Extra header(exist or None): 'boundary'
+    Extra header(exist or None):
 
     """
-    _headers = ['Subject', 'Date', 'From', 'To', 'Content-Type']
-    if extra_header:
-        extra_header = make_iterable(extra_header)
+    _headers = ['subject', 'date', 'from', 'to', 'content-type', 'boundary']
+    if args:
+        extra_header = make_iterable(args)
         for h in extra_header:
             _headers.append(h)
 
-    _string_header = bytes_to_string(header) if _bytes else header
-    headers = []
+    headers = {}
     result = {}
+    header = ''
+    part = ''
     boundary = None
-    for i in _string_header:
+
+    # Parse header.
+    for line in mail_as_bytes:
         # Get boundary if possible.
         if boundary is None:
-            have_boundary = re.findall(r'boundary=(.+)?', i)
+            have_boundary = re.findall(rb'boundary=(.+)?', line)
             if len(have_boundary):
                 boundary = have_boundary[0]
-                if boundary[0] == '"':
+                if boundary[0] == 34:
                     boundary = boundary[1:]
-                if boundary[-1] == '"':
+                if boundary[-1] == 34:
                     boundary = boundary[:-1]
 
-        # Get basic mail headers.
-        for header in _headers:
-            if re.match(header, i):
-                part = ''
-                for section in decode_header(i):
-                    if section[1] is None and isinstance(section[0], str):
-                        part = part + section[0]
-                    elif section[1] is None:
-                        part = part + section[0].decode()
-                    else:
-                        part = part + section[0].decode(section[1])
-                headers.append(part)
-
-    # Convert headers list to a dictionary object.
-    # Like ['Subject: success!'] -> {'subject':'success!'}
-    for j in headers:
-        header_split = j.split(' ')
-        if len(header_split) == 2:
-            result[header_split[0][:-1].lower()] = header_split[1]
-        elif header_split[0][:-1] == 'Date':
-            result['date'] = header_split[1:]
-        else:
-            result[header_split[0][:-1].lower()] = ''.join(header_split[1:])
-
-    result['date'] = _fmt_date(result['date'])
-
-    result['content-type'] = result['content-type'].split(';')[0]
-
-    result['boundary'] = boundary
-
-    return result
-
-
-def parse_header_new(mail_as_bytes, *args):
-    """Refactor parse header for improve, not be used now."""
-    mail_as_string = bytes_to_string(mail_as_bytes)
-
-    result = {}
-    for _need in args:
-        if isinstance(_need, str):
-            result.setdefault(_need, default=None)
-
-    part = ''
-    header = ''
-    for line in mail_as_string:
         # Header boundary check.
-        if line == '':
-            result[header] = part
+        if line == b'':
+            headers[header.lower()] = part
             break
-
-        if re.fullmatch(r'.+: .+?', line):
+        if re.fullmatch(rb'([a-zA-Z-]+):\s?.+?', line):
             # Line is a header.
-            header = re.findall(r'(.+)= ', line)[0]
             if part and header:
-                result[header] = part
-            part = line.split(header + '= ')[1]
+                headers[header.lower()] = part
+            header = re.findall(rb'([a-zA-Z-]+):\s?', line)[0].decode()
+            part = line.split(header.encode() + b':')[1]
         else:
             # Line is a part of header.
             part += line
+
+    headers['boundary'] = boundary if boundary else None
+
+    for k, v in headers.items():
+        if k in _headers:
+            result[k] = v
+
+    # Encoding ('from', 'to', 'subject', 'content-type').
+    for k, v in result.items():
+        if k in ('from', 'to', 'subject', 'content-type') and v:
+            v_decoded = ''
+            v_list = decode_header(v.decode())
+            for j in v_list:
+                if j[1] is None:
+                    v_decoded += str_decode(j[0])
+                else:
+                    v_decoded += str_decode(j[0], j[1])
+            result[k] = v_decoded
+
+    # Format time.
+    result['date'] = _fmt_date(result['date'])
 
     return result
 
@@ -220,8 +199,10 @@ def _get_attachment_part(file):
     return part
 
 
-def _fmt_date(date_list):
+def _fmt_date(date_as_bytes):
     """Format mail header Date for humans."""
+    date_as_string = date_as_bytes.decode()
+
     _month = {
         'Jan': 1,
         'Feb': 2,
@@ -236,11 +217,16 @@ def _fmt_date(date_list):
         'Nov': 11,
         'Dec': 12,
     }
-    day = date_list[1]
-    month = _month[date_list[2]]
-    year = date_list[3]
-    times = date_list[4]
-    time_zone = date_list[5]
+    date_list = date_as_string.split(',')
+    # week = date_list[0].replace(' ', '')
+    date_list = date_list[1].split(' ')
+
+    date_list = list(filter(lambda x: x != '', date_list))
+    day = date_list[0]
+    month = _month[date_list[1]]
+    year = date_list[2]
+    times = date_list[3]
+    time_zone = date_list[4]
 
     return '{}-{}-{} {} {}'.format(year, month, day, times, time_zone)
 
@@ -255,8 +241,10 @@ def multiple_part_decode(body_as_bytes, boundary):
     # Divide into multiple parts.
     is_part = False
     part = []
+
     for i in body_as_bytes:
-        if i.find(boundary.encode()) > -1:
+
+        if i.find(boundary) > -1:
             is_part = True
             if part:
                 parts.append(part)

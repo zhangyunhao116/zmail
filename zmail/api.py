@@ -18,6 +18,12 @@ def server(user, password):
         server.get_mail(which)
         server.get_mails(subject, from, after, before)
         server.get_latest()
-        server.get_all_info()
+        server.get_info()
+        server.stat()
+
+
+    Parse mail:
+        server.show(mail)
+        server.get_attachment(mail)
     """
     return MailServer(user, password)

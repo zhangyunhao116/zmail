@@ -70,3 +70,13 @@ def show(mails):
     for mail in mails:
         for k, v in mail.items():
             print(k, v)
+
+
+def str_decode(text, coding=None):
+    if isinstance(text, str):
+        return text
+    elif isinstance(text, bytes):
+        if coding:
+            return text.decode(coding)
+        else:
+            return text.decode()

@@ -68,6 +68,7 @@ def get_attachment(mail, *args):
 def show(mails):
     mails = make_iterable(mails)
     for mail in mails:
+        print('-------------------------')
         for k, v in mail.items():
             print(k, v)
 

@@ -16,7 +16,7 @@ def server(user, password):
 
     POP3:
         server.get_mail(which)
-        server.get_mails(subject, from, after, before)
+        server.get_mails(subject, sender, after, before)
         server.get_latest()
         server.get_info()
         server.stat()

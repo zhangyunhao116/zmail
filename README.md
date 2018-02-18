@@ -66,31 +66,47 @@ server = zmail.server('yourmail@example.com, 'yourpassword')
 server.send_mail('yourfriend@example.com', mail)
 ```
 
+- ##### To a list of recipients
+
+```
+server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
+```
+
+
+
 ### Retrieve your mail
 
-- Get the latest mail.
+- ##### Get the latest mail.
 
 ```python
 import zmail
-
 server = zmail.server('yourmail@example.com, 'yourpassword')
-
 mail = server.get_latest()
 ```
 
-- Retrieve mail by its id.
+- ##### Retrieve mail by its id.
 
 ```python
 mail = server.get_mail(2)
 ```
 
-- Get all mails' info, include each mail's header.A list of dictionary, each dictionary include all headers can be extracted.
+- ##### Get a list of mails by its (subject,after,before,sender)
+
+```
+mail = server.get_mails(subject='GitHub',after='2018-1-1',sender='github')
+```
+
+In the example, if 'GitHub' is in mail's subject, it will be matched, such as '  [GitHub] Your password has changed'
+
+sender is the same way.
+
+- ##### Get all mails' info, include each mail's header.A list of dictionary, each dictionary include all headers can be extracted.
 
 ```
 mail_info = server.get_info()
 ```
 
-- Get mailbox info. 
+- ##### Get mailbox info. 
 
 ```
 mailbox_info = server.stat()

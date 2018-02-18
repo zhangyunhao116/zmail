@@ -61,6 +61,25 @@ class MailServer:
 
         return mail_decode(header, body, which)
 
+    def get_mails(self, subject=None, after=None, before=None, sender=None):
+        """Get a list of mails from mailbox."""
+        info = self.get_info()
+        mail_id = []
+        result = []
+
+        for mail in info:
+            if self._match(mail, subject, after, before, sender):
+                mail_id.append(int(mail['id']))
+
+        server = self._init_pop3()
+
+        for i in mail_id:
+            header, body = server.get_mail(i)
+            result.append(mail_decode(header, body, i))
+        server.logout()
+
+        return result
+
     def get_latest(self):
         """Get latest mail in mailbox."""
         server = self._init_pop3()
@@ -89,6 +108,38 @@ class MailServer:
         server = POP3Server(host, port, self.user, self.password, ssl)
 
         return server
+
+    @staticmethod
+    def _match(mail, subject=None, after=None, before=None, sender=None):
+        """Match all conditions."""
+        _subject = mail['subject']
+        _date = mail['date'].split(' ')[0]
+        _sender = mail['from']
+
+        _time = tuple(map(lambda x: int(x), _date.split('-')))
+
+        if subject and _subject.find(subject) == -1:
+            return False
+
+        if sender and _sender.find(sender) == -1:
+            return False
+
+        if before:
+            # bf_year, bf_month, bf_day.
+            before_time = tuple(map(lambda x: int(x), before.split('-')))
+            for i in range(0, 3):
+                if before_time[i] < _time[i]:
+                    return False
+                elif before_time[i] > _time[i]:
+                    break
+        if after:
+            after_time = tuple(map(lambda x: int(x), after.split('-')))
+            for i in range(0, 3):
+                if after_time[i] > _time[i]:
+                    return False
+                elif after_time[i] < _time[i]:
+                    break
+        return True
 
 
 class SMTPServer:

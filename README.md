@@ -4,7 +4,11 @@
 [![platform](https://img.shields.io/badge/python-3.5-green.svg)]()
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)]()
 
-Zmail allows you to send and get emails as possible as it can be in python.There is no need to check server address or make your own MIME string.With zmail, you only need to care about your mail content.
+[中文介绍请戳这里](https://github.com/ZYunH/zmail/blob/master/README-cn.md)
+
+## Introduction
+
+Zmail allows you to send and get emails as possible as it can be in python.There is no need to check server address or make your own MIME object.With zmail, you only need to care about your mail content.
 
 ## Installation 
 
@@ -35,6 +39,7 @@ $ python3 setup.py install
 ## Features
 
 - Automatic looks for server address and it's port.
+- Automatic use suitable protocol to login.
 - Automatic converts a python dictionary to MIME object(with attachments).
 - Automatic add mail header and local name to avoid server reject your mail.
 - Easily custom your mail header.
@@ -116,7 +121,7 @@ The result is a tuple of 2 integers: `(message count, mailbox size)`.
 
 ### Parse your mail
 
-Show you mail, use
+Show you mail, use **zmail.show()**
 
 ```
 import zmail

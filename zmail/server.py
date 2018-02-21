@@ -11,7 +11,7 @@ import logging
 from .utils import make_iterable
 from .message import parse_header, mail_encode, mail_decode
 from .info import get_supported_server_info
-from .settings import __level__, __status__, __local__
+from .settings import __level__, __local__, __protocol_log__
 
 logger = logging.getLogger('zmail')
 
@@ -151,7 +151,7 @@ class SMTPServer:
 
     def send_ssl(self, recipients, message, timeout):
         with smtplib.SMTP_SSL(self.host, self.port, __local__, timeout=timeout) as server:
-            if __status__ == 'dev_a':
+            if __protocol_log__:
                 server.set_debuglevel(__level__)
             server.login(self.user, self.password)
             for recipient in recipients:
@@ -160,7 +160,7 @@ class SMTPServer:
 
     def send(self, recipients, message, timeout, tls=True):
         with smtplib.SMTP(self.host, self.port, __local__, timeout=timeout) as server:
-            if __status__ == 'dev_a':
+            if __protocol_log__:
                 server.set_debuglevel(__level__)
             if tls:
                 server.ehlo()
@@ -179,7 +179,7 @@ class POP3Server:
 
         self.pop3 = poplib.POP3_SSL(host, port) if ssl else poplib.POP3(host, port)
 
-        if __status__ == 'dev_a':
+        if __protocol_log__:
             self.pop3.set_debuglevel(__level__)
 
         if tls and ssl is False:

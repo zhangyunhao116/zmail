@@ -127,6 +127,8 @@ def parse_header(mail_as_bytes, *args):
                 boundary = have_boundary[0]
                 if boundary[0] == 34:
                     boundary = boundary[1:]
+                if boundary[-1] == 59:
+                    boundary = boundary[:-1]
                 if boundary[-1] == 34:
                     boundary = boundary[:-1]
 

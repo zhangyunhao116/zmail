@@ -5,7 +5,7 @@ Zmail allows you to send and get email as possible as it can be.
 """
 import logging
 from .api import *
-from .settings import __level__, __status__
+from .settings import __level__
 
 # Define logger.
 logger = logging.getLogger('zmail')
@@ -18,8 +18,8 @@ logger.addHandler(sh)
 logger.setLevel(__level__)
 
 # A standard zmail dict.
-ZMAIL = {
-    'subject': 'From zmail server',  # Anything you want.
+MAIL = {
+    'subject': 'None',  # Anything you want.
     'content': 'This message from zmail!',  # Anything you want.
     'attachments': '',  # Absolute path will be better.
 }

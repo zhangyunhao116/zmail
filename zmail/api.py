@@ -21,7 +21,6 @@ def server(user, password):
         server.get_info()
         server.stat()
 
-
     Parse mail:
         server.show(mail)
         server.get_attachment(mail)

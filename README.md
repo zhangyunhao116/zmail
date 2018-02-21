@@ -121,6 +121,12 @@ The result is a tuple of 2 integers: `(message count, mailbox size)`.
 
 ### Parse your mail
 
+In zmail, all mails will be mapped to a python dictionary, you can access your mail by
+
+```
+subject = mail['subject']
+```
+
 Show you mail, use **zmail.show()**
 
 ```
@@ -193,6 +199,21 @@ The mail server in this list has been tested and approved.
 | @sina.com      | ✓         | ✓             |                                |
 | @outlook       | ✓         | ✓             |                                |
 
-## API Changes
+## API
 
-- Ver 0.0.5 ：Do not use zmail.encode(mail) before send your mail. Direct use server.send_mail('yourfriend@examample.com', mail_as_dict)
+#### SMTP:
+
+​    server.send_mail([recipient,], mail)
+
+#### POP3:
+
+​    server.get_mail(which)
+​    server.get_mails(subject, sender, after, before)
+​    server.get_latest()
+​    server.get_info()
+​    server.stat()
+
+#### Parse mail:
+
+​    server.show(mail)
+​    server.get_attachment(mail)

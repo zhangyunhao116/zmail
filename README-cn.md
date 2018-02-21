@@ -105,7 +105,7 @@ mail = server.get_mails(subject='GitHub',after='2018-1-1',sender='github')
 
 sender亦是如此
 
-- ##### 得到所有邮件的头文件信息.一个由字典组成的列表,每个列表包含了所有能够提取的头文件.
+- ##### 得到所有邮件的头文件信息.一个由字典组成的列表,每个字典包含了所有能够提取的头文件.
 
 ```
 mail_info = server.get_info()
@@ -120,6 +120,12 @@ mailbox_info = server.stat()
 结果为包含两个整型的元组: `(邮件的数量, 邮箱的大小)`.
 
 ### 解析你的邮件
+
+在zmail中，接收到的邮件被映射为一个字典，你可以通过访问python字典的形式来访问你的邮件，例如
+
+```
+subject = mail['subject']
+```
 
 展示你的邮件，使用 **zmail.show()**
 
@@ -191,6 +197,23 @@ zmail.get_attachment(mail,'example.zip')
 | @sina.com  | ✓    | ✓    |               |
 | @outlook   | ✓    | ✓    |               |
 
-## API Changes
+## API 
 
-- Ver 0.0.5 ：Do not use zmail.encode(mail) before send your mail. Direct use server.send_mail('yourfriend@examample.com', mail_as_dict)
+server = zmail.server('user@example','password')
+
+#### SMTP
+
+​    server.send_mail([recipient,], mail)
+
+#### POP3
+
+​    server.get_mail(which)
+​    server.get_mails(subject, sender, after, before)
+​    server.get_latest()
+​    server.get_info()
+​    server.stat()
+
+#### Parse mail
+
+​    server.show(mail)
+​    server.get_attachment(mail)

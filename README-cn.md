@@ -203,17 +203,22 @@ server = zmail.server('user@example','password')
 
 #### SMTP
 
-​    server.send_mail([recipient,], mail)
+- server.send_mail([recipient,], mail)
+
 
 #### POP3
 
-​    server.get_mail(which)
-​    server.get_mails(subject, sender, after, before)
-​    server.get_latest()
-​    server.get_info()
-​    server.stat()
+- server.get_mail(which)
+
+- server.get_mails(subject, sender, after, before)
+- server.get_latest()
+- server.get_info()
+- server.stat()
 
 #### Parse mail
 
-​    server.show(mail)
-​    server.get_attachment(mail)
+- server.get_attachment(mail)
+
+#### Other
+
+- zmail.show()

@@ -201,19 +201,24 @@ The mail server in this list has been tested and approved.
 
 ## API
 
-#### SMTP:
+server = zmail.server('user@example','password')
 
-​    server.send_mail([recipient,], mail)
+#### SMTP
 
-#### POP3:
+- server.send_mail([recipient,], mail)
 
-​    server.get_mail(which)
-​    server.get_mails(subject, sender, after, before)
-​    server.get_latest()
-​    server.get_info()
-​    server.stat()
+#### POP3
 
-#### Parse mail:
+- server.get_mail(which)
+- server.get_mails(subject, sender, after, before)
+- server.get_latest()
+- server.get_info()
+- server.stat()
 
-​    server.show(mail)
-​    server.get_attachment(mail)
+#### Parse mail
+
+- server.get_attachment(mail)
+
+#### Other
+
+- zmail.show()

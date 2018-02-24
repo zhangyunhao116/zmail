@@ -4,7 +4,7 @@ zmail.settings
 This module contains some settings for zmail running or test.
 """
 
-__publish__ = False
+__publish__ = True
 
 __protocol_log__ = False
 

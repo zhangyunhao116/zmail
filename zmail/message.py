@@ -22,8 +22,6 @@ from .utils import type_check, get_abs_path, make_iterable, bytes_to_string, str
 
 logger = logging.getLogger('zmail')
 
-_basic = ('From', 'To', 'Subject')
-
 
 def mail_encode(message):
     """Convert a dict to a MIME obj."""
@@ -37,12 +35,12 @@ def mail_encode(message):
 
     # Set basic email elements.
     for k, v in message.items():
-        if k.capitalize() in _basic and v:
+        if k.capitalize() in ('From', 'To', 'Subject') and v:
             msg[k.capitalize()] = v
 
     # Set extra parameters.
     for k in message:
-        if k.capitalize() not in _basic and k not in ('attachments', 'content'):
+        if k.capitalize() not in ('From', 'To', 'Subject') and k not in ('attachments', 'content'):
             msg[k] = message[k]
 
     # Set mail content.
@@ -60,18 +58,38 @@ def mail_encode(message):
     return msg
 
 
-def mail_decode(header_as_bytes, body_as_bytes, which):
-    """Convert a MIME bytes list to dict."""
+def mail_decode(mail_as_bytes, which):
+    """Convert a MIME bytes to dict."""
+    result = {}
 
-    result = parse_header(header_as_bytes)
-
+    # Init.
     for i in ('content', 'contents', 'attachments',):
         result.setdefault(i)
     content = None
     attachments = None
 
-    # Add 'id'
+    # Parse headers.
+    headers = parse_header(mail_as_bytes, 'boundary')
+    result['header'] = headers
+
+    # Add id.
     result['id'] = which
+
+    # Try get ('subject', 'date', 'from', 'to', 'content-type', 'boundary')
+    _basic = {'subject': 'Subject', 'date': 'Date', 'from': 'From', 'to': 'To',
+              'content-type': 'Content-Type', 'boundary': 'boundary'}
+    for k, v in _basic.items():
+        try:
+            result[k] = headers[v]
+        except KeyError:
+            result[k] = None
+            logger.warning('Can not get element %s in this mail.' % v)
+    # Get body.
+    body_as_bytes = None
+    for line in mail_as_bytes:
+        if line in (b'\r\n', b''):
+            body_as_bytes = mail_as_bytes[mail_as_bytes.index(line):]
+    assert body_as_bytes is not None, 'Can not divide header and body'
 
     # Decode multi-part mail or one-part mail.
     if result['boundary']:
@@ -86,6 +104,7 @@ def mail_decode(header_as_bytes, body_as_bytes, which):
     result['contents'] = body
 
     # Add content|attachment if possible
+
     if content:
         result['content'] = content
     if attachments:
@@ -95,79 +114,55 @@ def mail_decode(header_as_bytes, body_as_bytes, which):
 
 
 def parse_header(mail_as_bytes, *args):
-    """Parse mail header then return a dictionary include basic elements in email.
+    """Parse mail header then return a dictionary include basic elements in email."""
+    email_headers = {}
 
-    [b'Subject: success!',b'Date:Fri, 09 Feb 2018 23:10:11 +0800 (CST)']
-    ---------->
-    {'subject':'success!','date': '2018-2-09 23:10:11 +0800'}
+    # Parse headers.
+    extra_header = {}
+    for i in args:
+        extra_header[i] = None
+    extra_pattern = rb"""[\s]?=["'\s]?([^"';\r\n\s]+)["';\r\n\s]?"""
 
-    Basic headers(must): 'Subject', 'Date', 'From', 'To', 'Content-Type' , 'boundary'
+    part = b''
+    header = b''
 
-    Extra header(exist or None):
-
-    """
-    _headers = ['subject', 'date', 'from', 'to', 'content-type', 'boundary']
-    if args:
-        extra_header = make_iterable(args)
-        for h in extra_header:
-            _headers.append(h)
-
-    headers = {}
-    result = {}
-    header = ''
-    part = ''
-    boundary = None
-
-    # Parse header.
     for line in mail_as_bytes:
-        # Get boundary if possible.
-        if boundary is None:
-            have_boundary = re.findall(rb'boundary=(.+)?', line)
-            if len(have_boundary):
-                boundary = have_boundary[0]
-                if boundary[0] == 34:
-                    boundary = boundary[1:]
-                if boundary[-1] == 59:
-                    boundary = boundary[:-1]
-                if boundary[-1] == 34:
-                    boundary = boundary[:-1]
+        # Get extra_header if possible.
+        for k, v in extra_header.items():
+            if v is None and re.search(bytes(k, encoding='utf8') + extra_pattern, line):
+                extra_header[k] = re.search(bytes(k, encoding='utf8') + extra_pattern, line).group(1)
 
-        # Header boundary check.
-        if line == b'':
-            headers[header.lower()] = part
-            break
-        if re.fullmatch(rb'([a-zA-Z-]+):\s?.+?', line):
+        # Parsing header.
+        if re.fullmatch(rb'([0-9a-zA-Z-]+):\s?([^\r\n]+)[\r\n]?', line):
             # Line is a header.
             if part and header:
-                headers[header.lower()] = part
-            header = re.findall(rb'([a-zA-Z-]+):\s?', line)[0].decode()
-            part = line.split(header.encode() + b':')[1]
-        else:
+                email_headers[header.decode()] = part
+            header, part = re.search(rb'([0-9a-zA-Z-]+):\s?([^\r\n]+)[\r\n]?', line).group(1, 2)
+        elif re.fullmatch(rb'[\t]?([^\r\n]+)[\r\n]?', line):
             # Line is a part of header.
-            part += line
+            _part = re.search(rb'[\t]?([^\r\n]+)[\r\n]?', line).group(1)
+            part += _part
+        elif line in (b'\r\n', b''):
+            # Mail header boundary.
+            if part and header:
+                email_headers[header.decode()] = part
+            break
+        else:
+            raise Exception('Parsing error:%s' % line)
 
-    headers['boundary'] = boundary if boundary else None
+    # Decode headers.
+    for k, v in email_headers.items():
+        groups = decode_header(v.decode())
+        string = ''
+        for group in groups:
+            _string, charset = group
+            string += str_decode(_string, charset)
+        email_headers[k] = string
 
-    for k, v in headers.items():
-        if k in _headers:
-            result[k] = v
+    # Add extra header if possible.
+    email_headers = {**email_headers, **extra_header}
 
-    # Encoding ('from', 'to', 'subject', 'content-type').
-    for k, v in result.items():
-        if k in ('from', 'to', 'subject', 'content-type') and v:
-            v_decoded = ''
-            v_list = decode_header(v.decode())
-            for j in v_list:
-                if j[1] is None:
-                    v_decoded += str_decode(j[0])
-                else:
-                    v_decoded += str_decode(j[0], j[1])
-            result[k] = v_decoded
-
-    # Format time.
-    result['date'] = _fmt_date(result['date'])
-
-    return result
+    return email_headers
 
 
 def _get_attachment_part(file):
@@ -243,7 +238,6 @@ def multiple_part_decode(body_as_bytes, boundary):
     # Divide into multiple parts.
     is_part = False
     part = []
-
     for i in body_as_bytes:
 
         if i.find(boundary) > -1:
@@ -258,37 +252,20 @@ def multiple_part_decode(body_as_bytes, boundary):
 
     # Parse each parts.
     for p in parts:
-        headers = {}
-        header = ''
-        part = ''
         # Parse each part's header.
-        for line in p:
-            # Header boundary check.
-            if line == b'':
-                headers[header] = part
-                break
-            if re.fullmatch(rb'.+:\s?.+?', line):
-                # Line is a header.
-                if part and header:
-                    headers[header] = part
-                header = re.findall(rb'(.+):\s?', line)[0].decode()
-                part = line.split(header.encode() + b':')[1]
-            else:
-                # Line is a part of header.
-                part += line
-        # Is attachment.
-        if headers.get('Content-Disposition') and headers['Content-Disposition'].find(b'attachment') == 0:
-            attachment = []
-            coding = headers['Content-Transfer-Encoding']
-            filename = re.findall(rb'attachment;\s?filename=(.+|".+")', headers['Content-Disposition'])[0]
-            filename = filename.decode()
-            # Fix " [could be improved]
-            if filename[0] == '"':
-                filename = filename[1:]
-            if filename[-1] == '"':
-                filename = filename[:-1]
+        headers = parse_header(p, 'charset')
 
-            attachment.append(filename + ';%s' % headers['Content-Type'].decode())
+        content_type = headers['Content-Type'] if headers.get('Content-Type') else None
+        encoding = headers['Content-Transfer-Encoding'] if headers.get('Content-Transfer-Encoding') else None
+        disposition = headers['Content-Disposition'] if headers.get('Content-Disposition') else None
+        charset = headers['charset'] if headers.get('charset') else None
+
+        # Is attachment.
+        if disposition and disposition.find('attachment') == 0:
+            attachment = []
+            filename = re.search(r"""attachment;[\s]?filename=[\s"']?([^"';]+)""", disposition).group(1)
+            attachment.append(filename + ';%s' % content_type)
+
             # Add body.
             is_body = False
             for line in p:
@@ -296,26 +273,29 @@ def multiple_part_decode(body_as_bytes, boundary):
                     is_body = True
                     continue
                 if is_body:
-                    if coding.find(b'base64') > -1:
+                    if encoding.find('base64') > -1:
                         attachment.append(base64.b64decode(line))
                     else:
                         attachment.append(line)
             attachments.append(attachment)
 
-        # Is text/plain.
-        elif headers['Content-Type'].find(b'text/plain') > -1:
-            logger.info('Parse text/plain part,coding:{}'.format(headers['Content-Transfer-Encoding']))
+        # Is text.
+        elif headers.get('Content-Type'):
+            logger.info('Parse {},coding:{}'.format(headers['Content-Type'], headers['Content-Transfer-Encoding']))
             is_body = False
             coding = headers['Content-Transfer-Encoding']
             for line in p:
-                if line == b'':
+                if line == '':
                     is_body = True
                     continue
                 if is_body:
-                    if coding.find(b'base64') > -1:
+                    if coding.find('base64') > -1:
                         content.append(base64.b64decode(line).decode())
                     else:
                         content.append(line.decode())
+        else:
+            raise Exception('Multiple part error!')
+
     return parts, content, attachments
 
 

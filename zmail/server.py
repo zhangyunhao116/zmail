@@ -55,11 +55,11 @@ class MailServer:
         """Get a mail from mailbox."""
         server = self._init_pop3()
 
-        header, body = server.get_mail(which)
+        mail = server.get_mail(which)
 
         server.logout()
 
-        return mail_decode(header, body, which)
+        return mail_decode(mail, which)
 
     def get_mails(self, subject=None, after=None, before=None, sender=None):
         """Get a list of mails from mailbox."""
@@ -85,11 +85,11 @@ class MailServer:
         server = self._init_pop3()
 
         latest_num = server.stat()[0]
-        header, body = server.get_mail(latest_num)
+        mail = server.get_mail(latest_num)
 
         server.logout()
 
-        return mail_decode(header, body, latest_num)
+        return mail_decode(mail, latest_num)
 
     def get_info(self):
         """Get all mails information.include(subject,from,to,date)"""
@@ -210,14 +210,11 @@ class POP3Server:
         return self.pop3.stat()
 
     def get_mail(self, which):
-        """Get a mail by its id.
-        ：:return (header,body)
-        """
-        header = self.pop3.top(which, 0)[1]
+        """Get a mail by its id."""
 
-        body = self.pop3.retr(which)[1][len(header):]
+        mail = self.pop3.retr(which)[1]
 
-        return header, body
+        return mail
 
     def get_header(self, which):
         """Use 'top' to get mail headers."""

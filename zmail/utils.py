@@ -81,3 +81,5 @@ def str_decode(text, coding=None):
             return text.decode(coding)
         else:
             return text.decode()
+    else:
+        raise Exception('String decoding error:%s' % text)

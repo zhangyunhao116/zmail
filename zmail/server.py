@@ -74,8 +74,8 @@ class MailServer:
         server = self._init_pop3()
 
         for i in mail_id:
-            header, body = server.get_mail(i)
-            result.append(mail_decode(header, body, i))
+            mail = server.get_mail(i)
+            result.append(mail_decode(mail, i))
         server.logout()
 
         return result

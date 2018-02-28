@@ -44,7 +44,8 @@ def mail_encode(message):
             msg[k] = message[k]
 
     # Set mail content.
-    msg.attach(MIMEText('%s' % message['content'], 'plain', 'utf-8'))
+    # If message is html format, set the subtype value of html else plain for default.
+    msg.attach(MIMEText('%s' % message['content'], message.get('subtype','plain'), 'utf-8'))
 
     # Set attachments.
     if 'attachments' in message and message['attachments']:

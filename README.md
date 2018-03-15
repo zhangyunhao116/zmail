@@ -66,7 +66,7 @@ mail = {
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 
-server = zmail.server('yourmail@example.com, 'yourpassword')
+server = zmail.server('yourmail@example.com‘, 'yourpassword')
 
 server.send_mail('yourfriend@example.com', mail)
 ```
@@ -77,7 +77,7 @@ server.send_mail('yourfriend@example.com', mail)
 server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```
 
-- **Send HTML content**
+- ##### **Send HTML content**
 
 ```python
 mail = {
@@ -109,7 +109,7 @@ server.send_mail('yourfriend@example.com',mail)
 
 ```python
 import zmail
-server = zmail.server('yourmail@example.com, 'yourpassword')
+server = zmail.server('yourmail@example.com‘, 'yourpassword')
 mail = server.get_latest()
 ```
 
@@ -155,7 +155,7 @@ Show you mail, use **zmail.show()**
 
 ```python
 import zmail
-server = zmail.server('yourmail@example.com, 'yourpassword')
+server = zmail.server('yourmail@example.com’, 'yourpassword')
 mail = server.get_latest()
 zmail.show(mail)
 ```
@@ -192,7 +192,7 @@ id 5
 
 ```python
 import zmail
-server = zmail.server('yourmail@example.com, 'yourpassword')
+server = zmail.server('yourmail@example.com‘, 'yourpassword')
 mail = server.get_latest()
 zmail.get_attachment(mail)
 ```

@@ -28,7 +28,7 @@ supported_server = {
 
     },
     'qq.com': {
-        'smtp': ('smtp.qq.com', 25, True),
+        'smtp': ('smtp.qq.com', 465, True),
         'pop3': ('pop.qq.com', 995, True),
     },
     'gmail.com': {

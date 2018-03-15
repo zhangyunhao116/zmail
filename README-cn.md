@@ -77,6 +77,30 @@ server.send_mail('yourfriend@example.com', mail)
 server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```
 
+- **发送HTML作为邮件内容**
+
+```python
+mail = {
+    'subject': 'Success!',  # Anything you want.
+    'content_html': zmail.get_html('/Users/example.html'), # Absolute path will be better.
+    'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
+}
+server.send_mail('yourfriend@example.com',mail)
+```
+
+或者
+
+```python
+with open('/Users/example.html','r') as f:
+    content_html = f.read()
+mail = {
+    'subject': 'Success!',  # Anything you want.
+    'content_html': content_html, 
+    'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
+}
+server.send_mail('yourfriend@example.com',mail)
+```
+
 
 
 ### 取回你的邮件
@@ -197,7 +221,7 @@ zmail.get_attachment(mail,'example.zip')
 | @sina.com  | ✓    | ✓    |               |
 | @outlook   | ✓    | ✓    |               |
 
-## API 
+## API
 
 server = zmail.server('user@example','password')
 
@@ -205,11 +229,9 @@ server = zmail.server('user@example','password')
 
 - server.send_mail([recipient,], mail)
 
-
 #### POP3
 
 - server.get_mail(which)
-
 - server.get_mails(subject, sender, after, before)
 - server.get_latest()
 - server.get_info()
@@ -218,6 +240,14 @@ server = zmail.server('user@example','password')
 #### Parse mail
 
 - server.get_attachment(mail)
+
+### Mail
+
+- subject
+- content
+- content_html
+- from
+- to
 
 #### Other
 

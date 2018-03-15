@@ -73,8 +73,32 @@ server.send_mail('yourfriend@example.com', mail)
 
 - ##### To a list of recipients
 
-```
+```python
 server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
+```
+
+- **Send HTML content**
+
+```python
+mail = {
+    'subject': 'Success!',  # Anything you want.
+    'content_html': zmail.get_html('/Users/example.html'), # Absolute path will be better.
+    'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
+}
+server.send_mail('yourfriend@example.com',mail)
+```
+
+OR
+
+```python
+with open('/Users/example.html','r') as f:
+    content_html = f.read()
+mail = {
+    'subject': 'Success!',  # Anything you want.
+    'content_html': content_html, 
+    'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
+}
+server.send_mail('yourfriend@example.com',mail)
 ```
 
 
@@ -129,7 +153,7 @@ subject = mail['subject']
 
 Show you mail, use **zmail.show()**
 
-```
+```python
 import zmail
 server = zmail.server('yourmail@example.com, 'yourpassword')
 mail = server.get_latest()
@@ -166,7 +190,7 @@ id 5
 
 #### **Get attachment**
 
-```
+```python
 import zmail
 server = zmail.server('yourmail@example.com, 'yourpassword')
 mail = server.get_latest()
@@ -218,6 +242,14 @@ server = zmail.server('user@example','password')
 #### Parse mail
 
 - server.get_attachment(mail)
+
+### Mail
+
+- subject
+- content
+- content_html
+- from
+- to
 
 #### Other
 

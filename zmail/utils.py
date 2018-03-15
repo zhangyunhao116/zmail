@@ -38,6 +38,7 @@ def make_iterable(obj):
 
 
 def get_attachment(mail, *args):
+    """Parsing attachment and save it."""
     names = list(args)
     names.reverse()
     if mail['attachments']:
@@ -66,6 +67,7 @@ def get_attachment(mail, *args):
 
 
 def show(mails):
+    """Show mails."""
     mails = make_iterable(mails)
     for mail in mails:
         print('-------------------------')
@@ -74,6 +76,7 @@ def show(mails):
 
 
 def str_decode(text, coding=None):
+    """Decode bytes to string."""
     if isinstance(text, str):
         return text
     elif isinstance(text, bytes):
@@ -83,3 +86,20 @@ def str_decode(text, coding=None):
             return text.decode()
     else:
         raise Exception('String decoding error:%s' % text)
+
+
+def get_html(html_path):
+    """Get html content by its path."""
+    path = get_abs_path(html_path)
+
+    with open(path, 'r') as f:
+        content = f.read()
+
+    return content
+
+
+def read_eml(path):
+    abs_path = get_abs_path(path)
+    with open(abs_path, 'rb') as file:
+        eml = file.readlines()
+    return eml

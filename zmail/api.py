@@ -5,7 +5,7 @@ This module implements the zmail API.
 """
 
 from .server import MailServer
-from .utils import get_attachment, show
+from .utils import get_attachment, get_html, show
 
 
 def server(user, password):

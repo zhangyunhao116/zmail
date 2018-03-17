@@ -43,6 +43,7 @@ $ python3 setup.py install
 - 自动将一个python字典映射成MIME对象（带有附件的）
 - 自动添加头文件以及localhostname来避免服务器拒收你的邮件
 - 轻松自定义你的头文件
+- 支持使用HTML作为邮件内容
 - 仅需python>=3.5，你可以将其嵌入你的项目而无需其他的依赖
 
 ## 使用须知

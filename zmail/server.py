@@ -19,9 +19,18 @@ logger = logging.getLogger('zmail')
 class MailServer:
     """This object communicate with server directly."""
 
-    def __init__(self, user, password):
+    def __init__(self, user, password, smtp_host=None, smtp_port=None, pop_host=None, pop_port=None, smtp_ssl=None,
+                 pop_ssl=None):
         self.user = user
         self.password = password
+
+        self.smtp_host = smtp_host
+        self.smtp_port = smtp_port
+        self.smtp_ssl = smtp_ssl
+
+        self.pop_host = pop_host
+        self.pop_port = pop_port
+        self.pop_ssl = pop_ssl
 
     def send_mail(self, recipients, message, timeout=60):
         """"Send email."""
@@ -31,6 +40,9 @@ class MailServer:
         recipients = make_iterable(recipients)
 
         host, port, ssl = get_supported_server_info(self.user, 'smtp')
+        host = self.smtp_host if self.smtp_host else host
+        port = self.smtp_port if self.smtp_port else port
+        ssl = self.pop_ssl if self.pop_ssl is not None else ssl
 
         logger.info('Prepare login into {}:{} ssl:{}.'.format(host, port, ssl))
 
@@ -104,6 +116,10 @@ class MailServer:
     def _init_pop3(self):
         """Initiate POP3 server."""
         host, port, ssl = get_supported_server_info(self.user, 'pop3')
+        host = self.pop_host if self.pop_host else host
+        port = self.pop_port if self.pop_port else port
+        ssl = self.pop_ssl if self.pop_ssl is not None else ssl
+
         logger.info('Prepare login into {}:{} ssl:{}.'.format(host, port, ssl))
         server = POP3Server(host, port, self.user, self.password, ssl)
 

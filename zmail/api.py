@@ -8,7 +8,7 @@ from .server import MailServer
 from .utils import get_attachment, get_html, show
 
 
-def server(user, password):
+def server(user, password, smtp_host=None, smtp_port=None, pop_host=None, pop_port=None, smtp_ssl=None, pop_ssl=None):
     """A shortcut to use MailServer.
 
     SMTP:
@@ -25,4 +25,6 @@ def server(user, password):
         server.show(mail)
         server.get_attachment(mail)
     """
-    return MailServer(user, password)
+    return MailServer(user, password, smtp_host=smtp_host, smtp_port=smtp_port, pop_host=pop_host, pop_port=pop_port,
+                      smtp_ssl=smtp_ssl,
+                      pop_ssl=pop_ssl)

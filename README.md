@@ -43,6 +43,7 @@ $ python3 setup.py install
 - Automatic converts a python dictionary to MIME object(with attachments).
 - Automatic add mail header and local name to avoid server reject your mail.
 - Easily custom your mail header.
+- Support HTML as mail content.
 - Only require python >= 3.5 , you can embed it in your project without other module required.
 
 ## Usage

@@ -5,7 +5,8 @@ This module implements the zmail API.
 """
 
 from .server import MailServer
-from .utils import get_attachment, get_html, show
+from .utils import get_attachment, get_html, show, read_eml, save_eml
+from .message import mail_decode
 
 
 def server(user, password, smtp_host=None, smtp_port=None, pop_host=None, pop_port=None, smtp_ssl=None, pop_ssl=None):
@@ -28,3 +29,7 @@ def server(user, password, smtp_host=None, smtp_port=None, pop_host=None, pop_po
     return MailServer(user, password, smtp_host=smtp_host, smtp_port=smtp_port, pop_host=pop_host, pop_port=pop_port,
                       smtp_ssl=smtp_ssl,
                       pop_ssl=pop_ssl)
+
+
+def decode(mail_as_bytes, which=1):
+    return mail_decode(mail_as_bytes, which)

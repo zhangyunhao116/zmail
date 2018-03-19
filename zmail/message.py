@@ -61,7 +61,7 @@ def mail_encode(message):
     return msg
 
 
-def mail_decode(mail_as_bytes, which):
+def mail_decode(mail_as_bytes, which=1):
     """Convert a MIME bytes to dict."""
     result = {}
 
@@ -113,6 +113,8 @@ def mail_decode(mail_as_bytes, which):
     if attachments:
         result['attachments'] = attachments
 
+    result['raw'] = mail_as_bytes
+
     return result
 
 
@@ -132,18 +134,18 @@ def parse_header(mail_as_bytes, *args):
     for line in mail_as_bytes:
         # Get extra_header if possible.
         for k, v in extra_header.items():
-            if v is None and re.search(bytes(k, encoding='utf8') + extra_pattern, line):
-                extra_header[k] = re.search(bytes(k, encoding='utf8') + extra_pattern, line).group(1)
+            if v is None and re.search(bytes(k, encoding='utf8') + bytes(extra_pattern), line):
+                extra_header[k] = re.search(bytes(k, encoding='utf8') + bytes(extra_pattern), line).group(1)
 
         # Parsing header.
-        if re.fullmatch(rb'([0-9a-zA-Z-]+):\s?([^\r\n]+)[\r\n]?', line):
+        if re.fullmatch(rb'([0-9a-zA-Z-]+):\s?([^\r\n]+)(\r\n)?', line):
             # Line is a header.
             if part and header:
                 email_headers[header.decode()] = part
-            header, part = re.search(rb'([0-9a-zA-Z-]+):\s?([^\r\n]+)[\r\n]?', line).group(1, 2)
-        elif re.fullmatch(rb'[\t]?([^\r\n]+)[\r\n]?', line):
+            header, part = re.search(rb'([0-9a-zA-Z-]+):\s?([^\r\n]+)(\r\n)?', line).group(1, 2)
+        elif re.fullmatch(rb'[\t]?([^\r\n]+)(\r\n)?', line):
             # Line is a part of header.
-            _part = re.search(rb'[\t]?([^\r\n]+)[\r\n]?', line).group(1)
+            _part = re.search(rb'[\t]?([^\r\n]+)(\r\n)?', line).group(1)
             part += _part
         elif line in (b'\r\n', b''):
             # Mail header boundary.
@@ -284,9 +286,9 @@ def multiple_part_decode(body_as_bytes, boundary):
 
         # Is text.
         elif headers.get('Content-Type'):
-            logger.info('Parse {},coding:{}'.format(headers['Content-Type'], headers['Content-Transfer-Encoding']))
+            coding = headers['Content-Transfer-Encoding'] if headers.get('Content-Transfer-Encoding') else None
+            logger.info('Parse {},coding:{}'.format(headers['Content-Type'], coding))
             is_body = False
-            coding = headers['Content-Transfer-Encoding']
             for line in p:
                 if line == '':
                     is_body = True

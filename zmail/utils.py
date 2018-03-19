@@ -5,6 +5,7 @@ This module contains some useful function power zmail.
 """
 
 import os
+import sys
 
 
 def bytes_to_string(bytes_list):
@@ -103,3 +104,15 @@ def read_eml(path):
     with open(abs_path, 'rb') as file:
         eml = file.readlines()
     return eml
+
+
+def save_eml(mail, name=None, path=None):
+    file_name = name if name else str(mail['subject'] + '.eml')
+    file_path = path if path else os.path.abspath(os.path.dirname(sys.argv[0]))
+
+    file_locate = os.path.join(file_path, file_name)
+
+    with open(file_locate, 'wb+') as f:
+        f.writelines(mail['raw'])
+
+    return True

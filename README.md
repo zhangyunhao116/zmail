@@ -171,7 +171,7 @@ from zmail<zmail@126.com>
 date 2018-2-3 01:42:29 +0800
 boundary ===============9196441298519098157==
 content ['This message from zmail!']
-contents [[b'Content-Type: text/plain; charset="utf-8"', b'MIME-Version: 1.0', b'Content-Transfer-Encoding: base64', b'', b'VGhpcyBtZXNzYWdlIGZyb20gem1haWwh', b'']]
+raw [[b'Content-Type: text/plain; charset="utf-8"', b'MIME-Version: 1.0', b'Content-Transfer-Encoding: base64', b'', b'VGhpcyBtZXNzYWdlIGZyb20gem1haWwh', b'']]
 attachments None
 id 5
 ```
@@ -185,7 +185,7 @@ id 5
 - date: year-month-day time TimeZone
 - boundary: If mail is multiple parts, you can get the boundary
 - content: Mail content as text/plain
-- contents: Mail's body as bytes,divided by boundary
+- raw: raw mail as bytes
 - attachments: None or [['attachment-name;Encoding','ATTACHMENT-DATA']...]
 - id: Mailbox id
 
@@ -202,6 +202,34 @@ you can rename your attachment file, by
 
 ```
 zmail.get_attachment(mail,'example.zip')
+```
+
+#### Save email
+
+```
+import zmail
+server = zmail.server('yourmail@example.com‘, 'yourpassword')
+mail = server.get_latest()
+zmail.save_eml(mail)
+```
+
+you can rename your mail or define the path,  by
+
+```
+zmail.save_eml(mail,name='hello.eml',path='/usr/home')
+```
+
+#### Read mail in disk
+
+```
+import zmail
+mail_as_raw = zmail.read_eml('/usr/home/hello.eml') # Abspath will be better
+```
+
+you can convert the raw mail to zmail format
+
+```
+mail = zmail.decode(mail_as_raw)
 ```
 
 
@@ -224,6 +252,16 @@ The mail server in this list has been tested and approved.
 | @sina.com      | ✓         | ✓             |                                |
 | @outlook       | ✓         | ✓             |                                |
 
+## Q&A
+
+- Can not send or retrieve
+  - ensure your smtp&pop3 function is open
+  - according to smtp or pop protocol provided by your mail server to define zmail.server 
+  - SMTP：server = zmail.server('user','psw',smtp_host = 'xxx',smtp_port = 'yyyyy',smtp_ssl=True)
+  - POP3：server = zmail.server('user','psw',pop_host = 'xxx',pop_port = 'yyyyy',pop_ssl=True)
+
+
+
 ## API
 
 server = zmail.server('user@example','password')
@@ -244,7 +282,7 @@ server = zmail.server('user@example','password')
 
 - server.get_attachment(mail)
 
-### Mail
+### Mail(For send)
 
 - subject
 - content

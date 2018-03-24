@@ -66,7 +66,7 @@ def mail_decode(mail_as_bytes, which=1):
     result = {}
 
     # Init.
-    for i in ('content', 'contents', 'attachments',):
+    for i in ('content', 'attachments',):
         result.setdefault(i)
     content = None
     attachments = None
@@ -103,8 +103,6 @@ def mail_decode(mail_as_bytes, which=1):
         body = one_part_decode(body_as_bytes, result['content-type'])
         if result['content-type'] == 'text/plain':
             result['content'] = body
-
-    result['contents'] = body
 
     # Add content|attachment if possible
 

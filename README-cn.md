@@ -171,7 +171,7 @@ from zmail<zmail@126.com>
 date 2018-2-3 01:42:29 +0800
 boundary ===============9196441298519098157==
 content ['This message from zmail!']
-contents [[b'Content-Type: text/plain; charset="utf-8"', b'MIME-Version: 1.0', b'Content-Transfer-Encoding: base64', b'', b'VGhpcyBtZXNzYWdlIGZyb20gem1haWwh', b'']]
+raw [[b'Content-Type: text/plain; charset="utf-8"', b'MIME-Version: 1.0', b'Content-Transfer-Encoding: base64', b'', b'VGhpcyBtZXNzYWdlIGZyb20gem1haWwh', b'']]
 attachments None
 id 5
 ```
@@ -185,7 +185,7 @@ id 5
 - date: 年-月-日 时间 时区
 - boundary: 如果邮件为multiple parts，你可以得到其分界线
 - content: 邮件的文本内容（仅在text/plain时可以被解析）
-- contents: 邮件的body,里面包含着由分界线分割的每一个段落
+- raw: 邮件的原始数据
 - attachments: None 或者 [['附件名称;编码方式','附件的二进制内容']...]
 - id: 在邮箱中的id
 
@@ -202,6 +202,34 @@ zmail.get_attachment(mail)
 
 ```
 zmail.get_attachment(mail,'example.zip')
+```
+
+#### 保存邮件
+
+```
+import zmail
+server = zmail.server('yourmail@example.com‘, 'yourpassword')
+mail = server.get_latest()
+zmail.save_eml(mail)
+```
+
+你可以重命名或者指定路径，使用
+
+```
+zmail.save_eml(mail,name='hello.eml',path='/usr/home')
+```
+
+#### 读取磁盘上的邮件
+
+```
+import zmail
+mail_as_raw = zmail.read_eml('/usr/home/hello.eml') # Abspath will be better
+```
+
+你可以将读取到的原始邮件解析成zmail格式的邮件
+
+```
+mail = zmail.decode(mail_as_raw)
 ```
 
 
@@ -221,6 +249,15 @@ zmail.get_attachment(mail,'example.zip')
 | @gmail.com | ✓    | ✓    | 需要应用专用密码      |
 | @sina.com  | ✓    | ✓    |               |
 | @outlook   | ✓    | ✓    |               |
+
+## 问题索引
+
+- ##### 发送或者接受失败
+
+  - 检查是否开启了SMTP和POP3功能
+  - 根据服务器SMTP或者POP3地址的端口填写server（没有填写的将会为默认值）
+  - SMTP：server = zmail.server('user','psw',smtp_host = 'xxx',smtp_port = 'yyyyy',smtp_ssl=True)
+  - POP3：server = zmail.server('user','psw',pop_host = 'xxx',pop_port = 'yyyyy',pop_ssl=True)
 
 ## API
 
@@ -242,7 +279,7 @@ server = zmail.server('user@example','password')
 
 - server.get_attachment(mail)
 
-### Mail
+### Mail(For send)
 
 - subject
 - content

@@ -8,13 +8,15 @@ MODULE_NAME = 'zmail'
 
 # 'setup.py publish' shortcut.
 if sys.argv[-1] == 'publish':
+    os.system('pip3 install twine')
     os.system('python3 setup.py sdist bdist_wheel')
     os.system('twine upload dist/*')
+    os.system('rm -rf build dist .egg zmail.egg-info')
     sys.exit()
 
 setup(
     name='zmail',
-    version='0.0.8',
+    version='0.0.9',
 
     author='ZYunH',
     author_email='workvl@163.com',

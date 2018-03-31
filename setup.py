@@ -16,10 +16,10 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='zmail',
-    version='0.0.9',
+    version='0.1.0',
 
     author='ZYunH',
-    author_email='workvl@163.com',
+    author_email='zyunhjob@163.com',
 
     description='Zmail allows you to send and get emails as possible as it can be in python',
     long_description='Zmail allows you to send and get emails as possible as it can be in python.There is no need to check server address or make your own MIME string.With zmail, you only need to care about your mail content.',
@@ -29,6 +29,18 @@ setup(
     license="MIT Licence",
 
     platforms='all',
+    classifiers=(
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Topic :: Software Development :: Libraries :: Python Modules'
+    ),
 
     packages=find_packages(),
     include_package_data=True,

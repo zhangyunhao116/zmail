@@ -113,6 +113,10 @@ def save_eml(mail, name=None, path=None):
     file_name = name if name else str(mail['subject'] + '.eml')
     file_path = path if path else os.path.abspath(os.path.dirname(sys.argv[0]))
 
+    # Check if filename is empty, use date instead.
+    if file_name == '.eml':
+        file_name = str(mail['date'] + '.eml')
+
     file_locate = os.path.join(file_path, file_name)
 
     with open(file_locate, 'wb+') as f:

@@ -243,7 +243,7 @@ class MailDecode:
         if isinstance(headers['charset'], bytes):
             headers['charset'] = headers['charset'].decode()
         # Patch for QQ mail.
-        if headers.get('X-QQ-STYLE') == b'1':
+        if headers.get('X-QQ-STYLE') in (b'1', b'4'):
             headers['charset'] = 'GBK'
 
         # Decode values use its charset.
@@ -255,7 +255,9 @@ class MailDecode:
                     headers[k] = v.decode(headers['charset'])
                 except UnicodeDecodeError as e:
                     if k in ('subject', 'from', 'to'):
+                        print(headers[k])
                         raise e
+
                     logger.warning('UnicodeDecodeError {} {} {}'.format(k, v, headers['charset']))
 
         # Decode headers for read.
@@ -319,7 +321,10 @@ class MailDecode:
             _bytes, charset = i
             charset = charset or 'utf-8'
             if isinstance(_bytes, bytes):
-                result += _bytes.decode(charset)
+                try:
+                    result += _bytes.decode(charset)
+                except UnicodeDecodeError:
+                    logger.warning('UnicodeDecodeError:{} {}'.format(_bytes, charset))
             elif isinstance(_bytes, str):
                 result += _bytes
             else:
@@ -337,6 +342,7 @@ class MailDecode:
         parts = divide_into_parts(self.body_as_bytes, self.boundary)
 
         for part in parts:
+            print(part)
             # Init headers.
             part_headers = CaseInsensitiveDict()
             part_headers.update(parse_header(part, 'charset'))
@@ -402,6 +408,7 @@ class MailDecode:
         self.result['attachments'] = attachments
 
     def one_part_decode(self):
+
         _content = []
         if self.content_transfer_encoding is None or self.content_transfer_encoding.lower() not in (
                 'base64', 'quoted-printable'):
@@ -410,8 +417,8 @@ class MailDecode:
         if self.content_transfer_encoding == 'base64':
             _temp = b''
             for i in self.body_as_bytes:
-                _temp += (base64.b64decode(i))
-            _temp = _temp.decode(self.charset)
+                _temp += i
+            _temp = base64.b64decode(_temp).decode(self.charset)
             _content.append(_temp)
         elif self.content_transfer_encoding == 'quoted-printable':
             _temp = b''
@@ -437,12 +444,8 @@ class MailDecode:
         if content_transfer_encoding == 'base64':
             _temp = b''
             for i in body_as_bytes:
-                try:
-                    _temp += (base64.b64decode(i))
-                except Exception:
-                    print(i)
-                    raise
-            _temp = _temp.decode(charset)
+                _temp += i
+            _temp = base64.b64decode(_temp).decode(charset)
             _content.append(_temp)
         elif content_transfer_encoding == 'quoted-printable':
             _temp = b''

@@ -15,6 +15,9 @@ from .settings import __level__, __local__, __protocol_log__
 
 logger = logging.getLogger('zmail')
 
+# Fix poplib bug.
+poplib._MAXLINE = 4096
+
 
 class MailServer:
     """This object communicate with server directly."""

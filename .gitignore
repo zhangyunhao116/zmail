@@ -1,6 +1,9 @@
-
-.DS_Store
-.idea/*
 *.pyc
-test/*
+.DS_Store
+*.eml
 test.py
+.idea/*
+mail/*
+test/*
+
+

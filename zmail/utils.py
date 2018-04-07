@@ -101,9 +101,12 @@ def get_html(html_path):
 
 def read_eml(path):
     abs_path = get_abs_path(path)
-    with open(abs_path, 'rb') as file:
-        eml = file.readlines()
-    return eml
+    with open(abs_path, 'rb') as f:
+        result = []
+        for i in f.readlines():
+            if i[-2:] == b'\r\n':
+                result.append(i[:-2])
+    return result
 
 
 def save_eml(mail, name=None, path=None):
@@ -113,6 +116,7 @@ def save_eml(mail, name=None, path=None):
     file_locate = os.path.join(file_path, file_name)
 
     with open(file_locate, 'wb+') as f:
-        f.writelines(mail['raw'])
+        for i in mail['raw']:
+            f.write(i + b'\r\n')
 
     return True

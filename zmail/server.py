@@ -116,6 +116,36 @@ class MailServer:
 
         return result
 
+    def smtp_able(self):
+        try:
+            host, port, ssl = get_supported_server_info(self.user, 'smtp')
+            host = self.smtp_host if self.smtp_host else host
+            port = self.smtp_port if self.smtp_port else port
+            ssl = self.pop_ssl if self.pop_ssl is not None else ssl
+
+            logger.info('Prepare login into {}:{} ssl:{}.'.format(host, port, ssl))
+
+            server = SMTPServer(host, port, self.user, self.password)
+            message = mail_encode({'subject': 'test', 'content': 'test'})
+
+            if ssl:
+                server.send_ssl([], message, 60)
+            else:
+                server.send([], message, 60)
+            return True
+        except Exception as e:
+            logger.warning('Login smtp error :{}'.format(e))
+            return False
+
+    def pop_able(self):
+        try:
+            server = self._init_pop3()
+            server.logout()
+            return True
+        except Exception as e:
+            logger.warning('Login pop3 error :{}'.format(e))
+            return False
+
     def _init_pop3(self):
         """Initiate POP3 server."""
         host, port, ssl = get_supported_server_info(self.user, 'pop3')

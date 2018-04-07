@@ -343,7 +343,6 @@ class MailDecode:
         parts = divide_into_parts(self.body_as_bytes, self.boundary)
 
         for part in parts:
-            print(part)
             # Init headers.
             part_headers = CaseInsensitiveDict()
             part_headers.update(parse_header(part, 'charset'))

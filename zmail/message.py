@@ -146,9 +146,8 @@ def _get_attachment_part(file):
     return part
 
 
-def _fmt_date(date_as_bytes):
+def _fmt_date(date_as_string):
     """Format mail header Date for humans."""
-    date_as_string = date_as_bytes.decode()
 
     _month = {
         'Jan': 1,
@@ -166,7 +165,10 @@ def _fmt_date(date_as_bytes):
     }
     date_list = date_as_string.split(',')
     # week = date_list[0].replace(' ', '')
-    date_list = date_list[1].split(' ')
+    try:
+        date_list = date_list[1].split(' ')
+    except IndexError:
+        return date_as_string
 
     date_list = list(filter(lambda x: x != '', date_list))
     day = date_list[0]
@@ -261,6 +263,10 @@ class MailDecode:
         for k in ('subject', 'from', 'to'):
             if headers[k]:
                 headers[k] = self._decode_header(headers[k])
+
+        # Decode 'date' for read.
+        if headers.get('date'):
+            headers['date'] = _fmt_date(headers['date'])
 
         # Warning failed to catch basic mail elements .
         for i in ('subject', 'date', 'from', 'to', 'content-type'):

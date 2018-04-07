@@ -242,9 +242,6 @@ class MailDecode:
         # Convert charset to str for subsequent parsing.
         if isinstance(headers['charset'], bytes):
             headers['charset'] = headers['charset'].decode()
-        # Patch for QQ mail.
-        if headers.get('X-QQ-STYLE') in (b'1', b'4'):
-            headers['charset'] = 'GBK'
 
         # Decode values use its charset.
         # 'boundary' need to be bytes for subsequent parsing.
@@ -253,13 +250,17 @@ class MailDecode:
             if headers[k] and k not in ('boundary', 'charset'):
                 try:
                     headers[k] = v.decode(headers['charset'])
-                except UnicodeDecodeError as e:
+                except UnicodeDecodeError:
                     if k in ('subject', 'from', 'to'):
-                        print(headers[k])
-                        raise e
-
-                    logger.warning('UnicodeDecodeError {} {} {}'.format(k, v, headers['charset']))
-
+                        try:
+                            headers[k] = v.decode('utf-8')
+                        except UnicodeDecodeError:
+                            logger.critical(
+                                'Can not decode basic "{}",Use {} instead, raw:{}'.format(k, 'Unknown%s' % k,
+                                                                                          headers[k]))
+                            headers[k] = 'Unknown%s' % k
+                    else:
+                        logger.warning('Can not decode {} {}'.format(k, headers['charset']))
         # Decode headers for read.
         # Usually, subject|from|to need to be decode again.
         for k in ('subject', 'from', 'to'):

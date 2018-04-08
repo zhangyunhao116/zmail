@@ -188,6 +188,7 @@ from zmail<zmail@126.com>
 date 2018-2-3 01:42:29 +0800
 boundary ===============9196441298519098157==
 content ['This message from zmail!']
+content_html ['<HTML EXAMPLE>']
 raw [[b'Content-Type: text/plain; charset="utf-8"', b'MIME-Version: 1.0', b'Content-Transfer-Encoding: base64', b'', b'VGhpcyBtZXNzYWdlIGZyb20gem1haWwh', b'']]
 attachments None
 id 5
@@ -286,9 +287,13 @@ server = zmail.server('user@example','password')
 
 #### SMTP
 
+- server.smtp_able()
+
 - server.send_mail([recipient,], mail)
 
 #### POP3
+
+- server.pop_able()
 
 - server.get_mail(which)
 - server.get_mails(subject, sender, after, before)

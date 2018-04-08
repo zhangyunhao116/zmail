@@ -57,6 +57,23 @@ $ python3 setup.py install
 
 ## 使用示例
 
+### 测试SMTP和POP功能是否正常
+
+```python
+import zmail
+server = zmail.server('yourmail@example.com’, 'yourpassword')
+
+if server.smtp_able():
+    pass
+    # SMTP function.
+if server.pop_able():
+    pass
+    # POP function.
+            
+```
+
+以上功能正常时，返回True，否则返回False，logger会打印相应错误信息。
+
 ### 发送你的邮件
 
 ```python
@@ -185,6 +202,7 @@ id 5
 - date: 年-月-日 时间 时区
 - boundary: 如果邮件为multiple parts，你可以得到其分界线
 - content: 邮件的文本内容（仅在text/plain时可以被解析）
+- content_html:邮件的网页内容（仅在text/html时可以被解析）
 - raw: 邮件的原始数据
 - attachments: None 或者 [['附件名称;编码方式','附件的二进制内容']...]
 - id: 在邮箱中的id

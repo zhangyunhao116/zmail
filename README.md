@@ -57,6 +57,23 @@ Then, all you need to do is just import zmail.
 
 ## Examples
 
+### Verify SMTP and POP function working correctly
+
+```python
+import zmail
+server = zmail.server('yourmail@example.com’, 'yourpassword')
+
+if server.smtp_able():
+    pass
+    # SMTP function.
+if server.pop_able():
+    pass
+    # POP function.
+            
+```
+
+If SMTP and POP are working correctly,the function will return True,else return Fasle.
+
 ### Send your mail
 
 ```python
@@ -185,6 +202,7 @@ id 5
 - date: year-month-day time TimeZone
 - boundary: If mail is multiple parts, you can get the boundary
 - content: Mail content as text/plain
+- content_html: Mail content as text/html
 - raw: raw mail as bytes
 - attachments: None or [['attachment-name;Encoding','ATTACHMENT-DATA']...]
 - id: Mailbox id

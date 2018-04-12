@@ -17,7 +17,7 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='zmail',
-    version='0.1.0',
+    version='0.1.1',
 
     author='ZYunH',
     author_email='zyunhjob@163.com',

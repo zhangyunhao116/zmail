@@ -48,7 +48,11 @@ def mail_encode(message):
     if 'content_html' in message:
         msg.attach(MIMEText('%s' % message['content_html'], 'html', 'utf-8'))
     if 'content' in message:
-        msg.attach(MIMEText('%s' % message['content'], 'plain', 'utf-8'))
+        _message = make_iterable(message['content'])
+        _combine_message = ''
+        for i in _message:
+            _combine_message += i
+        msg.attach(MIMEText('{}'.format(_combine_message), 'plain', 'utf-8'))
 
     # Set attachments.
     if 'attachments' in message and message['attachments']:

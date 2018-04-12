@@ -19,7 +19,7 @@ logger.setLevel(__level__)
 
 # A standard zmail dict.
 MAIL = {
-    'subject': 'None',  # Anything you want.
+    'subject': 'Zmail',  # Anything you want.
     'content': 'This message from zmail!',  # Anything you want.
     'attachments': '',  # Absolute path will be better.
 }

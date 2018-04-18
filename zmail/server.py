@@ -58,6 +58,8 @@ class MailServer:
         else:
             server.send(recipients, message, timeout)
 
+        return True
+
     def stat(self):
         """Get mailbox status."""
         server = self._init_pop3()

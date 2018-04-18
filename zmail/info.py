@@ -45,6 +45,25 @@ supported_server = {
     },
 
 }
+supported_server_config = {
+    'qqexmail': {
+        'smtp_host': 'smtp.exmail.qq.com',
+        'smtp_port': 465,
+        'smtp_ssl': True,
+        'pop_host': 'pop.exmail.qq.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+    },
+    'aliyunexmail': {
+        'smtp_host': 'smtp.mxhichina.com',
+        'smtp_port': 465,
+        'smtp_ssl': True,
+        'pop_host': 'pop3.mxhichina.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+    },
+
+}
 
 
 def get_supported_server_info(mail_address, protocol):
@@ -60,3 +79,11 @@ def get_supported_server_info(mail_address, protocol):
         return 'smtp.' + provider, 465, True
     elif protocol == 'pop3':
         return 'pop3.' + provider, 995, True
+
+
+def get_server_config(config):
+    """Get user-defined config."""
+    if config in supported_server_config:
+        return supported_server_config[config]
+    else:
+        return False

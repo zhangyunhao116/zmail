@@ -9,7 +9,7 @@ import poplib
 import logging
 
 from .utils import make_iterable
-from .message import parse_header, mail_encode, mail_decode
+from .message import mail_encode, mail_decode, parse_header_shortcut
 from .info import get_supported_server_info
 from .settings import __level__, __local__, __protocol_log__
 
@@ -163,10 +163,10 @@ class MailServer:
     @staticmethod
     def _match(mail, subject=None, after=None, before=None, sender=None):
         """Match all conditions."""
-        _subject = mail['subject']
-        _date = mail['date'].split(' ')[0]
-        _sender = mail['from']
+        _subject = mail.get('subject', 'None')
+        _sender = mail.get('from', 'None')
 
+        _date = mail['date'].split(' ')[0]
         _time = tuple(map(lambda x: int(x), _date.split('-')))
 
         if subject and _subject.find(subject) == -1:
@@ -243,7 +243,7 @@ class POP3Server:
         result = []
         for count in range(1, num + 1):
             header = self.get_header(count)
-            header_as_dict = parse_header(header)
+            header_as_dict = parse_header_shortcut(header)
             # Add mail id.
             header_as_dict['id'] = count
             result.append(header_as_dict)

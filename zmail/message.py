@@ -168,7 +168,6 @@ def _fmt_date(date_as_string):
         'Dec': 12,
     }
     date_list = date_as_string.split(',')
-    # week = date_list[0].replace(' ', '')
     try:
         date_list = date_list[1].split(' ')
     except IndexError:
@@ -203,6 +202,76 @@ def divide_into_parts(bytes_list, sep):
             part.append(i)
 
     return result
+
+
+def parse_header_shortcut(mail_as_bytes):
+    """Shortcut for parse mail headers(only)."""
+    def _decode_header(header_as_string):
+        result = ''
+
+        for i in decode_header(header_as_string):
+            _bytes, charset = i
+            charset = charset or 'utf-8'
+            if isinstance(_bytes, bytes):
+                try:
+                    result += _bytes.decode(charset)
+                except UnicodeDecodeError:
+                    logger.warning('UnicodeDecodeError:{} {}'.format(_bytes, charset))
+            elif isinstance(_bytes, str):
+                result += _bytes
+            else:
+                raise Exception('Can not decode header:{}'.format(header_as_string))
+        return result
+
+    # Set default values.
+    headers = CaseInsensitiveDict()
+    for i in ('subject', 'from', 'to', 'date', 'content-type', 'boundary'):
+        headers.setdefault(i, None)
+    headers['charset'] = 'utf-8'
+    # Update values by parse headers.
+    _parsed_headers = parse_header(mail_as_bytes, 'boundary', 'charset', 'content-transfer-encoding')
+    parsed_headers = _parsed_headers.copy()
+    for k, v in _parsed_headers.items():
+        if v is None:
+            parsed_headers.pop(k)
+    headers.update(parsed_headers)
+    # Convert charset to str for subsequent parsing.
+    if isinstance(headers['charset'], bytes):
+        headers['charset'] = headers['charset'].decode()
+
+    # Decode values use its charset.
+    # 'boundary' need to be bytes for subsequent parsing.
+    # 'charset' is already str.
+    for k, v in headers.lower_items():
+        if headers[k] and k not in ('boundary', 'charset'):
+            try:
+                headers[k] = v.decode(headers['charset'])
+            except UnicodeDecodeError:
+                if k in ('subject', 'from', 'to'):
+                    try:
+                        headers[k] = v.decode('utf-8')
+                    except UnicodeDecodeError:
+                        logger.critical(
+                            'Can not decode basic "{}",Use {} instead, raw:{}'.format(k, 'Unknown%s' % k,
+                                                                                      headers[k]))
+                        headers[k] = 'Unknown%s' % k
+                else:
+                    logger.warning('Can not decode {} {}'.format(k, headers['charset']))
+    # Decode headers for read.
+    # Usually, subject|from|to need to be decode again.
+    for k in ('subject', 'from', 'to'):
+        if headers[k]:
+            headers[k] = _decode_header(headers[k])
+
+    # Decode 'date' for read.
+    if headers.get('date'):
+        headers['date'] = _fmt_date(headers['date'])
+
+    # Warning failed to catch basic mail elements .
+    for i in ('subject', 'date', 'from', 'to', 'content-type'):
+        if headers[i] is None:
+            logger.warning("Can not get element '%s' in this mail." % i)
+    return headers
 
 
 class MailDecode:

@@ -28,14 +28,12 @@ def get_abs_path(file):
     elif os.path.isfile(file):
         return file
     else:
-        raise Exception("The file %s doesn't exist." % file)
+        raise FileExistsError("The file %s doesn't exist." % file)
 
 
 def make_iterable(obj):
     """Get a iterable obj."""
-    if isinstance(obj, (tuple, list)):
-        return obj
-    return obj,
+    return obj if isinstance(obj, (tuple, list)) else (obj,)
 
 
 def get_attachment(mail, *args):
@@ -99,7 +97,7 @@ def get_html(html_path):
     return content
 
 
-def read_eml(path):
+def read(path):
     abs_path = get_abs_path(path)
     with open(abs_path, 'rb') as f:
         result = []
@@ -109,7 +107,7 @@ def read_eml(path):
     return result
 
 
-def save_eml(mail, name=None, path=None):
+def save(mail, name=None, path=None):
     file_name = name if name else str(mail['subject'] + '.eml')
     file_path = path if path else os.path.abspath(os.path.dirname(sys.argv[0]))
 

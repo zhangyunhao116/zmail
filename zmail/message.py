@@ -18,30 +18,27 @@ from email.mime.multipart import MIMEMultipart
 from email.encoders import encode_base64
 from email.header import decode_header
 
-from .utils import type_check, get_abs_path, make_iterable, bytes_to_string, str_decode
+from .utils import get_abs_path, make_iterable
 from .structures import CaseInsensitiveDict
 
 logger = logging.getLogger('zmail')
 
 
-def mail_encode(message):
+def mail_encode(message: CaseInsensitiveDict):
     """Convert a dict to a MIME obj."""
     logger.info('Encoding mail to MIME obj.')
-
-    # Type check.
-    type_check(dict, message)
 
     # Create MIMEMultipart.
     msg = MIMEMultipart()
 
     # Set basic email elements.
-    for k, v in message.items():
-        if k.capitalize() in ('From', 'To', 'Subject') and v:
+    for k, v in message.lower_items():
+        if k in ('from', 'to', 'subject') and v:
             msg[k.capitalize()] = v
 
     # Set extra parameters.
     for k in message:
-        if k.capitalize() not in ('From', 'To', 'Subject') and k not in ('attachments', 'content'):
+        if k.lower() not in ('from', 'to', 'subject', 'attachments', 'content'):
             msg[k] = message[k]
 
     # Set mail content.
@@ -152,7 +149,6 @@ def _get_attachment_part(file):
 
 def _fmt_date(date_as_string):
     """Format mail header Date for humans."""
-
     _month = {
         'Jan': 1,
         'Feb': 2,
@@ -167,20 +163,21 @@ def _fmt_date(date_as_string):
         'Nov': 11,
         'Dec': 12,
     }
-    date_list = date_as_string.split(',')
-    try:
-        date_list = date_list[1].split(' ')
-    except IndexError:
+    pattern_one = r'(\w+),\s+([0-9]+)\s+(\w+)\s+([0-9]+)\s+([:0-9]+)\s+(.+)'
+    pattern_two = r'([0-9])\s+([\w]+)\s+([0-9]+)\s+([:0-9]+)\s+(.+)'
+    match_one = re.search(pattern_one, date_as_string)
+    match_two = re.search(pattern_two, date_as_string)
+    if match_one:
+        week, day, month_as_string, year, now_time, time_zone = match_one.groups()
+        month = [v for k, v in _month.items() if month_as_string.lower() == k.lower()][0]
+        return f'{int(year)}-{int(month)}-{int(day)} {now_time} {time_zone}'
+    elif match_two:
+        day, month_as_string, year, now_time, time_zone = match_two.groups()
+        month = [v for k, v in _month.items() if month_as_string.lower() == k.lower()][0]
+        return f'{int(year)}-{int(month)}-{int(day)} {now_time} {time_zone}'
+    else:
+        logger.warning(f'Can not parse Date:{date_as_string}')
         return date_as_string
-
-    date_list = list(filter(lambda x: x != '', date_list))
-    day = date_list[0]
-    month = _month[date_list[1]]
-    year = date_list[2]
-    times = date_list[3]
-    time_zone = date_list[4]
-
-    return '{}-{}-{} {} {}'.format(year, month, day, times, time_zone)
 
 
 def divide_into_parts(bytes_list, sep):
@@ -206,6 +203,7 @@ def divide_into_parts(bytes_list, sep):
 
 def parse_header_shortcut(mail_as_bytes):
     """Shortcut for parse mail headers(only)."""
+
     def _decode_header(header_as_string):
         result = ''
 
@@ -372,7 +370,10 @@ class MailDecode:
 
         # Set mail attributes.
         self.content_transfer_encoding = headers.get('content-transfer-encoding')
-        self.content_type = re.search(r'\s?([a-z0-9]+/[a-z0-9]+)\s?;.+', headers['content-type']).group(1)
+        try:
+            self.content_type = re.search(r'\s?([a-z0-9]+/[a-z0-9]+)\s?;.+', headers['content-type']).group(1)
+        except AttributeError:
+            self.content_type = ''
         self.charset = headers.get('charset')
         self.boundary = headers.get('boundary')
 

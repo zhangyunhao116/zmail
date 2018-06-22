@@ -8,59 +8,71 @@ import smtplib
 import poplib
 import logging
 
-from .utils import make_iterable
-from .message import mail_encode, mail_decode, parse_header_shortcut
-from .info import get_supported_server_info
-from .settings import __level__, __local__, __protocol_log__
-
-logger = logging.getLogger('zmail')
+from zmail.exceptions import InvalidProtocol
+from zmail.info import get_supported_server_info
+from zmail.structures import CaseInsensitiveDict
+from zmail.message import mail_encode, mail_decode
+from zmail.settings import __local__
+from zmail.message import parse_header_shortcut
 
 # Fix poplib bug.
 poplib._MAXLINE = 4096
 
+logger = logging.getLogger('zmail')
+
 
 class MailServer:
-    """This object communicate with server directly."""
+    """High-level MailServer API includes SMTPServer and POPServer."""
 
-    def __init__(self, user, password, smtp_host=None, smtp_port=None, pop_host=None, pop_port=None, smtp_ssl=None,
-                 pop_ssl=None):
+    def __init__(self, user: str, password: str, smtp_host: str, smtp_port: int, pop_host: str, pop_port: int,
+                 smtp_ssl: bool, pop_ssl: bool, smtp_tls: bool, pop_tls: bool, timeout=60,
+                 auto_add_from=True, auto_add_to=True):
         self.user = user
         self.password = password
+        self.timeout = timeout
 
         self.smtp_host = smtp_host
         self.smtp_port = smtp_port
         self.smtp_ssl = smtp_ssl
+        self.smtp_tls = smtp_tls
 
         self.pop_host = pop_host
         self.pop_port = pop_port
         self.pop_ssl = pop_ssl
+        self.pop_tls = pop_tls
+
+        self.auto_add_from = auto_add_from
+        self.auto_add_to = auto_add_to
 
     def send_mail(self, recipients, message, timeout=60):
         """"Send email."""
+        message = CaseInsensitiveDict(message)
 
-        _message_add_from(message, self.user)
+        if self.auto_add_from and message.get('from') is not None:
+            message['from'] = f'{self.user.split("@")[0]}<{self.user}>'
 
-        recipients = make_iterable(recipients)
+        recipients = recipients if isinstance(recipients, (list, tuple)) else (recipients,)
 
-        host, port, ssl = get_supported_server_info(self.user, 'smtp')
-        host = self.smtp_host if self.smtp_host else host
-        port = self.smtp_port if self.smtp_port else port
-        ssl = self.pop_ssl if self.pop_ssl is not None else ssl
+        host, port, ssl, tls = get_supported_server_info(self.user, 'smtp')
+        host = self.smtp_host if self.smtp_host is not None else host
+        port = self.smtp_port if self.smtp_port is not None else port
+        ssl = self.smtp_ssl if self.smtp_ssl is not None else ssl
+        tls = self.pop_tls if self.pop_tls is not None else tls
 
-        logger.info('Prepare login into {}:{} ssl:{}.'.format(host, port, ssl))
+        logger.info(f'Prepare login into {host}:{port} ssl:{ssl} tls:{tls}.')
 
         server = SMTPServer(host, port, self.user, self.password)
 
         message = mail_encode(message)
 
         if ssl:
-            server.send_ssl(recipients, message, timeout)
+            server.send_ssl(recipients, message, timeout, self.auto_add_to)
         else:
-            server.send(recipients, message, timeout)
+            server.send(recipients, message, timeout, self.auto_add_to, tls)
 
         return True
 
-    def stat(self):
+    def stat(self) -> tuple:
         """Get mailbox status."""
         server = self._init_pop3()
         status = server.stat()
@@ -68,7 +80,7 @@ class MailServer:
 
         return status
 
-    def get_mail(self, which):
+    def get_mail(self, which: int):
         """Get a mail from mailbox."""
         server = self._init_pop3()
 
@@ -82,20 +94,18 @@ class MailServer:
         """Get a list of mails from mailbox."""
         info = self.get_info()
         mail_id = []
-        result = []
 
-        for mail in info:
-            if self._match(mail, subject, after, before, sender):
-                mail_id.append(int(mail['id']))
+        for index, mail in enumerate(info):
+            if self._match(parse_header_shortcut(mail), subject, after, before, sender):
+                mail_id.append(index + 1)
 
         server = self._init_pop3()
 
-        for i in mail_id:
-            mail = server.get_mail(i)
-            result.append(mail_decode(mail, i))
+        mail_id.sort()
+        mail_as_bytes_list = server.get_mails(mail_id)
         server.logout()
 
-        return result
+        return [mail_decode(mail_as_bytes, mail_id[index]) for index, mail_as_bytes in enumerate(mail_as_bytes_list)]
 
     def get_latest(self):
         """Get latest mail in mailbox."""
@@ -108,36 +118,27 @@ class MailServer:
 
         return mail_decode(mail, latest_num)
 
-    def get_info(self):
+    def get_info(self) -> list:
         """Get all mails information.include(subject,from,to,date)"""
         server = self._init_pop3()
 
-        result = server.get_info()
+        result = server.get_headers()
 
         server.logout()
 
         return result
 
     def smtp_able(self):
-        try:
-            host, port, ssl = get_supported_server_info(self.user, 'smtp')
-            host = self.smtp_host if self.smtp_host else host
-            port = self.smtp_port if self.smtp_port else port
-            ssl = self.pop_ssl if self.pop_ssl is not None else ssl
+        host, port, ssl, tls = get_supported_server_info(self.user, 'smtp')
+        host = self.smtp_host if self.smtp_host is not None else host
+        port = self.smtp_port if self.smtp_port is not None else port
+        ssl = self.smtp_ssl if self.smtp_ssl is not None else ssl
+        tls = self.pop_tls if self.pop_tls is not None else tls
 
-            logger.info('Prepare login into {}:{} ssl:{}.'.format(host, port, ssl))
+        logger.info(f'Prepare login into {host}:{port} ssl:{ssl} tls:{tls}.')
 
-            server = SMTPServer(host, port, self.user, self.password)
-            message = mail_encode({'subject': 'test', 'content': 'test'})
-
-            if ssl:
-                server.send_ssl([], message, 60)
-            else:
-                server.send([], message, 60)
-            return True
-        except Exception as e:
-            logger.warning('Login smtp error :{}'.format(e))
-            return False
+        server = SMTPServer(host, port, self.user, self.password)
+        return server.login_able(ssl, tls, self.timeout)
 
     def pop_able(self):
         try:
@@ -150,13 +151,14 @@ class MailServer:
 
     def _init_pop3(self):
         """Initiate POP3 server."""
-        host, port, ssl = get_supported_server_info(self.user, 'pop3')
-        host = self.pop_host if self.pop_host else host
-        port = self.pop_port if self.pop_port else port
+        host, port, ssl, tls = get_supported_server_info(self.user, 'pop3')
+        host = self.pop_host if self.pop_host is not None else host
+        port = self.pop_port if self.pop_port is not None else port
         ssl = self.pop_ssl if self.pop_ssl is not None else ssl
+        tls = self.pop_tls if self.pop_tls is not None else tls
 
         logger.info('Prepare login into {}:{} ssl:{}.'.format(host, port, ssl))
-        server = POP3Server(host, port, self.user, self.password, ssl)
+        server = POP3Server(host, port, self.user, self.password, ssl, tls, self.timeout)
 
         return server
 
@@ -194,89 +196,98 @@ class MailServer:
 
 
 class SMTPServer:
+    """Base SMTPServer, which encapsulates python3 standard library to a SMTPServer."""
+
     def __init__(self, host, port, user, password):
         self.host = host
         self.port = port
         self.user = user
         self.password = password
 
-    def send_ssl(self, recipients, message, timeout):
+    def send_ssl(self, recipients, message, timeout, auto_add_to):
         with smtplib.SMTP_SSL(self.host, self.port, __local__, timeout=timeout) as server:
-            if __protocol_log__:
-                server.set_debuglevel(__level__)
             server.login(self.user, self.password)
             for recipient in recipients:
-                _message_add_to(message, recipient)
+                if auto_add_to and message.get('to') is None:
+                    message['To'] = f'{recipient.split("@")[0]}<{recipient}>'
                 server.sendmail(self.user, recipient, message.as_string())
 
-    def send(self, recipients, message, timeout, tls=True):
+    def send(self, recipients, message, timeout, auto_add_to, tls=True):
         with smtplib.SMTP(self.host, self.port, __local__, timeout=timeout) as server:
-            if __protocol_log__:
-                server.set_debuglevel(__level__)
             if tls:
                 server.ehlo()
                 server.starttls()
                 server.ehlo()
             server.login(self.user, self.password)
             for recipient in recipients:
-                _message_add_to(message, recipient)
+                if auto_add_to and message.get('to') is None:
+                    message['To'] = f'{recipient.split("@")[0]}<{recipient}>'
                 server.sendmail(self.user, recipient, message.as_string())
+
+    def login_able(self, use_ssl, use_tls, timeout):
+        try:
+            if use_ssl:
+                with smtplib.SMTP_SSL(self.host, self.port, __local__, timeout=timeout) as server:
+                    server.login(self.user, self.password)
+            else:
+                with smtplib.SMTP(self.host, self.port, __local__, timeout=timeout) as server:
+                    if use_tls:
+                        server.ehlo()
+                        server.starttls()
+                        server.ehlo()
+                    server.login(self.user, self.password)
+        except Exception as e:
+            logger.warning('Login SMTP error :{}'.format(e))
+            return False
+        return True
 
 
 class POP3Server:
-    def __init__(self, host, port, user, password, ssl=True, tls=True):
+    """Base POP3Server, which encapsulates python3 standard library to a SMTPServer."""
+
+    def __init__(self, host: str, port: int, user: str, password: str, ssl=False, tls=False, timeout=60):
         self.user = user
         self.password = password
 
-        self.pop3 = poplib.POP3_SSL(host, port) if ssl else poplib.POP3(host, port)
+        self.pop3 = poplib.POP3_SSL(host, port, timeout=timeout) if ssl else poplib.POP3(host, port, timeout=timeout)
 
-        if __protocol_log__:
-            self.pop3.set_debuglevel(__level__)
-
-        if tls and ssl is False:
+        if tls and not ssl:
             self.pop3.stls()
+        elif tls and ssl:
+            raise InvalidProtocol('Can not used ssl and tls together.')
+
         self.login()
 
-    def get_info(self):
-        """Get all mails info. The result is the form [header_as_dict,...,] """
-        num = self.stat()[0]
-        result = []
-        for count in range(1, num + 1):
-            header = self.get_header(count)
-            header_as_dict = parse_header_shortcut(header)
-            # Add mail id.
-            header_as_dict['id'] = count
-            result.append(header_as_dict)
-        return result
-
     def login(self):
+        """Note: the mailbox on the server is locked until logout() is called."""
         self.pop3.user(self.user)
         self.pop3.pass_(self.password)
 
     def logout(self):
+        """Quit pop3 server."""
         self.pop3.quit()
 
-    def stat(self):
+    def stat(self) -> tuple:
         """Get mailbox status. The result is a tuple of 2 integers: (message count, mailbox size)."""
         return self.pop3.stat()
 
-    def get_mail(self, which):
-        """Get a mail by its id."""
-
-        mail = self.pop3.retr(which)[1]
-
-        return mail
-
-    def get_header(self, which):
+    def get_header(self, which) -> list:
         """Use 'top' to get mail headers."""
         return self.pop3.top(which, 0)[1]
 
+    def get_headers(self) -> list:
+        """Get all mails headers."""
+        num = self.stat()[0]
+        result = []
+        for count in range(1, num + 1):
+            header_as_bytes = self.get_header(count)
+            result.append(header_as_bytes)
+        return result
 
-def _message_add_from(message, sender_address):
-    """Add 'From' header to avoid server reject the mail."""
-    message['From'] = '{}<{}>'.format(sender_address.split('@')[0], sender_address)
+    def get_mail(self, which) -> list:
+        """Get a mail by its id."""
+        return self.pop3.retr(which)[1]
 
-
-def _message_add_to(message, recipient_address):
-    """Add 'To' header to avoid server reject the mail."""
-    message['To'] = '{}<{}>'.format(recipient_address.split('@')[0], recipient_address)
+    def get_mails(self, which_list: list) -> list:
+        """Get a list of mails by its id."""
+        return [self.pop3.retr(which)[1] for which in which_list]

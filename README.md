@@ -269,7 +269,7 @@ The mail server in this list has been tested and approved.
 | @yeah.net      | ✓         | ✓             |                                |
 | @gmail.com     | ✓         | ✓             | Need app private password      |
 | @sina.com      | ✓         | ✓             |                                |
-| @outlook       | ✓         | ✓             |                                |
+| @outlook       | ✓         | ✓             | Need app private password      |
 
 ## Q&A
 

@@ -50,3 +50,4 @@ class CaseInsensitiveDict(collections.MutableMapping):
 
     def __repr__(self):
         return str(dict(self.items()))
+

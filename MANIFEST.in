@@ -3,5 +3,6 @@ include LICENSE
 include setup.py
 include *.md
 
-exclude test
+exclude test/*
 exclude test.py
+exclude *.pyc

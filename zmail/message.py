@@ -170,13 +170,13 @@ def _fmt_date(date_as_string):
     if match_one:
         week, day, month_as_string, year, now_time, time_zone = match_one.groups()
         month = [v for k, v in _month.items() if month_as_string.lower() == k.lower()][0]
-        return f'{int(year)}-{int(month)}-{int(day)} {now_time} {time_zone}'
+        return '{}-{}-{} {} {}'.format(int(year), int(month), int(day), now_time, time_zone)
     elif match_two:
         day, month_as_string, year, now_time, time_zone = match_two.groups()
         month = [v for k, v in _month.items() if month_as_string.lower() == k.lower()][0]
-        return f'{int(year)}-{int(month)}-{int(day)} {now_time} {time_zone}'
+        return '{}-{}-{} {} {}'.format(int(year), int(month), int(day), now_time, time_zone)
     else:
-        logger.warning(f'Can not parse Date:{date_as_string}')
+        logger.warning('Can not parse Date:{}'.format(date_as_string))
         return date_as_string
 
 

@@ -49,7 +49,7 @@ class MailServer:
         message = CaseInsensitiveDict(message)
 
         if self.auto_add_from and message.get('from') is not None:
-            message['from'] = f'{self.user.split("@")[0]}<{self.user}>'
+            message['from'] = '{}<{}>'.format(self.user.split("@")[0], self.user)
 
         recipients = recipients if isinstance(recipients, (list, tuple)) else (recipients,)
 
@@ -59,7 +59,7 @@ class MailServer:
         ssl = self.smtp_ssl if self.smtp_ssl is not None else ssl
         tls = self.pop_tls if self.pop_tls is not None else tls
 
-        logger.info(f'Prepare login into {host}:{port} ssl:{ssl} tls:{tls}.')
+        logger.info('Prepare login into {}:{} ssl:{} tls:{}.'.format(host, port, ssl, tls))
 
         server = SMTPServer(host, port, self.user, self.password)
 
@@ -135,7 +135,7 @@ class MailServer:
         ssl = self.smtp_ssl if self.smtp_ssl is not None else ssl
         tls = self.pop_tls if self.pop_tls is not None else tls
 
-        logger.info(f'Prepare login into {host}:{port} ssl:{ssl} tls:{tls}.')
+        logger.info('Prepare login into {}:{} ssl:{} tls:{}.'.format(host, port, ssl, tls))
 
         server = SMTPServer(host, port, self.user, self.password)
         return server.login_able(ssl, tls, self.timeout)
@@ -209,7 +209,7 @@ class SMTPServer:
             server.login(self.user, self.password)
             for recipient in recipients:
                 if auto_add_to and message.get('to') is None:
-                    message['To'] = f'{recipient.split("@")[0]}<{recipient}>'
+                    message['To'] = '{}<{}>'.format(recipient.split("@")[0], recipient)
                 server.sendmail(self.user, recipient, message.as_string())
 
     def send(self, recipients, message, timeout, auto_add_to, tls=True):
@@ -221,7 +221,7 @@ class SMTPServer:
             server.login(self.user, self.password)
             for recipient in recipients:
                 if auto_add_to and message.get('to') is None:
-                    message['To'] = f'{recipient.split("@")[0]}<{recipient}>'
+                    message['To'] = '{}<{}>'.format(recipient.split("@")[0], recipient)
                 server.sendmail(self.user, recipient, message.as_string())
 
     def login_able(self, use_ssl, use_tls, timeout):

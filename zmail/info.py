@@ -8,7 +8,7 @@ This module provide supported server information.
     'protocol':('protocol_server_address', port, use_ssl,use_tls),
 }
 """
-supported_server = {
+SUPPORTED_SERVER = {
     '163.com': {
         'smtp': ('smtp.163.com', 994, True, False),
         'pop3': ('pop.163.com', 995, True, False),
@@ -46,7 +46,7 @@ supported_server = {
 
 }
 
-supported_enterprise_server_config = {
+SUPPORTED_ENTERPRISE_SERVER_CONFIG = {
     'qq': {
         'smtp_host': 'smtp.exmail.qq.com',
         'smtp_port': 465,
@@ -81,8 +81,8 @@ def get_supported_server_info(mail_address: str, protocol: str) -> tuple:
     """
     provider = mail_address.split('@')[1]
 
-    if provider in supported_server:
-        server_info = supported_server[provider]
+    if provider in SUPPORTED_SERVER:
+        server_info = SUPPORTED_SERVER[provider]
         if protocol in server_info:
             return server_info[protocol]
 
@@ -97,7 +97,6 @@ def get_enterprise_server_config(config: str):
     :param config: str
     :return: ('protocol_server_address', port, use_ssl)
     """
-    if config in supported_enterprise_server_config:
-        return supported_enterprise_server_config[config]
-    else:
-        return False
+    if config in SUPPORTED_ENTERPRISE_SERVER_CONFIG:
+        return SUPPORTED_ENTERPRISE_SERVER_CONFIG[config]
+    return False

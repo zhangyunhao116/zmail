@@ -49,4 +49,5 @@ def server(user, password, smtp_host=None, smtp_port=None, pop_host=None, pop_po
 
 
 def decode(mail_as_bytes, which=1):
+    """Decode bytes mail, as usual in your disk."""
     return mail_decode(mail_as_bytes, which)

@@ -8,7 +8,7 @@ TEST_ALL_CASE = False
 
 class TestGetServerInfo(unittest.TestCase):
     def test_get_exist_server_info(self):
-        info_as_dict = zmail.info.supported_server
+        info_as_dict = zmail.info.SUPPORTED_SERVER
         for k, v in info_as_dict.items():
             _mailaddress = '123456@' + k
             self.assertEqual(zmail.info.get_supported_server_info(_mailaddress, 'smtp'), info_as_dict[k]['smtp'])

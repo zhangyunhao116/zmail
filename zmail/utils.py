@@ -108,6 +108,7 @@ def read(path):
 
 
 def save(mail, name=None, path=None):
+    """Save a mail."""
     file_name = name if name else str(mail['subject'] + '.eml')
     file_path = path if path else os.path.abspath(os.path.dirname(sys.argv[0]))
 

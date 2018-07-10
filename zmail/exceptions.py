@@ -1,6 +1,12 @@
+"""
+zmail.exceptions
+~~~~~~~~~~~~~~~~
+Include all exceptions used within zmail.
+"""
+
+
 class ZmailException(IOError):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    """Base exception."""
 
 
 class InvalidProtocol(ZmailException, ValueError):

@@ -1,3 +1,8 @@
+"""
+zmail.structures
+~~~~~~~~~~~~~~~~
+Data structures that power zmail.
+"""
 import collections
 
 
@@ -46,8 +51,8 @@ class CaseInsensitiveDict(collections.MutableMapping):
         return dict(self.lower_items()) == dict(other.lower_items())
 
     def copy(self):
+        """Shallow copy."""
         return CaseInsensitiveDict(self._store.values())
 
     def __repr__(self):
         return str(dict(self.items()))
-

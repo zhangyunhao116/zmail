@@ -48,7 +48,7 @@ class MailServer:
         """"Send email."""
         message = CaseInsensitiveDict(message)
 
-        if self.auto_add_from and message.get('from') is not None:
+        if self.auto_add_from and message.get('from') is None:
             message['from'] = '{}<{}>'.format(self.user.split("@")[0], self.user)
 
         recipients = recipients if isinstance(recipients, (list, tuple)) else (recipients,)

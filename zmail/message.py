@@ -497,7 +497,8 @@ class MailDecode:
             if content_disposition and content_disposition.find('attachment') > -1:
                 attachment = []
                 filename = re.search(r"""attachment;[\s]?filename=[\s"']?([^"';]+)""", content_disposition).group(1)
-                decoded_filename = ''.join([i[0].decode(i[1]) for i in decode_header(filename)])
+                decoded_filename = ''.join(
+                    [i[0] if isinstance(i[0], str) else i[0].decode(i[1]) for i in decode_header(filename)])
                 attachment.append(decoded_filename + ';%s' % content_type)
 
                 # Add body.

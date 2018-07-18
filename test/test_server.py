@@ -3,7 +3,7 @@ import zmail
 import zmail.info
 from test.base import config
 
-TEST_ALL_CASE = False
+TEST_ALL_CASE = True
 
 
 class TestGetServerInfo(unittest.TestCase):
@@ -56,13 +56,15 @@ class TestGetMail(unittest.TestCase):
     mail_with_attachments_and_chinese = {
         'subject': 'Zmail test mail with attachments.测试邮件',
         'content': 'Nothing here.这里什么都没有。',
-        'attachments': 'favicon.ico'
+        'from': 'ZYunH',
+        'to': 'dear',
+        'attachments': 'favicon.ico',
     }
     mail_with_attachments_and_chinese_result = {
         'subject': 'Zmail test mail with attachments.测试邮件',
         'content': ['Nothing here.这里什么都没有。'],
-        'from': 'zmailserver@126.com',
-        'to': 'zmailserver<zmailserver@126.com>',
+        'from': 'ZYunH',
+        'to': 'dear',
         'attachments': [['favicon.ico;',
                          b'\x00\x00\x01\x00\x01\x00\x10\x10\x00\x00\x01\x00 \x00h\x04\x00\x00\x16\x00\x00\x00(\x00\x00\x00\x10\x00\x00\x00 \x00\x00\x00\x01\x00 \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
                          b'\x00\x00\x00\x00\x00\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff',

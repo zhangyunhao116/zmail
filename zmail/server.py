@@ -10,10 +10,8 @@ import logging
 
 from zmail.exceptions import InvalidProtocol
 from zmail.info import get_supported_server_info
-from zmail.structures import CaseInsensitiveDict
-from zmail.message import mail_encode, mail_decode
+from zmail.message import mail_decode, Mail, decode_headers
 from zmail.settings import __local__
-from zmail.message import parse_header_shortcut
 
 # Fix poplib bug.
 poplib._MAXLINE = 4096
@@ -44,12 +42,12 @@ class MailServer:
         self.auto_add_from = auto_add_from
         self.auto_add_to = auto_add_to
 
-    def send_mail(self, recipients, message, timeout=60):
+    def send_mail(self, recipients, message: dict, timeout=60) -> bool:
         """"Send email."""
-        message = CaseInsensitiveDict(message)
+        mail = Mail(message)
 
-        if self.auto_add_from and message.get('from') is None:
-            message['from'] = '{}<{}>'.format(self.user.split("@")[0], self.user)
+        if self.auto_add_from and mail.get('from') is None:
+            mail['from'] = '{}<{}>'.format(self.user.split("@")[0], self.user)
 
         recipients = recipients if isinstance(recipients, (list, tuple)) else (recipients,)
 
@@ -63,12 +61,10 @@ class MailServer:
 
         server = SMTPServer(host, port, self.user, self.password)
 
-        message = mail_encode(message)
-
         if ssl:
-            server.send_ssl(recipients, message, timeout, self.auto_add_to)
+            server.send_ssl(recipients, mail, timeout, self.auto_add_to)
         else:
-            server.send(recipients, message, timeout, self.auto_add_to, tls)
+            server.send(recipients, mail, timeout, self.auto_add_to, tls)
 
         return True
 
@@ -96,7 +92,7 @@ class MailServer:
         mail_id = []
 
         for index, mail in enumerate(info):
-            if self._match(parse_header_shortcut(mail), subject, after, before, sender):
+            if self._match(decode_headers(mail), subject, after, before, sender):
                 mail_id.append(index + 1)
 
         server = self._init_pop3()

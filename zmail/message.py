@@ -5,10 +5,11 @@ This module provides functions to handles MIME object.
 """
 import os
 import re
-import mimetypes
-import logging
 import quopri
 import base64
+import logging
+import mimetypes
+import collections
 
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
@@ -16,7 +17,7 @@ from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.encoders import encode_base64
-from email.header import decode_header
+from email.header import decode_header, Header
 
 from .utils import get_abs_path, make_iterable
 from .structures import CaseInsensitiveDict
@@ -24,48 +25,181 @@ from .structures import CaseInsensitiveDict
 logger = logging.getLogger('zmail')
 
 
-def mail_encode(message: CaseInsensitiveDict):
-    """Convert a dict to a MIME obj."""
-    logger.info('Encoding mail to MIME obj.')
+class Mail(collections.MutableMapping):
+    basic_item = ('subject', 'from', 'to', 'date', 'content-type')
+    optional_item = ('content-transfer-encoding', 'boundary', 'charset',  # All three from parsed headers.
+                     'id',  # From mail servers.
+                     'raw',  # Raw data.
+                     'headers',  # Parsed headers as dict.
+                     'as_string',  # As string for send.
+                     'content',  # From parsed body or user(for send).
+                     'content-html',  # From parsed body or user(for send).
+                     'attachments',  # From parsed body or user(for send).
+                     )
 
-    # Create MIMEMultipart.
-    msg = MIMEMultipart()
+    def __init__(self, data=None, **kwargs):
+        self._store = {}
+        self.mime = None
+        self.as_bytes_list = None
 
-    # Set basic email elements.
-    for k, v in message.lower_items():
-        if k in ('from', 'to', 'subject') and v:
-            msg[k.capitalize()] = v
+        if data is None:
+            self.update(**kwargs)
+        elif isinstance(data, dict):
+            self.update(data, **kwargs)
+        elif isinstance(data, (list, tuple)):
+            self.as_bytes_list = data
 
-    # Set extra parameters.
-    for k in message:
-        if k.lower() not in ('from', 'to', 'subject', 'attachments', 'content'):
-            msg[k] = message[k]
+    def __setitem__(self, key, value):
+        self._store[key.lower()] = (key, value)
 
-    # Set mail content.
-    if 'content_html' in message:
-        msg.attach(MIMEText('%s' % message['content_html'], 'html', 'utf-8'))
-    if 'content' in message:
-        _message = make_iterable(message['content'])
-        _combine_message = ''
-        for i in _message:
-            _combine_message += i
-        msg.attach(MIMEText('{}'.format(_combine_message), 'plain', 'utf-8'))
+    def __getitem__(self, key):
+        try:
+            return self._store[key.lower()][1]
+        except KeyError:
+            if key.lower() in self.basic_item or key.lower() in self.optional_item:
+                return None
+            raise
 
-    # Set attachments.
-    if 'attachments' in message and message['attachments']:
-        attachments = make_iterable(message['attachments'])
-        for attachment in attachments:
-            logger.info('Loading %s', attachment)
-            attachment = get_abs_path(attachment)
-            part = _get_attachment_part(attachment)
-            msg.attach(part)
+    def __delitem__(self, key):
+        del self._store[key.lower()]
 
-    return msg
+    def __iter__(self):
+        return (raw_key for raw_key, _ in self._store.values())
+
+    def __len__(self):
+        return len(self._store)
+
+    def __eq__(self, other):
+        """Compared insensitively."""
+        if isinstance(other, collections.Mapping):
+            other = Mail(other)
+        else:
+            return NotImplemented
+        return dict(self.lower_items()) == dict(other.lower_items())
+
+    def lower_items(self):
+        return (
+            (lower_key, value[1])
+            for (lower_key, value)
+            in self._store.items()
+        )
+
+    def copy(self):
+        """Shallow copy."""
+        return Mail(self._store.values())
+
+    def set_default_value(self, value=None):
+        for i in self.basic_item:
+            if i not in self._store:
+                self[i] = value
+        for i in self.optional_item:
+            if i not in self._store:
+                self[i] = value
+        return self
+
+    def pre_send(self):
+        """Make a MIME obj for send."""
+        logger.info('Making MIME obj.')
+
+        mime = MIMEMultipart()
+        # Set basic email elements.
+        for k, v in self.lower_items():
+            if k in ('from', 'to', 'subject') and v:
+                mime[k.capitalize()] = v
+
+        # Set extra parameters.
+        for k in self:
+            if k.lower() not in ('from', 'to', 'subject', 'attachments', 'content'):
+                mime[k] = self[k]
+
+        # Set mail content.
+        if 'content_html' in self:
+            mime.attach(MIMEText('%s' % self['content_html'], 'html', 'utf-8'))
+        if 'content' in self:
+            _message = make_iterable(self['content'])
+            _combine_message = ''
+            for i in _message:
+                _combine_message += i
+            mime.attach(MIMEText('{}'.format(_combine_message), 'plain', 'utf-8'))
+
+        # Set attachments.
+        if 'attachments' in self and self['attachments']:
+            attachments = make_iterable(self['attachments'])
+            for attachment in attachments:
+                logger.info('Loading %s', attachment)
+                attachment = get_abs_path(attachment)
+                part = self._get_attachment_part(attachment)
+                mime.attach(part)
+
+        self.mime = mime
+
+        return self
+
+    def as_string(self):
+        if self.mime is None:
+            self.pre_send()
+        elif isinstance(self.mime, MIMEMultipart):
+            pass
+        else:
+            raise ValueError('MIME should be MIMEMultipart or None.')
+
+        return self.mime.as_string()
+
+    def as_bytes(self):
+        if self.mime is None:
+            self.pre_send()
+        elif isinstance(self.mime, MIMEMultipart):
+            pass
+        else:
+            raise ValueError('MIME should be MIMEMultipart or None.')
+
+        return self.mime.as_bytes()
+
+    def decode(self):
+        if self.as_bytes_list is None:
+            raise TypeError('Need mail as bytes list.')
+        return MailDecode(self.as_bytes_list).get_decoded_result()
+
+    @staticmethod
+    def _get_attachment_part(file):
+        """According to file-type return a prepared attachment part."""
+        name = os.path.split(file)[1]
+        file_type = mimetypes.guess_type(name)[0]
+
+        encoded_name = Header(name).encode()
+
+        if file_type is None:
+            logger.warning('Could not guess %s type, use application type instead.', file)
+            file_type = 'application/octet-stream'
+
+        main_type, sub_type = file_type.split('/')
+
+        if main_type == 'text':
+            with open(file, 'r') as f:
+                part = MIMEText(f.read())
+                part['Content-Disposition'] = 'attachment;filename="%s"' % encoded_name
+
+        elif main_type in ('image', 'audio'):
+            with open(file, 'rb') as f:
+                part = MIMEImage(f.read(), _subtype=sub_type) if main_type == 'image' else \
+                    MIMEAudio(f.read(), _subtype=sub_type)
+                part['Content-Disposition'] = 'attachment;filename="%s"' % encoded_name
+        else:
+            with open(file, 'rb') as f:
+                part = MIMEBase(main_type, sub_type)
+                part.set_payload(f.read())
+                part['Content-Disposition'] = 'attachment;filename="%s"' % encoded_name
+                encode_base64(part)
+
+        return part
+
+    def __repr__(self):
+        return str(dict(self.items()))
 
 
-def mail_decode(mail_as_bytes, which=1):
+def mail_decode(mail_as_bytes, which=-1):
     """Convert a MIME bytes to dict."""
-    return MailDecode(mail_as_bytes, which).result
+    return MailDecode(mail_as_bytes, which).get_decoded_result()
 
 
 def parse_header(mail_as_bytes, *args):
@@ -116,94 +250,7 @@ def parse_header(mail_as_bytes, *args):
     return email_headers
 
 
-def _get_attachment_part(file):
-    """According to file-type return a prepared attachment part."""
-    name = os.path.split(file)[1]
-    file_type = mimetypes.guess_type(name)[0]
-
-    if file_type is None:
-        logger.warning('Could not guess %s type, use application type instead.', file)
-        file_type = 'application/octet-stream'
-
-    main_type, sub_type = file_type.split('/')
-
-    if main_type == 'text':
-        with open(file, 'r') as f:
-            part = MIMEText(f.read())
-            part['Content-Disposition'] = 'attachment;filename="%s"' % name
-
-    elif main_type in ('image', 'audio'):
-        with open(file, 'rb') as f:
-            part = MIMEImage(f.read(), _subtype=sub_type) if main_type == 'image' else \
-                MIMEAudio(f.read(), _subtype=sub_type)
-            part['Content-Disposition'] = 'attachment;filename="%s"' % name
-    else:
-        with open(file, 'rb') as f:
-            part = MIMEBase(main_type, sub_type)
-            part.set_payload(f.read())
-            part['Content-Disposition'] = 'attachment;filename="%s"' % name
-            encode_base64(part)
-
-    return part
-
-
-def _fmt_date(date_as_string):
-    """Format mail header Date for humans."""
-    _month = {
-        'Jan': 1,
-        'Feb': 2,
-        'Mar': 3,
-        'Apr': 4,
-        'May': 5,
-        'Jun': 6,
-        'Jul': 7,
-        'Aug': 8,
-        'Sep': 9,
-        'Oct': 10,
-        'Nov': 11,
-        'Dec': 12,
-    }
-    pattern_one = r'(\w+),\s+([0-9]+)\s+(\w+)\s+([0-9]+)\s+([:0-9]+)\s+(.+)'
-    pattern_two = r'([0-9])\s+([\w]+)\s+([0-9]+)\s+([:0-9]+)\s+(.+)'
-    match_one = re.search(pattern_one, date_as_string)
-    match_two = re.search(pattern_two, date_as_string)
-    if match_one:
-        week, day, month_as_string, year, now_time, time_zone = match_one.groups()
-        month = [v for k, v in _month.items() if month_as_string.lower() == k.lower()][0]
-        return '{}-{}-{} {} {}'.format(int(year), int(month), int(day), now_time, time_zone)
-    elif match_two:
-        day, month_as_string, year, now_time, time_zone = match_two.groups()
-        month = [v for k, v in _month.items() if month_as_string.lower() == k.lower()][0]
-        return '{}-{}-{} {} {}'.format(int(year), int(month), int(day), now_time, time_zone)
-    else:
-        logger.warning('Can not parse Date:{}'.format(date_as_string))
-        return date_as_string
-
-
-def divide_into_parts(bytes_list, sep):
-    """Divide a list of bytes to parts.
-    """
-    is_part = False
-    result = []
-
-    part = []
-    for i in bytes_list:
-        if i.find(sep) > -1:
-            is_part = True
-            if part:
-                result.append(part)
-            part = []
-            continue
-
-        if is_part:
-            part.append(i)
-
-    return result
-
-
-def parse_header_shortcut(mail_as_bytes):
-    """Shortcut for parse mail headers(only)."""
-
+def decode_headers(mail_as_bytes) -> CaseInsensitiveDict:
     def _decode_header(header_as_string):
         result = ''
 
@@ -221,6 +268,38 @@ def parse_header_shortcut(mail_as_bytes):
                 raise Exception('Can not decode header:{}'.format(header_as_string))
         return result
 
+    def _fmt_date(date_as_string):
+        """Format mail header Date for humans."""
+        _month = {
+            'Jan': 1,
+            'Feb': 2,
+            'Mar': 3,
+            'Apr': 4,
+            'May': 5,
+            'Jun': 6,
+            'Jul': 7,
+            'Aug': 8,
+            'Sep': 9,
+            'Oct': 10,
+            'Nov': 11,
+            'Dec': 12,
+        }
+        pattern_one = r'(\w+),\s+([0-9]+)\s+(\w+)\s+([0-9]+)\s+([:0-9]+)\s+(.+)'
+        pattern_two = r'([0-9])\s+([\w]+)\s+([0-9]+)\s+([:0-9]+)\s+(.+)'
+        match_one = re.search(pattern_one, date_as_string)
+        match_two = re.search(pattern_two, date_as_string)
+        if match_one:
+            week, day, month_as_string, year, now_time, time_zone = match_one.groups()
+            month = [v for k, v in _month.items() if month_as_string.lower() == k.lower()][0]
+            return '{}-{}-{} {} {}'.format(int(year), int(month), int(day), now_time, time_zone)
+        elif match_two:
+            day, month_as_string, year, now_time, time_zone = match_two.groups()
+            month = [v for k, v in _month.items() if month_as_string.lower() == k.lower()][0]
+            return '{}-{}-{} {} {}'.format(int(year), int(month), int(day), now_time, time_zone)
+        else:
+            logger.warning('Can not parse Date:{}'.format(date_as_string))
+            return date_as_string
+
     # Set default values.
     headers = CaseInsensitiveDict()
     for i in ('subject', 'from', 'to', 'date', 'content-type', 'boundary'):
@@ -233,6 +312,7 @@ def parse_header_shortcut(mail_as_bytes):
         if v is None:
             parsed_headers.pop(k)
     headers.update(parsed_headers)
+
     # Convert charset to str for subsequent parsing.
     if isinstance(headers['charset'], bytes):
         headers['charset'] = headers['charset'].decode()
@@ -265,15 +345,17 @@ def parse_header_shortcut(mail_as_bytes):
     if headers.get('date'):
         headers['date'] = _fmt_date(headers['date'])
 
-    # Warning failed to catch basic mail elements .
+    # Warning if failed to catch basic mail elements .
     for i in ('subject', 'date', 'from', 'to', 'content-type'):
         if headers[i] is None:
             logger.warning("Can not get element '%s' in this mail." % i)
+
+    # Headers init is complete.
     return headers
 
 
 class MailDecode:
-    def __init__(self, mail_as_bytes, which):
+    def __init__(self, mail_as_bytes, which=None):
         """
         Mail content:
         - headers content (generated from mail headers)
@@ -296,86 +378,43 @@ class MailDecode:
         - raw (mail itself)
         'raw'                       basic. mail itself as raw.
         """
+
         self.mail_as_bytes = mail_as_bytes
+        self.body_as_bytes = None
+        self.headers = None
+        self.id = which
+        self.result = None
 
-        # Set default values.
-        headers = CaseInsensitiveDict()
-        for i in ('subject', 'from', 'to', 'date', 'content-type', 'boundary'):
-            headers.setdefault(i, None)
-        headers['charset'] = 'utf-8'
-        # Update values by parse headers.
-        _parsed_headers = parse_header(mail_as_bytes, 'boundary', 'charset', 'content-transfer-encoding')
-        parsed_headers = _parsed_headers.copy()
-        for k, v in _parsed_headers.items():
-            if v is None:
-                parsed_headers.pop(k)
-        headers.update(parsed_headers)
-        # Convert charset to str for subsequent parsing.
-        if isinstance(headers['charset'], bytes):
-            headers['charset'] = headers['charset'].decode()
+    def get_decoded_result(self):
 
-        # Decode values use its charset.
-        # 'boundary' need to be bytes for subsequent parsing.
-        # 'charset' is already str.
-        for k, v in headers.lower_items():
-            if headers[k] and k not in ('boundary', 'charset'):
-                try:
-                    headers[k] = v.decode(headers['charset'])
-                except UnicodeDecodeError:
-                    if k in ('subject', 'from', 'to'):
-                        try:
-                            headers[k] = v.decode('utf-8')
-                        except UnicodeDecodeError:
-                            logger.critical(
-                                'Can not decode basic "{}",Use {} instead, raw:{}'.format(k, 'Unknown%s' % k,
-                                                                                          headers[k]))
-                            headers[k] = 'Unknown%s' % k
-                    else:
-                        logger.warning('Can not decode {} {}'.format(k, headers['charset']))
-        # Decode headers for read.
-        # Usually, subject|from|to need to be decode again.
-        for k in ('subject', 'from', 'to'):
-            if headers[k]:
-                headers[k] = self._decode_header(headers[k])
-
-        # Decode 'date' for read.
-        if headers.get('date'):
-            headers['date'] = _fmt_date(headers['date'])
-
-        # Warning failed to catch basic mail elements .
-        for i in ('subject', 'date', 'from', 'to', 'content-type'):
-            if headers[i] is None:
-                logger.warning("Can not get element '%s' in this mail." % i)
-
-        # Headers init is complete.
-        self.headers = headers
+        self.headers = decode_headers(self.mail_as_bytes) if self.headers is None else self.headers
 
         # Make result init.
         self.result = dict()
         for k in ('subject', 'from', 'to', 'date', 'content-type', 'boundary', 'charset'):
-            self.result[k] = headers.get(k)
+            self.result[k] = self.headers.get(k)
         for k in ('attachments', 'content', 'content_html'):
             self.result.setdefault(k, None)
 
-        self.result['id'] = which
-        self.result['headers'] = headers
-        self.result['raw'] = mail_as_bytes
+        self.result['id'] = self.id
+        self.result['headers'] = self.headers
+        self.result['raw'] = self.mail_as_bytes
 
         # Get body_as_bytes
         self.body_as_bytes = None
-        for line in mail_as_bytes:
+        for line in self.mail_as_bytes:
             if line in (b'\r\n', b''):
-                self.body_as_bytes = mail_as_bytes[mail_as_bytes.index(line) + 1:]
+                self.body_as_bytes = self.mail_as_bytes[self.mail_as_bytes.index(line) + 1:]
         assert self.body_as_bytes is not None, 'Can not divide headers and body.'
 
         # Set mail attributes.
-        self.content_transfer_encoding = headers.get('content-transfer-encoding')
+        self.content_transfer_encoding = self.headers.get('content-transfer-encoding')
         try:
-            self.content_type = re.search(r'\s?([a-z0-9]+/[a-z0-9]+)\s?;.+', headers['content-type']).group(1)
+            self.content_type = re.search(r'\s?([a-z0-9]+/[a-z0-9]+)\s?;.+', self.headers['content-type']).group(1)
         except AttributeError:
             self.content_type = ''
-        self.charset = headers.get('charset')
-        self.boundary = headers.get('boundary')
+        self.charset = self.headers.get('charset')
+        self.boundary = self.headers.get('boundary')
 
         # Attribute check.
         if self.content_transfer_encoding is not None and self.content_transfer_encoding.lower() not in (
@@ -388,22 +427,27 @@ class MailDecode:
             _content, _content_html = self.one_part_decode()
             self.result['content'], self.result['content_html'] = _content, _content_html
 
-    @staticmethod
-    def _decode_header(header_as_string):
-        result = ''
+        return self.result
 
-        for i in decode_header(header_as_string):
-            _bytes, charset = i
-            charset = charset or 'utf-8'
-            if isinstance(_bytes, bytes):
-                try:
-                    result += _bytes.decode(charset)
-                except UnicodeDecodeError:
-                    logger.warning('UnicodeDecodeError:{} {}'.format(_bytes, charset))
-            elif isinstance(_bytes, str):
-                result += _bytes
-            else:
-                raise Exception('Can not decode header:{}'.format(header_as_string))
+    @staticmethod
+    def divide_into_parts(bytes_list, sep):
+        """Divide a list of bytes to parts.
+        """
+        is_part = False
+        result = []
+
+        part = []
+        for i in bytes_list:
+            if i.find(sep) > -1:
+                is_part = True
+                if part:
+                    result.append(part)
+                part = []
+                continue
+
+            if is_part:
+                part.append(i)
+
         return result
 
     def is_multiple_part(self):
@@ -414,7 +458,7 @@ class MailDecode:
         content = []
         content_html = []
 
-        parts = divide_into_parts(self.body_as_bytes, self.boundary)
+        parts = self.divide_into_parts(self.body_as_bytes, self.boundary)
 
         for part in parts:
             # Init headers.
@@ -453,7 +497,8 @@ class MailDecode:
             if content_disposition and content_disposition.find('attachment') > -1:
                 attachment = []
                 filename = re.search(r"""attachment;[\s]?filename=[\s"']?([^"';]+)""", content_disposition).group(1)
-                attachment.append(filename + ';%s' % content_type)
+                decoded_filename = ''.join([i[0].decode(i[1]) for i in decode_header(filename)])
+                attachment.append(decoded_filename + ';%s' % content_type)
 
                 # Add body.
                 is_body = False

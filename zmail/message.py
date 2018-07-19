@@ -207,6 +207,7 @@ def parse_header(mail_as_bytes, *args):
 
     :param mail_as_bytes: mail as bytes
     :param args: extra parameters
+
     :return: dict {'header_as_str':'value_as_bytes'}
     """
     email_headers = {}

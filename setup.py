@@ -17,7 +17,7 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='zmail',
-    version='0.1.7',
+    version='0.1.8',
 
     author='ZYunH',
     author_email='zyunhjob@163.com',
@@ -37,7 +37,9 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation',
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Software Development :: Libraries :: Python Modules'

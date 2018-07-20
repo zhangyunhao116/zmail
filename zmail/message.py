@@ -109,7 +109,7 @@ class Mail(collections.MutableMapping):
 
         # Set extra parameters.
         for k in self:
-            if k.lower() not in ('from', 'to', 'subject', 'attachments', 'content'):
+            if k.lower() not in ('from', 'to', 'subject', 'attachments', 'content', 'content_html'):
                 mime[k] = self[k]
 
         # Set mail content.
@@ -154,6 +154,18 @@ class Mail(collections.MutableMapping):
             raise ValueError('MIME should be MIMEMultipart or None.')
 
         return self.mime.as_bytes()
+
+    def set_boundary(self, boundary):
+        if self.mime is None:
+            self.pre_send()
+        elif isinstance(self.mime, MIMEMultipart):
+            pass
+        else:
+            raise ValueError('MIME should be MIMEMultipart or None.')
+
+        self.mime.set_boundary(boundary)
+
+        return self
 
     def decode(self):
         if self.as_bytes_list is None:

@@ -15,6 +15,12 @@ if sys.argv[-1] == 'publish':
     os.system('rm -rf build dist .egg zmail.egg-info')
     sys.exit()
 
+# 'setup.py test' shortcut.
+if sys.argv[-1] == 'test':
+    os.system('pip3 install pytest')
+    os.system('cd test && pytest')
+    sys.exit()
+
 setup(
     name='zmail',
     version='0.1.8',

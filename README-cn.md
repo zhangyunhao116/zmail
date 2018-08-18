@@ -119,7 +119,13 @@ mail = {
 server.send_mail('yourfriend@example.com',mail)
 ```
 
+- ##### 自定义你的server
 
+如果zmail不能正常工作，你可以自定义server的配置
+
+```
+server = zmail.server('username','password',smtp_host='smtp.163.com',smtp_port=994,smtp_ssl=True,pop_host='pop.163.com',pop_port=995,pop_tls=True)
+```
 
 ### 取回你的邮件
 

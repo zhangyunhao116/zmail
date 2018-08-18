@@ -119,7 +119,13 @@ mail = {
 server.send_mail('yourfriend@example.com',mail)
 ```
 
+- ##### Customize your server
 
+If zmail not working correctly, you can customize your server config by yourself.
+
+```
+server = zmail.server('username','password',smtp_host='smtp.163.com',smtp_port=994,smtp_ssl=True,pop_host='pop.163.com',pop_port=995,pop_tls=True)
+```
 
 ### Retrieve your mail
 

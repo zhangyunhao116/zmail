@@ -109,21 +109,22 @@ class Mail(collections.MutableMapping):
 
         # Set extra parameters.
         for k in self:
-            if k.lower() not in ('from', 'to', 'subject', 'attachments', 'content', 'content_html'):
+            if k.lower() not in ('from', 'to', 'subject', 'attachments', 'content', 'content_html', 'content-html'):
                 mime[k] = self[k]
 
         # Set mail content.
-        if 'content_html' in self:
+        if self.get('content_html'):
             mime.attach(MIMEText('%s' % self['content_html'], 'html', 'utf-8'))
-        if 'content' in self:
+        elif self.get('content-html'):
+            mime.attach(MIMEText('%s' % self['content-html'], 'html', 'utf-8'))
+
+        if self['content']:
             _message = make_iterable(self['content'])
-            _combine_message = ''
-            for i in _message:
-                _combine_message += i
+            _combine_message = ''.join(_message)
             mime.attach(MIMEText('{}'.format(_combine_message), 'plain', 'utf-8'))
 
         # Set attachments.
-        if 'attachments' in self and self['attachments']:
+        if self['attachments']:
             attachments = make_iterable(self['attachments'])
             for attachment in attachments:
                 logger.info('Loading %s', attachment)
@@ -406,7 +407,7 @@ class MailDecode:
         self.result = dict()
         for k in ('subject', 'from', 'to', 'date', 'content-type', 'boundary', 'charset'):
             self.result[k] = self.headers.get(k)
-        for k in ('attachments', 'content', 'content_html'):
+        for k in ('attachments', 'content', 'content-html'):
             self.result.setdefault(k, None)
 
         self.result['id'] = self.id
@@ -438,8 +439,10 @@ class MailDecode:
             self.multiple_part_decode()
         else:
             _content, _content_html = self.one_part_decode()
-            self.result['content'], self.result['content_html'] = _content, _content_html
+            self.result['content'], self.result['content-html'] = _content, _content_html
 
+        # Compatible between content_html and content-html TODO
+        self.result['content_html'] = self.result['content-html']
         return self.result
 
     @staticmethod
@@ -537,7 +540,7 @@ class MailDecode:
                 logger.warning('Can not parse:{}'.format(content_type))
 
         self.result['content'] = content
-        self.result['content_html'] = content_html
+        self.result['content-html'] = content_html
         self.result['attachments'] = attachments
 
     def one_part_decode(self):

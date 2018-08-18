@@ -81,7 +81,7 @@ import zmail
 mail = {
     'subject': 'Success!',  # Anything you want.
     'content': 'This message from zmail!',  # Anything you want.
-    'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
+    'attachments': ['/Users/zyh/Documents/example.zip','/root/1.jpg'],  # Absolute path will be better.
 }
 
 server = zmail.server('yourmail@example.com’, 'yourpassword')
@@ -100,7 +100,7 @@ server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```python
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content_html': zmail.get_html('/Users/example.html'), # Absolute path will be better.
+    'content-html': zmail.get_html('/Users/example.html'), # Absolute path will be better.
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
@@ -113,7 +113,7 @@ with open('/Users/example.html','r') as f:
     content_html = f.read()
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content_html': content_html, 
+    'content-html': content_html, 
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
@@ -188,7 +188,7 @@ from zmail<zmail@126.com>
 date 2018-2-3 01:42:29 +0800
 boundary ===============9196441298519098157==
 content ['This message from zmail!']
-content_html ['<HTML EXAMPLE>']
+content-html ['<HTML EXAMPLE>']
 raw [[b'Content-Type: text/plain; charset="utf-8"', b'MIME-Version: 1.0', b'Content-Transfer-Encoding: base64', b'', b'VGhpcyBtZXNzYWdlIGZyb20gem1haWwh', b'']]
 attachments None
 id 5
@@ -203,7 +203,7 @@ id 5
 - date: 年-月-日 时间 时区
 - boundary: 如果邮件为multiple parts，你可以得到其分界线
 - content: 邮件的文本内容（仅在text/plain时可以被解析）
-- content_html:邮件的网页内容（仅在text/html时可以被解析）
+- content-html:邮件的网页内容（仅在text/html时可以被解析）
 - raw: 邮件的原始数据
 - attachments: None 或者 [['附件名称;编码方式','附件的二进制内容']...]
 - id: 在邮箱中的id
@@ -277,6 +277,8 @@ mail = zmail.decode(mail_as_raw)
   - 根据服务器SMTP或者POP3地址的端口填写server（没有填写的将会为默认值）
   - SMTP：server = zmail.server('user','psw',smtp_host = 'xxx',smtp_port = 'yyyyy',smtp_ssl=True)
   - POP3：server = zmail.server('user','psw',pop_host = 'xxx',pop_port = 'yyyyy',pop_ssl=True)
+
+- 为了统一API,content_html将于0.2版本消失,在此之前你仍可使用content_html作为发送或解析邮件的关键字,但是更建议使用content-html
 
 ## API
 

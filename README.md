@@ -81,7 +81,7 @@ import zmail
 mail = {
     'subject': 'Success!',  # Anything you want.
     'content': 'This message from zmail!',  # Anything you want.
-    'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
+    'attachments': ['/Users/zyh/Documents/example.zip','/root/1.jpg'],  # Absolute path will be better.
 }
 
 server = zmail.server('yourmail@example.com‘, 'yourpassword')
@@ -100,7 +100,7 @@ server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```python
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content_html': zmail.get_html('/Users/example.html'), # Absolute path will be better.
+    'content-html': zmail.get_html('/Users/example.html'), # Absolute path will be better.
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
@@ -113,7 +113,7 @@ with open('/Users/example.html','r') as f:
     content_html = f.read()
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content_html': content_html, 
+    'content-html': content_html, 
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
@@ -188,7 +188,7 @@ from zmail<zmail@126.com>
 date 2018-2-3 01:42:29 +0800
 boundary ===============9196441298519098157==
 content ['This message from zmail!']
-content_html ['<HTML EXAMPLE>']
+content-html ['<HTML EXAMPLE>']
 raw [[b'Content-Type: text/plain; charset="utf-8"', b'MIME-Version: 1.0', b'Content-Transfer-Encoding: base64', b'', b'VGhpcyBtZXNzYWdlIGZyb20gem1haWwh', b'']]
 attachments None
 id 5
@@ -203,7 +203,7 @@ id 5
 - date: year-month-day time TimeZone
 - boundary: If mail is multiple parts, you can get the boundary
 - content: Mail content as text/plain
-- content_html: Mail content as text/html
+- content-html: Mail content as text/html
 - raw: raw mail as bytes
 - attachments: None or [['attachment-name;Encoding','ATTACHMENT-DATA']...]
 - id: Mailbox id
@@ -278,8 +278,7 @@ The mail server in this list has been tested and approved.
   - according to smtp or pop protocol provided by your mail server to define zmail.server 
   - SMTP：server = zmail.server('user','psw',smtp_host = 'xxx',smtp_port = 'yyyyy',smtp_ssl=True)
   - POP3：server = zmail.server('user','psw',pop_host = 'xxx',pop_port = 'yyyyy',pop_ssl=True)
-
-
+- For unified API,'content_html' will no longer used in version 0.2,'content-html'  is recommended.
 
 ## API
 

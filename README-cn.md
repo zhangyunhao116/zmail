@@ -269,6 +269,17 @@ mail = zmail.decode(mail_as_raw)
 | @sina.com  | ✓        | ✓        |                       |
 | @outlook   | ✓        | ✓        | 需要应用专用密码      |
 
+
+
+## 支持的企业邮箱
+
+| 名称         | 使用示例                                    |
+| ------------ | ------------------------------------------- |
+| 腾讯企业邮箱 | zmail.server('username','psw',config='qq')  |
+| 阿里企业邮箱 | zmail.server('username','psw',config='ali') |
+
+
+
 ## 问题索引
 
 - ##### 发送或者接受失败

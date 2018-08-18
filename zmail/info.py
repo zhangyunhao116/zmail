@@ -58,7 +58,7 @@ SUPPORTED_ENTERPRISE_SERVER_CONFIG = {
         'pop_tls': False
 
     },
-    'aliyun': {
+    'ali': {
         'smtp_host': 'smtp.mxhichina.com',
         'smtp_port': 465,
         'smtp_ssl': True,

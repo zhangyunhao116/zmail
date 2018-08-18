@@ -271,6 +271,17 @@ The mail server in this list has been tested and approved.
 | @sina.com      | ✓         | ✓             |                                |
 | @outlook       | ✓         | ✓             | Need app private password      |
 
+
+
+## Supported enterprise mail server
+
+| Name                    | Usage                                       |
+| ----------------------- | ------------------------------------------- |
+| Tencent enterprise mail | zmail.server('username','psw',config='qq')  |
+| Ali enterprise mail     | zmail.server('username','psw',config='ali') |
+
+
+
 ## Q&A
 
 - Can not send or retrieve

@@ -274,6 +274,7 @@ mail = zmail.decode(mail_as_raw)
 | @gmail.com | ✓        | ✓        | 需要应用专用密码      |
 | @sina.com  | ✓        | ✓        |                       |
 | @outlook   | ✓        | ✓        | 需要应用专用密码      |
+| @hotmail   | ✓        | ✓        | 需要额外设置          |
 
 
 

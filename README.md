@@ -276,6 +276,7 @@ The mail server in this list has been tested and approved.
 | @gmail.com     | ✓         | ✓             | Need app private password      |
 | @sina.com      | ✓         | ✓             |                                |
 | @outlook       | ✓         | ✓             | Need app private password      |
+| @hotmail       | ✓         | ✓             | Require extra setup            |
 
 
 

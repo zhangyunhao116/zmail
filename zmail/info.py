@@ -43,7 +43,10 @@ SUPPORTED_SERVER = {
         'smtp': ('smtp-mail.outlook.com', 587, False, True),
         'pop3': ('pop.outlook.com', 995, True, False),
     },
-
+    'hotmail.com': {
+        'smtp': ('smtp.office365.com', 587, False, True),
+        'pop3': ('outlook.office365.com', 995, True, False),
+    },
 }
 
 SUPPORTED_ENTERPRISE_SERVER_CONFIG = {

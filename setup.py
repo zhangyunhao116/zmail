@@ -23,7 +23,7 @@ if sys.argv[-1] == 'test':
 
 setup(
     name='zmail',
-    version='0.1.10',
+    version='0.1.11',
 
     author='ZYunH',
     author_email='zyunhjob@163.com',

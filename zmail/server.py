@@ -177,29 +177,8 @@ class SMTPServer(ProtocolServer):
     def _remove_server(self):
         self.server = None
 
-    def send(self, recipients: List[str], message,
-             timeout: int or float or None, auto_add_to: bool):
-
-        if timeout is not None:
-            self.server.timeout = timeout
-
-        for recipient in recipients:
-            if auto_add_to and message.get('to') is None:
-                message['To'] = '{}<{}>'.format(recipient.split("@")[0], recipient)
-            self.server.sendmail(self.username, recipient, message.as_string())
-
     def login(self):
-        if self._login:
-            return
-
-        if self.debug:
-            self.log_debug(
-                'SMTPServer login into {}:{} ssl:{} tls:{}.'.format(self.host, self.port, self.ssl, self.tls))
-
-        self._make_server()
-
-        if self.tls:
-            self.stls()
+        super().login()
 
         self.server.login(self.username, self.password)
 
@@ -207,11 +186,14 @@ class SMTPServer(ProtocolServer):
 
     def logout(self):
         if not self._login:
+            self.log_exception('{} Logout before login!'.format(self.__repr__()))
             return
 
         if self.debug:
-            self.log_debug('{} logout.'.format(self.__repr__()))
+            self.log_access('logout')
 
+        # Copied from smtplib.SMTP.__exit__
+        # used for close connection.
         try:
             code, message = self.server.docmd("QUIT")
             if code != 221:
@@ -231,29 +213,17 @@ class SMTPServer(ProtocolServer):
         self.server.starttls()
         self.server.ehlo()
 
-    def check_available(self) -> bool:
-        try:
-            if self.ssl:
-                with smtplib.SMTP_SSL(self.host, self.port, __local__, timeout=self.timeout) as server:
-                    server.login(self.username, self.password)
-            else:
-                with smtplib.SMTP(self.host, self.port, __local__, timeout=self.timeout) as server:
-                    if self.tls:
-                        server.ehlo()
-                        server.starttls()
-                        server.ehlo()
-                    server.login(self.username, self.password)
-        except Exception as e:
-            logger.warning('Login SMTP error :{}'.format(e))
-            return False
-        return True
+    # Methods
+    def send(self, recipients: List[str], message,
+             timeout: int or float or None, auto_add_to: bool):
 
-    def __enter__(self):
-        self.login()
-        return self
+        if timeout is not None:
+            self.server.timeout = timeout
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.logout()
+        for recipient in recipients:
+            if auto_add_to and message.get('to') is None:
+                message['To'] = '{}<{}>'.format(recipient.split("@")[0], recipient)
+            self.server.sendmail(self.username, recipient, message.as_string())
 
 
 class POPServer(ProtocolServer):
@@ -272,16 +242,7 @@ class POPServer(ProtocolServer):
 
     def login(self):
         """Note: the mailbox on the server is locked until logout() is called."""
-        if self._login:
-            return
-
-        self._make_server()
-
-        if self.debug:
-            self.log_debug('{} login.'.format(self.__repr__()))
-
-        if self.tls:
-            self.stls()
+        super().login()
 
         self.server.user(self.username)
         self.server.pass_(self.password)
@@ -291,11 +252,11 @@ class POPServer(ProtocolServer):
     def logout(self):
         """Quit and remove pop3 server."""
         if not self._login:
-            self.log_exception('Logout before login!')
+            self.log_exception('{} Logout before login!'.format(self.__repr__()))
             return
 
         if self.debug:
-            self.log_debug('{} logout.'.format(self.__repr__()))
+            self.log_access('logout')
 
         self.server.quit()
 
@@ -306,14 +267,7 @@ class POPServer(ProtocolServer):
     def stls(self):
         self.server.stls()
 
-    def check_available(self) -> bool:
-        try:
-            self.login()
-            self.logout()
-            return True
-        except Exception as e:
-            self.log_exception('Login POPServer error :{}'.format(e))
-            return False
+    # Methods
 
     def stat(self) -> tuple:
         """Get mailbox status. The result is a tuple of 2 integers: (message count, mailbox size)."""
@@ -339,10 +293,3 @@ class POPServer(ProtocolServer):
     def get_mails(self, which_list: list) -> list:
         """Get a list of mails by its id."""
         return [self.server.retr(which)[1] for which in which_list]
-
-    def __enter__(self):
-        self.login()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.logout()

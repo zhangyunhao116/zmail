@@ -10,42 +10,96 @@ This module provide supported server information.
 """
 SUPPORTED_SERVER = {
     '163.com': {
-        'smtp': ('smtp.163.com', 994, True, False),
-        'pop3': ('pop.163.com', 995, True, False),
-        'imap': ('imap.163.com', 993, True, False)
-
+        'smtp_host': 'smtp.163.com',
+        'smtp_port': 994,
+        'smtp_ssl': True,
+        'smtp_tls': False,
+        'pop_host': 'pop.163.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
+        'imap_host': 'imap.163.com',
+        'imap_port': 993,
+        'imap_ssl': True,
+        'imap_tls': False
     },
     '126.com': {
-        'smtp': ('smtp.126.com', 994, True, False),
-        'pop3': ('pop.126.com', 995, True, False),
-        'imap': ('imap.126.com', 993, True, False)
-
+        'smtp_host': 'smtp.126.com',
+        'smtp_port': 994,
+        'smtp_ssl': True,
+        'smtp_tls': False,
+        'pop_host': 'pop.126.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
+        'imap_host': 'imap.126.com',
+        'imap_port': 993,
+        'imap_ssl': True,
+        'imap_tls': False
     },
     'yeah.net': {
-        'smtp': ('smtp.yeah.net', 994, True, False),
-        'pop3': ('pop.yeah.net', 995, True, False),
-        'imap': ('imap.yeah.net', 993, True, False)
-
+        'smtp_host': 'smtp.yeah.net',
+        'smtp_port': 994,
+        'smtp_ssl': True,
+        'smtp_tls': False,
+        'pop_host': 'pop.yeah.net',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
+        'imap_host': 'imap.yeah.net',
+        'imap_port': 993,
+        'imap_ssl': True,
+        'imap_tls': False
     },
     'qq.com': {
-        'smtp': ('smtp.qq.com', 465, True, False),
-        'pop3': ('pop.qq.com', 995, True, False),
+        'smtp_host': 'smtp.qq.com',
+        'smtp_port': 465,
+        'smtp_ssl': True,
+        'smtp_tls': False,
+        'pop_host': 'pop.qq.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
     },
     'gmail.com': {
-        'smtp': ('smtp.gmail.com', 587, False, True),
-        'pop3': ('pop.gmail.com', 995, True, False),
+        'smtp_host': 'smtp.gmail.com',
+        'smtp_port': 587,
+        'smtp_ssl': False,
+        'smtp_tls': True,
+        'pop_host': 'pop.gmail.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
     },
     'sina.com': {
-        'smtp': ('smtp.sina.com', 465, True, False),
-        'pop3': ('pop.sina.com', 995, True, False),
+        'smtp_host': 'smtp.sina.com',
+        'smtp_port': 465,
+        'smtp_ssl': True,
+        'smtp_tls': False,
+        'pop_host': 'pop.sina.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
     },
     'outlook.com': {
-        'smtp': ('smtp-mail.outlook.com', 587, False, True),
-        'pop3': ('pop.outlook.com', 995, True, False),
+        'smtp_host': 'smtp-mail.outlook.com',
+        'smtp_port': 587,
+        'smtp_ssl': False,
+        'smtp_tls': True,
+        'pop_host': 'pop.outlook.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
     },
     'hotmail.com': {
-        'smtp': ('smtp.office365.com', 587, False, True),
-        'pop3': ('outlook.office365.com', 995, True, False),
+        'smtp_host': 'smtp.office365.com',
+        'smtp_port': 587,
+        'smtp_ssl': False,
+        'smtp_tls': True,
+        'pop_host': 'outlook.office365.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
     },
 }
 
@@ -74,32 +128,45 @@ SUPPORTED_ENTERPRISE_SERVER_CONFIG = {
 
 }
 
+DEFAULT_SERVER_CONFIG = {
+    'smtp_host': 'smtp.',
+    'smtp_port': 465,
+    'smtp_ssl': True,
+    'smtp_tls': False,
+    'pop_host': 'pop.',
+    'pop_port': 995,
+    'pop_ssl': True,
+    'pop_tls': False,
+    'imap_host': 'imap.',
+    'imap_port': 993,
+    'imap_ssl': True,
+    'imap_tls': False
+}
 
-def get_supported_server_info(mail_address: str, protocol: str) -> tuple:
+
+def get_supported_server_info(mail_address: str, *allowed_protocols) -> dict:
     """Use user address to get server address and port.
 
     :param mail_address: str
-    :param protocol: str
-    :return: ('protocol_server_address', port, use_ssl)
+    :return: ('protocol_server_address', port, ssl, tls)
     """
     provider = mail_address.split('@')[1]
 
     if provider in SUPPORTED_SERVER:
-        server_info = SUPPORTED_SERVER[provider]
-        if protocol in server_info:
-            return server_info[protocol]
+        return {k: v for k, v in SUPPORTED_SERVER[provider].items()
+                if k.split('_')[0] in allowed_protocols}
 
-    if protocol == 'smtp':
-        return 'smtp.' + provider, 465, True, False
-    elif protocol == 'pop3':
-        return 'pop3.' + provider, 995, True, False
+    # Return default configs.
+    return {(k + provider if 'host' in k else k): v
+            for k, v in DEFAULT_SERVER_CONFIG.items()
+            if k.split('_')[0] in allowed_protocols}
 
 
-def get_enterprise_server_config(config: str):
+def get_enterprise_server_config(config: str) -> dict:
     """Get user-defined config.
     :param config: str
     :return: ('protocol_server_address', port, use_ssl)
     """
     if config in SUPPORTED_ENTERPRISE_SERVER_CONFIG:
         return SUPPORTED_ENTERPRISE_SERVER_CONFIG[config]
-    return False
+    return {}

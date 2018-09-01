@@ -15,7 +15,7 @@ fmt = logging.Formatter('[%(levelname)s] %(message)s')
 sh.setFormatter(fmt)
 logger.addHandler(sh)
 
-logger.setLevel(__level__)
+logger.setLevel(logging.DEBUG)
 
 # A standard zmail dict.
 MAIL = {

@@ -1,7 +1,7 @@
 import time
 import zmail
 
-from test.base import config
+from test.utils import accounts
 
 mail = {
     'subject': '测试邮件test!',
@@ -64,8 +64,8 @@ mail_receive_result = {
 
 
 def test_union():
-    username = config[0][0]
-    password = config[0][1]
+    username = accounts[0][0]
+    password = accounts[0][1]
     test_server = zmail.server(username, password)
     test_server.send_mail(username, mail)
     time.sleep(5)

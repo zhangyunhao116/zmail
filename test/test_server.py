@@ -70,6 +70,17 @@ def test_smtp_context():
     assert srv.server is None
 
 
+def test_check_available():
+    assert SMTPServer(**get_config('smtp')).check_available()
+    assert POPServer(**get_config('pop')).check_available()
+    incorrect_config = get_config('smtp')
+    incorrect_config.update(host='')
+    assert SMTPServer(**incorrect_config).check_available() is False
+    incorrect_config = get_config('pop')
+    incorrect_config.update(host='')
+    assert POPServer(**incorrect_config).check_available() is False
+
+
 def test_pop_context():
     srv = POPServer(**get_config('pop'))
 
@@ -78,11 +89,6 @@ def test_pop_context():
         assert srv.server is not None
 
     assert srv.server is None
-
-
-def test_check_available():
-    assert SMTPServer(**get_config('smtp')).check_available()
-    assert POPServer(**get_config('pop')).check_available()
 
 
 """Test specified smtp functions"""

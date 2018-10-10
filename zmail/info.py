@@ -8,6 +8,8 @@ This module provide supported server information.
     'protocol':('protocol_server_address', port, use_ssl,use_tls),
 }
 """
+from typing import Optional
+
 SUPPORTED_SERVER = {
     '163.com': {
         'smtp_host': 'smtp.163.com',
@@ -113,7 +115,6 @@ SUPPORTED_ENTERPRISE_SERVER_CONFIG = {
         'pop_port': 995,
         'pop_ssl': True,
         'pop_tls': False
-
     },
     'ali': {
         'smtp_host': 'smtp.mxhichina.com',
@@ -144,29 +145,22 @@ DEFAULT_SERVER_CONFIG = {
 }
 
 
-def get_supported_server_info(mail_address: str, *allowed_protocols) -> dict:
-    """Use user address to get server address and port.
-
-    :param mail_address: str
-    :return: ('protocol_server_address', port, ssl, tls)
-    """
+def get_supported_server_info(mail_address: str, config: Optional[str] = None) -> dict:
+    """Use user address to get server address and port."""
     provider = mail_address.split('@')[1]
 
+    if config is not None:
+        if config in SUPPORTED_ENTERPRISE_SERVER_CONFIG:
+            return SUPPORTED_ENTERPRISE_SERVER_CONFIG[config]
+        else:
+            raise RuntimeError(f'Can not this config "{config}".')
+
     if provider in SUPPORTED_SERVER:
-        return {k: v for k, v in SUPPORTED_SERVER[provider].items()
-                if k.split('_')[0] in allowed_protocols}
-
-    # Return default configs.
-    return {(k + provider if 'host' in k else k): v
-            for k, v in DEFAULT_SERVER_CONFIG.items()
-            if k.split('_')[0] in allowed_protocols}
-
-
-def get_enterprise_server_config(config: str) -> dict:
-    """Get user-defined config.
-    :param config: str
-    :return: ('protocol_server_address', port, use_ssl)
-    """
-    if config in SUPPORTED_ENTERPRISE_SERVER_CONFIG:
-        return SUPPORTED_ENTERPRISE_SERVER_CONFIG[config]
-    return {}
+        return SUPPORTED_SERVER[provider]
+    else:
+        # Return default configs.
+        config = DEFAULT_SERVER_CONFIG.copy()
+        config['smtp_host'] += provider
+        config['pop_host'] += provider
+        config['imap_host'] += provider
+        return config

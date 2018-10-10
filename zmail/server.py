@@ -178,7 +178,17 @@ class SMTPServer(ProtocolServer):
         self.server = None
 
     def login(self):
-        super().login()
+        if self._login:
+            self.log_exception('{} duplicate login!'.format(self.__repr__()))
+            return
+
+        if self.debug:
+            self.log_access('login')
+
+        self._make_server()
+
+        if self.tls:
+            self.stls()
 
         self.server.login(self.username, self.password)
 
@@ -242,7 +252,17 @@ class POPServer(ProtocolServer):
 
     def login(self):
         """Note: the mailbox on the server is locked until logout() is called."""
-        super().login()
+        if self._login:
+            self.log_exception('{} duplicate login!'.format(self.__repr__()))
+            return
+
+        if self.debug:
+            self.log_access('login')
+
+        self._make_server()
+
+        if self.tls:
+            self.stls()
 
         self.server.user(self.username)
         self.server.pass_(self.password)

@@ -16,10 +16,10 @@ def smtp_server():
     password = account[1]
     config = get_supported_server_info(username)
     return SMTPServer(username, password,
-                      config['smtp_host'],
-                      config['smtp_port'],
-                      config['smtp_ssl'],
-                      config['smtp_tls'],
+                      host=config['smtp_host'],
+                      port=config['smtp_port'],
+                      ssl=config['smtp_ssl'],
+                      tls=config['smtp_tls'],
                       timeout=60,
                       debug=False)
 
@@ -42,47 +42,29 @@ def smtp_server_config():
     }
 
 
-def test_smtp_server_init():
+def test_smtp_server_init(smtp_server_config):
     account = accounts[0]
     username = account[0]
     password = account[1]
-    config = get_supported_server_info(username)
     new_logger = mock.Mock()
-    srv = SMTPServer(username, password,
-                     config['smtp_host'],
-                     config['smtp_port'],
-                     config['smtp_ssl'],
-                     config['smtp_tls'],
-                     timeout=60,
-                     debug=False,
-                     log=new_logger)
+    srv = SMTPServer(**smtp_server_config, log=new_logger)
     assert srv.username == username
     assert srv.password == password
-    assert srv.host == config['smtp_host']
-    assert srv.port == config['smtp_port']
-    assert srv.ssl == config['smtp_ssl']
-    assert srv.tls == config['smtp_tls']
+    assert srv.host == smtp_server_config['host']
+    assert srv.port == smtp_server_config['port']
+    assert srv.ssl == smtp_server_config['ssl']
+    assert srv.tls == smtp_server_config['tls']
     assert srv.timeout == 60
     assert srv.debug is False
     assert srv.log is new_logger
 
 
-def test_smtp_server_default_logger():
-    account = accounts[0]
-    username = account[0]
-    password = account[1]
-    config = get_supported_server_info(username)
-    srv = SMTPServer(username, password,
-                     config['smtp_host'],
-                     config['smtp_port'],
-                     config['smtp_ssl'],
-                     config['smtp_tls'],
-                     timeout=60,
-                     debug=False)
+def test_smtp_server_default_logger(smtp_server_config):
+    srv = SMTPServer(**smtp_server_config)
     assert srv.log == logging.getLogger('zmail')
 
 
-def test_ssl_tls_error(smtp_server_config):
+def test_smtp_ssl_tls_error(smtp_server_config):
     configs = smtp_server_config.copy()
     configs.update(tls=True)
     with pytest.raises(TypeError):

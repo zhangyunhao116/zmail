@@ -1,6 +1,6 @@
 from zmail.server import SMTPServer, POPServer
 from zmail.info import get_supported_server_info, get_enterprise_server_config
-from test.utils import accounts
+from tests.utils import accounts
 
 server_default_configs = {
     'username': '',

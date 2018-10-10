@@ -55,15 +55,25 @@ class MailServer:
     def prepare(self):
         """Init SMTPServer and POPServer."""
         if self.smtp_server is None:
-            self.smtp_server = SMTPServer(self.username, self.password,
-                                          self.smtp_host, self.smtp_port,
-                                          self.timeout, self.smtp_ssl, self.smtp_tls,
-                                          self.debug, self.log)
+            self.smtp_server = SMTPServer(username=self.username,
+                                          password=self.password,
+                                          host=self.smtp_host,
+                                          port=self.smtp_port,
+                                          ssl=self.smtp_ssl,
+                                          tls=self.smtp_tls,
+                                          timeout=self.timeout,
+                                          debug=self.debug,
+                                          log=self.log)
         if self.pop_server is None:
-            self.pop_server = POPServer(self.username, self.password,
-                                        self.pop_host, self.pop_port,
-                                        self.timeout, self.pop_ssl, self.pop_tls,
-                                        self.debug, self.log)
+            self.pop_server = POPServer(username=self.username,
+                                        password=self.password,
+                                        host=self.pop_host,
+                                        port=self.pop_port,
+                                        ssl=self.pop_ssl,
+                                        tls=self.pop_tls,
+                                        timeout=self.timeout,
+                                        debug=self.debug,
+                                        log=self.log)
 
     def send_mail(self, recipients: List[str], message: dict, timeout=None,
                   auto_add_from=None, auto_add_to=None) -> bool:
@@ -167,7 +177,7 @@ class SMTPServer(ProtocolServer):
     """Base SMTPServer, which encapsulates python3 standard library to a SMTPServer."""
 
     def _make_server(self):
-        """Init Server."""
+        """Init Server if possible."""
         if self.server is None:
             if self.ssl:
                 self.server = smtplib.SMTP_SSL(self.host, self.port, __local__, timeout=self.timeout)

@@ -5,10 +5,10 @@ This module implements the zmail API.
 """
 import logging
 
-from .server import MailServer
-from .message import mail_decode
-from .utils import get_attachment, get_html, show, read, save
 from .info import get_enterprise_server_config, get_supported_server_info
+from .message import mail_decode
+from .server import MailServer
+from .utils import get_attachment, get_html, read, save, show
 
 logger = logging.getLogger('zmail')
 

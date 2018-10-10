@@ -4,14 +4,14 @@ zmail.server
 This module provides a MailServer object to communicate with mail server.
 """
 
-import smtplib
-import poplib
 import logging
-
-from zmail.message import mail_decode, Mail, decode_headers
-from zmail.settings import __local__
-from zmail.abc import ProtocolServer
+import poplib
+import smtplib
 from typing import List
+
+from zmail.abc import ProtocolServer
+from zmail.message import Mail, decode_headers, mail_decode
+from zmail.settings import __local__
 
 # Fix poplib bug.
 poplib._MAXLINE = 4096

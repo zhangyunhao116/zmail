@@ -1,73 +1,49 @@
-from zmail.server import SMTPServer, POPServer
-from zmail.info import get_supported_server_info, get_enterprise_server_config
-from tests.utils import accounts
-
-server_default_configs = {
-    'username': '',
-    'password': '',
-    'host': '',
-    'port': 995,
-    'timeout': 60,
-    'ssl': True,
-    'tls': False,
-    'debug': True,
-}
-
-account = accounts[0]
+import pytest
+from zmail.info import (DEFAULT_SERVER_CONFIG,
+                        SUPPORTED_ENTERPRISE_SERVER_CONFIG, SUPPORTED_SERVER,
+                        get_supported_server_info)
 
 
-def get_config(protocol):
-    """Get specified protocol config base on username."""
-    username = account[0]
-    password = account[1]
-    config = server_default_configs.copy()
-    config.update(username=username, password=password)
-    config.update({k.split('_')[1]: v for k, v in get_supported_server_info(username, protocol).items()})
-    return config
+def test_supported_server():
+    assert isinstance(SUPPORTED_SERVER, dict)
+    assert isinstance(SUPPORTED_ENTERPRISE_SERVER_CONFIG, dict)
 
+    combine = SUPPORTED_SERVER.copy()
+    combine.update(SUPPORTED_ENTERPRISE_SERVER_CONFIG)
 
-def get_configs(protocol):
-    configs = list()
-    for _account in accounts:
-        username = _account[0]
-        password = _account[1]
-        config = server_default_configs.copy()
-        config.update(username=username, password=password)
-        config.update({k.split('_')[1]: v for k, v in get_supported_server_info(username, protocol).items()})
-        configs.append(config)
-    return configs
+    for host in combine:
+        host_info = combine[host]
+        smtp_host = host_info['smtp_host']
+        smtp_port = host_info['smtp_port']
+        smtp_ssl = host_info['smtp_ssl']
+        smtp_tls = host_info['smtp_tls']
+        pop_host = host_info['pop_host']
+        pop_port = host_info['pop_port']
+        pop_ssl = host_info['pop_ssl']
+        pop_tls = host_info['pop_tls']
+
+        assert isinstance(smtp_host, str), smtp_host
+        assert isinstance(pop_host, str), pop_host
+
+        assert isinstance(smtp_port, int)
+        assert isinstance(pop_port, int)
+
+        assert not (smtp_ssl and smtp_tls)
+        assert not (pop_ssl and pop_tls)
 
 
 def test_get_supported_server_info():
-    for i in accounts:
-        username = i[0]
-        assert len(get_supported_server_info(username)) == 0, username
-        assert len(get_supported_server_info(username, 'smtp')) == 4, username
-        assert len(get_supported_server_info(username, 'smtp')) == 4, username
-        assert len(get_supported_server_info(username, 'smtp', 'pop')) == 8, username
-        assert len(get_supported_server_info(username, 'smtp', 'pop', 'imap')) in (8, 12), username
-        # SSL and TLS can not be true together.
-        j = get_supported_server_info(username, 'smtp', 'pop', 'imap')
-        assert not (j['smtp_tls'] and j['smtp_ssl']), username
-        assert not (j['pop_tls'] and j['pop_ssl']), username
-        if j.get('imap_tls') is not None:
-            assert not (j['imap_tls'] and j['imap_ssl']), username
-
-        # PORT is INT.
-        for k, v in j.items():
-            if 'port' in k:
-                assert isinstance(v, int), (k, v)
+    for k in SUPPORTED_SERVER:
+        assert get_supported_server_info('zmailtest@' + k), SUPPORTED_SERVER[k]
 
 
-def test_get_enterprise_server_config():
-    pass
+def test_get_supported_server_info_as_enterprise_server():
+    for k in SUPPORTED_ENTERPRISE_SERVER_CONFIG:
+        assert get_supported_server_info('zmailtest@gmail.com', config=k), SUPPORTED_ENTERPRISE_SERVER_CONFIG[k]
+
+    with pytest.raises(RuntimeError):
+        get_supported_server_info('zmailtest@gmail.com', config='zmailtest')
 
 
-# Test all configs working correctly
-def test_all_configs():
-    for config in get_configs('smtp'):
-        srv = SMTPServer(**config)
-        assert srv.check_available(), config['username']
-    for config in get_configs('pop'):
-        srv = POPServer(**config)
-        assert srv.check_available(), config['username']
+def test_get_supported_server_info_as_default_config():
+    assert get_supported_server_info('zmailtest@zmailtest.com'), DEFAULT_SERVER_CONFIG

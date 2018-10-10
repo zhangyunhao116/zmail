@@ -1,5 +1,9 @@
 import json
+import os
+
 from zmail.message import Mail
+
+from tests.utils import here
 
 mail_suites = {
     'mail_base': {
@@ -20,7 +24,7 @@ mail_suites = {
     'mail_with_attachments': {
         'subject': 'test',
         'content': 'content',
-        'attachments': ['favicon.ico', '图标.ico']
+        'attachments': [os.path.join(here, 'favicon.ico'), os.path.join(here, '图标.ico')]
     },
 
     'mail_with_customized_from': {
@@ -37,7 +41,7 @@ def test_as_string():
     for k, v in mail_suites.items():
         res[k] = Mail(v).set_boundary('==============ZYunH==').as_string()
 
-    with open('mail_suites_result', 'r') as f:
+    with open(os.path.join(here, 'mail_suites_result'), 'r') as f:
         mail_suites_result = json.loads(f.read())
 
     for k, v in mail_suites_result.items():

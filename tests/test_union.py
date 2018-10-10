@@ -1,7 +1,9 @@
+import os
 import time
+
 import zmail
 
-from tests.utils import accounts
+from tests.utils import accounts, here
 
 mail = {
     'subject': '测试邮件test!',
@@ -9,8 +11,9 @@ mail = {
     'content_html': '<html> \n<body>\n <h1>标题</h1>\n</body>',
     'from': 'ZMAIL',
     'to': 'ZMAIL',
-    'attachments': ['图标.ico', 'favicon.ico']
+    'attachments': [os.path.join(here, '图标.ico'), os.path.join(here, 'favicon.ico')]
 }
+
 mail_receive_result = {
     'subject': '测试邮件test!',
     'content': ['测试内容1_1\n测试内容1_2'],

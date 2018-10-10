@@ -9,8 +9,9 @@ class ProtocolServer(ABC):
     """Base protocol server."""
 
     def __init__(self, username: str, password: str,
-                 host: str, port: int, timeout: int or float,
+                 host: str, port: int,
                  ssl: bool, tls: bool,
+                 timeout: int or float,
                  debug: bool, log: Optional[logging.Logger] = None):
         self.server = None
         self.username = username

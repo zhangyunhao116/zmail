@@ -1,7 +1,7 @@
 import os
 import sys
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 PROJECT_NAME = 'zmail'
 MODULE_NAME = 'zmail'
@@ -18,12 +18,17 @@ if sys.argv[-1] == 'publish':
 # 'setup.py test' shortcut.
 if sys.argv[-1] == 'test':
     os.system('pip3 install pytest')
-    os.system('cd test && pytest')
+    os.system('pytest tests/')
+    sys.exit()
+
+# 'setup.py isort' shortcut.
+if sys.argv[-1] == 'isort':
+    os.system('isort -rc *.py')
     sys.exit()
 
 setup(
     name='zmail',
-    version='0.1.11',
+    version='0.1.12',
 
     author='ZYunH',
     author_email='zyunhjob@163.com',

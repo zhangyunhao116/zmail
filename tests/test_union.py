@@ -1,5 +1,4 @@
 import os
-import time
 
 import zmail
 
@@ -71,7 +70,6 @@ def test_union():
     password = accounts[0][1]
     test_server = zmail.server(username, password)
     test_server.send_mail(username, mail)
-    time.sleep(5)
     mail_receive = test_server.get_latest()
     for k in mail_receive_result:
         assert mail_receive[k] == mail_receive_result[k]

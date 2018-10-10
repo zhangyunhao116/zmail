@@ -4,8 +4,9 @@ zmail.api
 This module implements the zmail API.
 """
 import logging
+from typing import Optional
 
-from .info import get_enterprise_server_config, get_supported_server_info
+from .info import get_supported_server_info
 from .message import mail_decode
 from .server import MailServer
 from .utils import get_attachment, get_html, read, save, show
@@ -19,9 +20,17 @@ save_eml = save
 __all__ = ['get_attachment', 'get_html', 'show', 'read', 'save', 'server', 'decode', 'read_eml', 'save_eml']
 
 
-def server(username, password, smtp_host=None, smtp_port=None, pop_host=None, pop_port=None, smtp_ssl=None,
-           pop_ssl=None,
-           smtp_tls=None, pop_tls=None, config=None, timeout=60, debug=False, auto_add_to=True, auto_add_from=True):
+def server(username: str, password: str,
+           smtp_host: Optional[str] = None,
+           smtp_port: Optional[int] = None,
+           smtp_ssl: Optional[bool] = None,
+           smtp_tls: Optional[bool] = None,
+           pop_host: Optional[str] = None,
+           pop_port: Optional[int] = None,
+           pop_ssl: Optional[bool] = None,
+           pop_tls: Optional[bool] = None,
+           config: Optional[str] = None,
+           timeout=60, debug=False, auto_add_to=True, auto_add_from=True):
     """A wrapper to MailServer.
 
     SMTP:
@@ -50,19 +59,14 @@ def server(username, password, smtp_host=None, smtp_port=None, pop_host=None, po
         'pop_tls': pop_tls,
     }
 
-    if config:
-        config_dict = get_enterprise_server_config(config)
-        if config_dict:
-            config_dict.update({k: v for k, v in user_define_config.items() if v is not None})
-            return MailServer(username, password, **config_dict, timeout=timeout, debug=debug,
-                              auto_add_to=auto_add_to, auto_add_from=auto_add_from)
-        else:
-            logger.warning('User-defined server config error, use default config instead.')
+    auto_generate_config = get_supported_server_info(username, config)  # type:dict
 
-    # Load default configs.
-    config_dict = get_supported_server_info(username, 'smtp', 'pop')
-    config_dict.update({k: v for k, v in user_define_config.items() if v is not None})
-    return MailServer(username, password, **config_dict, timeout=timeout, debug=debug,
+    auto_generate_config.update({k: v for k, v in user_define_config.items() if v is not None})
+
+    # Ignore IMAP config.
+    auto_generate_config = {k: v for k, v in auto_generate_config.items() if 'imap' not in k}
+
+    return MailServer(username, password, **auto_generate_config, timeout=timeout, debug=debug,
                       auto_add_to=auto_add_to, auto_add_from=auto_add_from)
 
 

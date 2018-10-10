@@ -61,6 +61,7 @@ def server(username: str, password: str,
 
     auto_generate_config = get_supported_server_info(username, config)  # type:dict
 
+    # Fill user-defined config.
     auto_generate_config.update({k: v for k, v in user_define_config.items() if v is not None})
 
     # Ignore IMAP config.

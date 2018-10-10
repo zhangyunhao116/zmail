@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+from typing import Optional
 
 logger = logging.getLogger('zmail')
 
@@ -10,7 +11,7 @@ class ProtocolServer(ABC):
     def __init__(self, username: str, password: str,
                  host: str, port: int, timeout: int or float,
                  ssl: bool, tls: bool,
-                 debug: bool, log=None):
+                 debug: bool, log: Optional[logging.Logger] = None):
         self.server = None
         self.username = username
         self.password = password
@@ -37,19 +38,7 @@ class ProtocolServer(ABC):
 
     @abstractmethod
     def login(self):
-        if self._login:
-            self.log_exception('{} duplicate login!'.format(self.__repr__()))
-            return
-
-        if self.debug:
-            self.log_access('login')
-
-        self._make_server()
-
-        if self.tls:
-            self.stls()
-
-        # Not implement.
+        pass
 
     @abstractmethod
     def logout(self):

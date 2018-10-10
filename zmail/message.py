@@ -3,24 +3,23 @@ zmail.message
 ~~~~~~~~~~~~
 This module provides functions to handles MIME object.
 """
-import os
-import re
-import quopri
 import base64
+import collections
 import logging
 import mimetypes
-import collections
-
-from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
+import os
+import quopri
+import re
+from email.encoders import encode_base64
+from email.header import Header, decode_header
 from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
-from email.encoders import encode_base64
-from email.header import decode_header, Header
+from email.mime.text import MIMEText
 
-from .utils import get_abs_path, make_iterable
 from .structures import CaseInsensitiveDict
+from .utils import get_abs_path, make_iterable
 
 logger = logging.getLogger('zmail')
 

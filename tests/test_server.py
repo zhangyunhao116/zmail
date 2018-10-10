@@ -3,7 +3,7 @@ import smtplib
 import poplib
 
 from zmail.server import SMTPServer, POPServer
-from test.test_info import get_config, server_default_configs
+from tests.test_info import get_config, server_default_configs
 
 srvs = (SMTPServer, POPServer)
 

@@ -1,7 +1,7 @@
 import time
 import zmail
 
-from test.utils import accounts
+from tests.utils import accounts
 
 mail = {
     'subject': '测试邮件test!',

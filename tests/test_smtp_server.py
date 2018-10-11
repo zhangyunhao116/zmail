@@ -68,7 +68,7 @@ def test_smtp_ssl_tls_error(smtp_server_config):
     configs = smtp_server_config.copy()
     configs.update(tls=True)
     with pytest.raises(TypeError):
-        srv = SMTPServer(**configs)
+        SMTPServer(**configs)
 
 
 def test_smtp_make_server(smtp_server_config):

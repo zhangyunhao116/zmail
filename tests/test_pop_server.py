@@ -68,7 +68,7 @@ def test_pop_ssl_tls_error(pop_server_config):
     configs = pop_server_config.copy()
     configs.update(tls=True)
     with pytest.raises(TypeError):
-        srv = POPServer(**configs)
+        POPServer(**configs)
 
 
 def test_pop_make_server(pop_server_config):

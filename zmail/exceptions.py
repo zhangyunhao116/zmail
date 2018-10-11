@@ -5,7 +5,7 @@ Include all exceptions used within zmail.
 """
 
 
-class ZmailException(IOError):
+class ZmailException(RuntimeError):
     """Base exception."""
 
 

@@ -99,7 +99,7 @@ def test_pop_logout(pop_server_config):
     assert srv.is_login() is False and srv._login is False
 
 
-def test_pop_context(pop_server):
+def test_pop_context(pop_server: POPServer):
     assert pop_server.is_login() is False
     with pop_server as server:
         assert isinstance(server, POPServer)
@@ -109,8 +109,63 @@ def test_pop_context(pop_server):
     assert server.is_login() is False and server._login is False
 
 
-def test_check_available(pop_server_config):
+def test_pop_check_available(pop_server_config):
     assert POPServer(**pop_server_config).check_available()
     incorrect_config = pop_server_config.copy()
     incorrect_config.update(host='')
     assert POPServer(**incorrect_config).check_available() is False
+
+
+# Methods
+
+def test_stat(pop_server: POPServer):
+    with pop_server as server:
+        stat = server.stat()
+        assert isinstance(stat, tuple)
+        assert len(stat) == 2
+        assert isinstance(stat[0], int) and isinstance(stat[1], int)
+
+
+def test_get_header(pop_server: POPServer):
+    with pop_server as server:
+        if server.stat()[0]:
+            header = server.get_header(1)
+            assert isinstance(header, list)
+            for i in header:
+                assert isinstance(i, bytes)
+
+
+def test_get_headers(pop_server: POPServer):
+    with pop_server as server:
+        total_num = server.stat()[0]
+        if total_num >= 2:
+            which_list = list(range(1, 5 if total_num >= 5 else total_num))
+            headers = server.get_headers(which_list)
+            assert isinstance(headers, list)
+            for header in headers:
+                assert isinstance(header, list)
+                for i in header:
+                    assert isinstance(i, bytes)
+
+
+def test_get_mail(pop_server: POPServer):
+    with pop_server as server:
+        total_num = server.stat()[0]
+        if total_num:
+            mail = server.get_mail(1)
+            assert isinstance(mail, list)
+            for i in mail:
+                assert isinstance(i, bytes)
+
+
+def test_get_mails(pop_server: POPServer):
+    with pop_server as server:
+        total_num = server.stat()[0]
+        if total_num >= 2:
+            which_list = list(range(1, 5 if total_num >= 5 else total_num))
+            mails = server.get_mails(which_list)
+            assert isinstance(mails, list)
+            for mail in mails:
+                assert isinstance(mail, list)
+                for i in mail:
+                    assert isinstance(i, bytes)

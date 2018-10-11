@@ -109,8 +109,14 @@ def test_smtp_context(smtp_server):
     assert server.is_login() is False and server._login is False
 
 
-def test_check_available(smtp_server_config):
+def test_smtp_check_available(smtp_server_config):
     assert SMTPServer(**smtp_server_config).check_available()
     incorrect_config = smtp_server_config.copy()
     incorrect_config.update(host='')
     assert SMTPServer(**incorrect_config).check_available() is False
+
+
+# Methods
+
+def test_send_mail():
+    pass

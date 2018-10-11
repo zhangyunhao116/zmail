@@ -7,9 +7,9 @@ This module provides a MailServer object to communicate with mail server.
 import logging
 import poplib
 import smtplib
-from typing import List
+from typing import List, Optional
 
-from zmail.abc import ProtocolServer
+from zmail.abc import BaseServer
 from zmail.message import Mail, decode_headers, mail_decode
 from zmail.settings import __local__
 
@@ -173,7 +173,7 @@ class MailServer:
         return True
 
 
-class SMTPServer(ProtocolServer):
+class SMTPServer(BaseServer):
     """Base SMTPServer, which encapsulates python3 standard library to a SMTPServer."""
 
     def _make_server(self):
@@ -246,7 +246,7 @@ class SMTPServer(ProtocolServer):
             self.server.sendmail(self.username, recipient, message.as_string())
 
 
-class POPServer(ProtocolServer):
+class POPServer(BaseServer):
     """Base POPServer, which encapsulates python3 standard library to a POPServer."""
 
     def _make_server(self):
@@ -307,13 +307,20 @@ class POPServer(ProtocolServer):
         """Use 'top' to get mail headers."""
         return self.server.top(which, 0)[1]
 
-    def get_headers(self) -> list:
+    def get_headers(self, which_list: Optional[list] = None) -> list:
         """Get all mails headers."""
         num = self.stat()[0]
         result = []
-        for count in range(1, num + 1):
+
+        if which_list is None:
+            _range = range(1, num + 1)
+        else:
+            _range = which_list
+
+        for count in _range:
             header_as_bytes = self.get_header(count)
             result.append(header_as_bytes)
+
         return result
 
     def get_mail(self, which: int) -> list:

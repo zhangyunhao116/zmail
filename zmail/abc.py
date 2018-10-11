@@ -5,7 +5,7 @@ from typing import Optional
 logger = logging.getLogger('zmail')
 
 
-class ProtocolServer(ABC):
+class BaseServer(ABC):
     """Base protocol server."""
 
     def __init__(self, username: str, password: str,

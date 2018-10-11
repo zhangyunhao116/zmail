@@ -17,7 +17,7 @@ logger = logging.getLogger('zmail')
 read_eml = read
 save_eml = save
 
-__all__ = ['get_attachment', 'get_html', 'show', 'read', 'save', 'server', 'decode', 'read_eml', 'save_eml']
+__all__ = ('get_attachment', 'get_html', 'show', 'read', 'save', 'server', 'decode', 'read_eml', 'save_eml')
 
 
 def server(username: str, password: str,

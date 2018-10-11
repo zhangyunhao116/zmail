@@ -26,6 +26,11 @@ if sys.argv[-1] == 'isort':
     os.system('isort -rc *.py')
     sys.exit()
 
+# 'setup.py flake8' shortcut.
+if sys.argv[-1] in ('flake8', 'flake'):
+    os.system('flake8 --ignore=E501 zmail/*.py tests/*.py')
+    sys.exit()
+
 setup(
     name='zmail',
     version='0.1.12',
@@ -34,7 +39,9 @@ setup(
     author_email='zyunhjob@163.com',
 
     description='Zmail allows you to send and get emails as possible as it can be in python',
-    long_description='Zmail allows you to send and get emails as possible as it can be in python.There is no need to check server address or make your own MIME string.With zmail, you only need to care about your mail content.',
+    long_description='Zmail allows you to send and get emails as possible as it can be in python.'
+                     'There is no need to check server address or make your own MIME string.With zmail, '
+                     'you only need to care about your mail content.',
     keywords='email python3 package',
 
     url='https://github.com/ZYunH/zmail',

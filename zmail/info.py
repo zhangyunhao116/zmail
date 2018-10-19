@@ -153,7 +153,7 @@ def get_supported_server_info(mail_address: str, config: Optional[str] = None) -
         if config in SUPPORTED_ENTERPRISE_SERVER_CONFIG:
             return SUPPORTED_ENTERPRISE_SERVER_CONFIG[config]
         else:
-            raise RuntimeError(f'Can not this config "{config}".')
+            raise RuntimeError('Can not this config "{}".'.format(config))
 
     if provider in SUPPORTED_SERVER:
         return SUPPORTED_SERVER[provider]

@@ -11,3 +11,11 @@ class ZmailException(RuntimeError):
 
 class InvalidProtocol(ZmailException, ValueError):
     """Invalid protocol settings used."""
+
+
+class ParseError(ZmailException):
+    """Parse mail error."""
+
+
+class InvalidArguments(ZmailException):
+    """Invalid arguments."""

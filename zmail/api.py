@@ -7,7 +7,6 @@ import logging
 from typing import Optional
 
 from .info import get_supported_server_info
-from .message import mail_decode
 from .server import MailServer
 from .utils import get_attachment, get_html, read, save, show
 
@@ -17,7 +16,7 @@ logger = logging.getLogger('zmail')
 read_eml = read
 save_eml = save
 
-__all__ = ('get_attachment', 'get_html', 'show', 'read', 'save', 'server', 'decode', 'read_eml', 'save_eml')
+__all__ = ('get_attachment', 'get_html', 'show', 'read', 'save', 'server', 'read_eml', 'save_eml')
 
 
 def server(username: str, password: str,
@@ -30,7 +29,7 @@ def server(username: str, password: str,
            pop_ssl: Optional[bool] = None,
            pop_tls: Optional[bool] = None,
            config: Optional[str] = None,
-           timeout=60, debug=False, auto_add_to=True, auto_add_from=True):
+           timeout=60, debug=False, auto_add_to=True, auto_add_from=True) -> MailServer:
     """A wrapper to MailServer.
 
     SMTP:
@@ -69,8 +68,3 @@ def server(username: str, password: str,
 
     return MailServer(username, password, **auto_generate_config, timeout=timeout, debug=debug,
                       auto_add_to=auto_add_to, auto_add_from=auto_add_from)
-
-
-def decode(mail_as_bytes, which=1):
-    """Decode bytes mail, as usual in your disk."""
-    return mail_decode(mail_as_bytes, which)

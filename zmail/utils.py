@@ -7,21 +7,8 @@ This module contains some useful function power zmail.
 import os
 import sys
 
-
-def get_abs_path(file):
-    """if the file exists, return its abspath or raise a exception."""
-    work_path = os.path.abspath(os.getcwd())
-    if os.path.isfile(os.path.join(work_path, file)):
-        return os.path.join(work_path, file)
-    elif os.path.isfile(file):
-        return file
-    else:
-        raise FileExistsError("The file %s doesn't exist." % file)
-
-
-def make_iterable(obj):
-    """Get a iterable obj."""
-    return obj if isinstance(obj, (tuple, list)) else (obj,)
+from .helpers import get_abs_path, make_iterable
+from .structures import CaseInsensitiveDict
 
 
 def get_attachment(mail, *args):
@@ -53,26 +40,20 @@ def get_attachment(mail, *args):
                     f.writelines(body)
 
 
-def show(mails):
+def show(mails: list or CaseInsensitiveDict):
     """Show mails."""
     mails = make_iterable(mails)
     for mail in mails:
         print('-------------------------')
-        for k, v in mail.items():
-            print(k, v)
+        for k in ('subject', 'id', 'from', 'to', 'date', 'content_text', 'content_html', 'attachments'):
+            if k != 'attachments':
+                print(k.capitalize() + ' ', mail.get(k))
+            else:
+                _ = ''
+                for idx, v in enumerate(mail['attachments']):
+                    _ += str(idx + 1) + '.' + 'Name:' + v[0] + ' ' + 'Size:' + str(len(v[1])) + ' '
 
-
-def str_decode(text, coding=None):
-    """Decode bytes to string."""
-    if isinstance(text, str):
-        return text
-    elif isinstance(text, bytes):
-        if coding:
-            return text.decode(coding)
-        else:
-            return text.decode()
-    else:
-        raise Exception('String decoding error:%s' % text)
+                print(k.capitalize() + ' ', _)
 
 
 def get_html(html_path):

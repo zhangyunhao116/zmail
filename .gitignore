@@ -6,6 +6,4 @@
 test.py
 tests/config
 venv/*
-
-
-
+tests/mails/*

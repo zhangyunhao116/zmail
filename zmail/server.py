@@ -7,11 +7,16 @@ This module provides a MailServer object to communicate with mail server.
 import logging
 import poplib
 import smtplib
+import warnings
 from typing import List, Optional
 
-from zmail.abc import BaseServer
-from zmail.message import Mail, decode_headers, mail_decode
-from zmail.settings import __local__
+from .abc import BaseServer
+from .exceptions import InvalidArguments
+from .helpers import match_conditions
+from .mime import Mail
+from .parser import parse_headers, parse_mail
+from .settings import __local__
+from .structures import CaseInsensitiveDict
 
 # Fix poplib bug.
 poplib._MAXLINE = 4096
@@ -50,6 +55,10 @@ class MailServer:
         self.smtp_server = None  # type:SMTPServer
         self.pop_server = None  # type:POPServer
 
+        # Check logger.
+        if not isinstance(self.log, logging.Logger):
+            raise InvalidArguments('log excepted type logging.Logger got {}'.format(type(self.log)))
+
         self.prepare()
 
     def prepare(self):
@@ -78,10 +87,10 @@ class MailServer:
     def send_mail(self, recipients: List[str], message: dict, timeout=None,
                   auto_add_from=None, auto_add_to=None) -> bool:
         """"Send email."""
-        mail = Mail(message)
+        mail = Mail(message, debug=self.debug, log=self.log)
 
-        if (auto_add_from or self.auto_add_from) and mail.get('from') is None:
-            mail['from'] = '{}<{}>'.format(self.username.split("@")[0], self.username)
+        if (auto_add_from or self.auto_add_from) and mail.mail.get('From') is None:
+            mail.set_mime_header('From', '{}<{}>'.format(self.username.split("@")[0], self.username))
 
         recipients = recipients if isinstance(recipients, (list, tuple)) else (recipients,)
 
@@ -95,38 +104,55 @@ class MailServer:
         with self.pop_server as server:
             return server.stat()
 
-    def get_mail(self, which: int):
+    def get_mail(self, which: int) -> CaseInsensitiveDict:
         """Get a mail from mailbox."""
         with self.pop_server as server:
             mail = server.get_mail(which)
-            return mail_decode(mail, which)
+            return parse_mail(mail, which, self.debug, self.log)
 
-    def get_mails(self, subject=None, after=None, before=None, sender=None):
+    def get_mails(self, subject=None, after=None, before=None, sender=None) -> list:
         """Get a list of mails from mailbox."""
-        info = self.get_info()
+        headers = self.get_headers()
         mail_id = []
 
-        for index, mail in enumerate(info):
-            if self._match(decode_headers(mail), subject, after, before, sender):
-                mail_id.append(index + 1)
+        for header in headers:
+            if match_conditions(header, subject, after, before, sender):
+                mail_id.append(header['id'])
 
         with self.pop_server as server:
             mail_id.sort()
             mail_as_bytes_list = server.get_mails(mail_id)
-            return [mail_decode(mail_as_bytes, mail_id[index])
+            return [parse_mail(mail_as_bytes, mail_id[index], self.debug, self.log)
                     for index, mail_as_bytes in enumerate(mail_as_bytes_list)]
 
-    def get_latest(self):
+    def get_latest(self) -> CaseInsensitiveDict:
         """Get latest mail in mailbox."""
         with self.pop_server as server:
             latest_num = server.stat()[0]
             mail = server.get_mail(latest_num)
-            return mail_decode(mail, latest_num)
+            return parse_mail(mail, latest_num, self.debug, self.log)
 
-    def get_info(self) -> list:
-        """Get all mails information.include(subject,from,to,date)"""
+    def get_info(self) -> List[List[bytes]]:
+        warnings.warn("server.get_info is deprecated, if you want to access mail headers,"
+                      "use server.get_headers instead",
+                      DeprecationWarning,
+                      stacklevel=2)
         with self.pop_server as server:
             return server.get_headers()
+
+    def get_headers(self) -> List[CaseInsensitiveDict]:
+        """Get all mails headers."""
+        headers = []
+
+        with self.pop_server as server:
+            mail_hdrs = server.get_headers()
+
+        for index, mail_header in enumerate(mail_hdrs):
+            _, _headers, *__ = parse_headers(mail_header)
+            _headers.update(id=index + 1)
+            headers.append(_headers)
+
+        return headers
 
     def log_debug(self, *args, **kwargs):
         self.log.debug(*args, **kwargs)
@@ -134,43 +160,11 @@ class MailServer:
     def log_exception(self, *args, **kwargs):
         self.log_exception(*args, **kwargs)
 
-    def smtp_able(self):
+    def smtp_able(self) -> bool:
         return self.smtp_server.check_available()
 
-    def pop_able(self):
+    def pop_able(self) -> bool:
         return self.pop_server.check_available()
-
-    @staticmethod
-    def _match(mail, subject=None, after=None, before=None, sender=None):
-        """Match all conditions."""
-        _subject = mail.get('subject', 'None')
-        _sender = mail.get('from', 'None')
-
-        _date = mail['date'].split(' ')[0]
-        _time = tuple(map(lambda x: int(x), _date.split('-')))
-
-        if subject and _subject.find(subject) == -1:
-            return False
-
-        if sender and _sender.find(sender) == -1:
-            return False
-
-        if before:
-            # bf_year, bf_month, bf_day.
-            before_time = tuple(map(lambda x: int(x), before.split('-')))
-            for i in range(0, 3):
-                if before_time[i] < _time[i]:
-                    return False
-                elif before_time[i] > _time[i]:
-                    break
-        if after:
-            after_time = tuple(map(lambda x: int(x), after.split('-')))
-            for i in range(0, 3):
-                if after_time[i] > _time[i]:
-                    return False
-                elif after_time[i] < _time[i]:
-                    break
-        return True
 
 
 class SMTPServer(BaseServer):
@@ -234,16 +228,16 @@ class SMTPServer(BaseServer):
         self.server.ehlo()
 
     # Methods
-    def send(self, recipients: List[str], message,
+    def send(self, recipients: List[str], mail: Mail,
              timeout: int or float or None, auto_add_to: bool):
 
         if timeout is not None:
             self.server.timeout = timeout
 
         for recipient in recipients:
-            if auto_add_to and message.get('to') is None:
-                message['To'] = '{}<{}>'.format(recipient.split("@")[0], recipient)
-            self.server.sendmail(self.username, recipient, message.as_string())
+            if auto_add_to and mail.mail.get('To') is None:
+                mail.set_mime_header('To', '{}<{}>'.format(recipient.split("@")[0], recipient))
+            self.server.sendmail(self.username, recipient, mail.get_mime_as_string())
 
 
 class POPServer(BaseServer):

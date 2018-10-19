@@ -24,6 +24,8 @@ if sys.argv[-1] == 'test':
 # 'setup.py isort' shortcut.
 if sys.argv[-1] == 'isort':
     os.system('isort -rc *.py')
+    os.system('isort -rc zmail/*.py')
+    os.system('isort -rc tests/*.py')
     sys.exit()
 
 # 'setup.py flake8' shortcut.
@@ -33,7 +35,7 @@ if sys.argv[-1] in ('flake8', 'flake'):
 
 setup(
     name='zmail',
-    version='0.1.12',
+    version='0.2.0',
 
     author='ZYunH',
     author_email='zyunhjob@163.com',

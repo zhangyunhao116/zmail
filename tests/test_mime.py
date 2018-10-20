@@ -8,13 +8,11 @@ import pytest
 
 from zmail.mime import Mail
 
-from .utils import here
-
 logger = logging.getLogger('zmail')
 
 
 @pytest.fixture
-def mail_config():
+def mail_config(here):
     mail_as_dict = {
         'subject': '测试邮件',
         'from': '中国<123@test.com>',

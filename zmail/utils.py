@@ -54,17 +54,14 @@ def read_html(html_path: str):
     return content
 
 
-def read(path):
+def read(file_path: str, SEP=b'\r\n') -> CaseInsensitiveDict:
     """Read a mail."""
-    abs_path = get_abs_path(path)
-    result = []
+    abs_path = get_abs_path(file_path)
+
     with open(abs_path, 'rb') as f:
-        for i in f.readlines():
-            if i[-2:] == b'\r\n':
-                result.append(i[:-2])
-            elif i[-1:] == b'\n':
-                result.append(i[:-1])
-    return parse_mail(result, 0)
+        raw_lines = f.read().split(SEP)
+
+    return parse_mail(raw_lines, 0)
 
 
 def save(mail, name=None, target_path=None, overwrite=False) -> bool:

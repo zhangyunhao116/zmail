@@ -428,6 +428,5 @@ def parse_mail(lines: List[bytes], which: int, debug=False, log=None) -> CaseIns
     parsed_mail = parse(lines, debug, log)
     parsed_mail['id'] = which
     parsed_mail['raw'] = lines
-    parsed_mail['content'] = parsed_mail['content_text']
 
     return parsed_mail

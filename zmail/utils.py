@@ -5,43 +5,31 @@ This module contains some useful function power zmail.
 """
 
 import os
-import sys
+from typing import Optional
 
 from .helpers import get_abs_path, make_iterable
+from .parser import parse_mail
 from .structures import CaseInsensitiveDict
 
 
-def get_attachment(mail, *args):
+def save_attachment(mail: CaseInsensitiveDict, target_path: Optional[str] = None, overwrite=False):
     """Parsing attachment and save it."""
-    names = list(args)
-    names.reverse()
-    if mail['attachments']:
-        for attachment in mail['attachments']:
-            info = attachment[0].split(';')
-            name = info[0]
-            body_type = info[1]
-            is_text_file = True if body_type.find('text/plain') > -1 else False
+    if mail.get('attachments'):
+        if target_path is not None:
+            assert os.path.isdir(target_path) and os.path.exists(target_path)
+        else:
+            target_path = os.getcwd()
 
-            try:
-                name = names.pop()
-            except IndexError:
-                pass
-
-            # Write file.
-            if not is_text_file:
-                # Binary file.
-                body = b''.join(attachment[1:])
-                with open(name, 'wb') as f:
-                    f.write(body)
-            else:
-                # Text file.
-                body = tuple(map(lambda x: x.decode() + '\r\n', attachment[1:]))
-                with open(name, 'w') as f:
-                    f.writelines(body)
+        for name, raw in mail['attachments']:
+            file_path = os.path.join(target_path, name)
+            if not overwrite and os.path.exists(file_path):
+                raise FileExistsError("{} already exists, set overwrite to True to avoid this error.")
+            with open(file_path, 'wb') as f:
+                f.write(raw)
 
 
 def show(mails: list or CaseInsensitiveDict) -> None:
-    """Show mails."""
+    """Show mail or mails."""
     mails = make_iterable(mails)
     for mail in mails:
         print('-------------------------')
@@ -56,7 +44,7 @@ def show(mails: list or CaseInsensitiveDict) -> None:
                 print(k.capitalize() + ' ', _)
 
 
-def get_html(html_path):
+def get_html(html_path: str):
     """Get html content by its path."""
     path = get_abs_path(html_path)
 
@@ -67,27 +55,32 @@ def get_html(html_path):
 
 
 def read(path):
+    """Read a mail."""
     abs_path = get_abs_path(path)
     result = []
     with open(abs_path, 'rb') as f:
         for i in f.readlines():
             if i[-2:] == b'\r\n':
                 result.append(i[:-2])
-    return result
+            elif i[-1:] == b'\n':
+                result.append(i[:-1])
+    return parse_mail(result, 0)
 
 
-def save(mail, name=None, path=None):
+def save(mail, name=None, target_path=None, overwrite=False) -> bool:
     """Save a mail."""
-    file_name = name if name else str(mail['subject'] + '.eml')
-    file_path = path if path else os.path.abspath(os.path.dirname(sys.argv[0]))
+    if name is None:
+        name = str(mail['subject'] + '.eml') if mail.get('subject') else 'Untitled'
 
-    # Check if filename is empty, use date instead.
-    if file_name == '.eml':
-        file_name = str(mail['date'] + '.eml')
+    if target_path is None:
+        target_path = os.getcwd()
 
-    file_locate = os.path.join(file_path, file_name)
+    file_path = os.path.join(target_path, name)
 
-    with open(file_locate, 'wb') as f:
+    if not overwrite and os.path.exists(file_path):
+        raise FileExistsError("{} already exists, set overwrite to True to avoid this error.")
+
+    with open(file_path, 'wb') as f:
         f.write(b'\r\n'.join(mail['raw']))
 
     return True

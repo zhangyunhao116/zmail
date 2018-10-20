@@ -44,7 +44,7 @@ def show(mails: list or CaseInsensitiveDict) -> None:
                 print(k.capitalize() + ' ', _)
 
 
-def get_html(html_path: str):
+def read_html(html_path: str):
     """Get html content by its path."""
     path = get_abs_path(html_path)
 

@@ -126,6 +126,16 @@ SUPPORTED_ENTERPRISE_SERVER_CONFIG = {
         'pop_ssl': True,
         'pop_tls': False
     },
+    '163': {
+        'smtp_host': 'smtp.qiye.163.com',
+        'smtp_port': 994,
+        'smtp_ssl': True,
+        'smtp_tls': False,
+        'pop_host': 'pop.qiye.163.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False
+    },
 
 }
 

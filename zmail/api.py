@@ -8,7 +8,7 @@ from typing import Optional
 
 from .info import get_supported_server_info
 from .server import MailServer
-from .utils import get_html, read, save, save_attachment, show
+from .utils import read, read_html, save, save_attachment, show
 
 logger = logging.getLogger('zmail')
 
@@ -16,7 +16,7 @@ logger = logging.getLogger('zmail')
 read_eml = read
 save_eml = save
 
-__all__ = ('save_attachment', 'get_html', 'show', 'read', 'save', 'server', 'read_eml', 'save_eml')
+__all__ = ('save_attachment', 'read_html', 'show', 'read', 'save', 'server', 'read_eml', 'save_eml')
 
 
 def server(username: str, password: str,

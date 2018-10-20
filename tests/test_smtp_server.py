@@ -3,10 +3,10 @@ import smtplib
 from unittest import mock
 
 import pytest
-from zmail.info import get_supported_server_info
-from zmail.server import SMTPServer
 
 from tests.utils import accounts
+from zmail.info import get_supported_server_info
+from zmail.server import SMTPServer
 
 
 @pytest.fixture

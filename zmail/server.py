@@ -87,7 +87,7 @@ class MailServer:
                                         debug=self.debug,
                                         log=self.log)
 
-    def send_mail(self, recipients: List[str], message: dict, timeout=None,
+    def send_mail(self, recipients: List[str] or str, message: dict, timeout=None,
                   auto_add_from=False, auto_add_to=False) -> bool:
         """"Send email."""
         mail = Mail(message, debug=self.debug, log=self.log)

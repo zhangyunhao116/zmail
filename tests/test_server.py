@@ -9,13 +9,11 @@ from zmail.exceptions import InvalidArguments
 from zmail.info import get_supported_server_info
 from zmail.server import MailServer, POPServer, SMTPServer
 
-from .utils import accounts, here
-
 logger = logging.getLogger('zmail')
 
 
 @pytest.fixture
-def mail_server_config() -> dict:
+def mail_server_config(accounts) -> dict:
     account = accounts[0]
     username = account[0]
     password = account[1]
@@ -81,7 +79,7 @@ def test_stat(mail_server: MailServer):
     assert isinstance(stat[1], int)
 
 
-def test_send_and_get(mail_server: MailServer):
+def test_send_and_get(mail_server: MailServer, here):
     datetime_stamp = str(datetime.datetime.now())
     mail_as_dict = {
         'subject': '新测试邮件test! ' + datetime_stamp,

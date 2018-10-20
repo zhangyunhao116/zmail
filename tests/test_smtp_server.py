@@ -4,13 +4,12 @@ from unittest import mock
 
 import pytest
 
-from tests.utils import accounts
 from zmail.info import get_supported_server_info
 from zmail.server import SMTPServer
 
 
 @pytest.fixture
-def smtp_server():
+def smtp_server(accounts):
     account = accounts[0]
     username = account[0]
     password = account[1]
@@ -25,7 +24,7 @@ def smtp_server():
 
 
 @pytest.fixture
-def smtp_server_config():
+def smtp_server_config(accounts):
     account = accounts[0]
     username = account[0]
     password = account[1]
@@ -42,7 +41,7 @@ def smtp_server_config():
     }
 
 
-def test_smtp_server_init(smtp_server_config):
+def test_smtp_server_init(smtp_server_config, accounts):
     account = accounts[0]
     username = account[0]
     password = account[1]

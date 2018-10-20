@@ -4,13 +4,12 @@ from unittest import mock
 
 import pytest
 
-from tests.utils import accounts
 from zmail.info import get_supported_server_info
 from zmail.server import POPServer
 
 
 @pytest.fixture
-def pop_server():
+def pop_server(accounts):
     account = accounts[0]
     username = account[0]
     password = account[1]
@@ -25,7 +24,7 @@ def pop_server():
 
 
 @pytest.fixture
-def pop_server_config():
+def pop_server_config(accounts):
     account = accounts[0]
     username = account[0]
     password = account[1]
@@ -42,7 +41,7 @@ def pop_server_config():
     }
 
 
-def test_pop_server_init(pop_server_config):
+def test_pop_server_init(pop_server_config, accounts):
     account = accounts[0]
     username = account[0]
     password = account[1]

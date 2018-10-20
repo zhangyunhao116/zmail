@@ -29,7 +29,8 @@ def server(username: str, password: str,
            pop_ssl: Optional[bool] = None,
            pop_tls: Optional[bool] = None,
            config: Optional[str] = None,
-           timeout=60, debug=False, auto_add_to=True, auto_add_from=True) -> MailServer:
+           timeout=60, debug=False, log: Optional[logging.Logger] = None,
+           auto_add_to=True, auto_add_from=True) -> MailServer:
     """A wrapper to MailServer.
 
     SMTP:
@@ -39,7 +40,7 @@ def server(username: str, password: str,
         server.get_mail(which)
         server.get_mails(subject, sender, after, before)
         server.get_latest()
-        server.get_info()
+        server.get_headers()
         server.stat()
 
     Parse mail:
@@ -67,4 +68,4 @@ def server(username: str, password: str,
     auto_generate_config = {k: v for k, v in auto_generate_config.items() if 'imap' not in k}
 
     return MailServer(username, password, **auto_generate_config, timeout=timeout, debug=debug,
-                      auto_add_to=auto_add_to, auto_add_from=auto_add_from)
+                      log=log, auto_add_to=auto_add_to, auto_add_from=auto_add_from)

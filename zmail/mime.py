@@ -1,6 +1,7 @@
 import logging
 import mimetypes
 import os
+import warnings
 from email.encoders import encode_base64
 from email.header import Header
 from email.mime.audio import MIMEAudio
@@ -25,7 +26,6 @@ class Mail:
         else:
             raise InvalidArguments('mail field excepted type dict got {}'.format(type(mail)))
 
-        self.mail = mail
         self.boundary = boundary
         self.debug = debug
         self.log = log or logger
@@ -36,12 +36,21 @@ class Mail:
 
         # Set basic email elements.
         for k, v in self.mail.items():
-            if k in ('from', 'to', 'subject') and v is not None:
-                mime[k.capitalize()] = v
-            elif k in ('attachments', 'content_text', 'content_html'):
+            _k = k.lower()
+            if _k in ('from', 'to', 'subject') and v is not None:
+                mime[_k.capitalize()] = v
+            elif _k in ('attachments', 'content_text', 'content_html'):
+                pass
+            elif _k == 'headers':
                 pass
             else:
-                # Set extra parameters.
+                warnings.warn("Header '{}' is invalid,"
+                              "if you want to add extra headers"
+                              "use 'headers' instead.".format(str(_k)), DeprecationWarning)
+
+        # Set extra headers.
+        if self.mail.get('headers') and isinstance(self.mail['headers'], dict):
+            for k, v in self.mail['headers'].items():
                 mime[k] = v
 
         # Set HTML content.

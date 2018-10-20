@@ -40,7 +40,7 @@ def get_attachment(mail, *args):
                     f.writelines(body)
 
 
-def show(mails: list or CaseInsensitiveDict):
+def show(mails: list or CaseInsensitiveDict) -> None:
     """Show mails."""
     mails = make_iterable(mails)
     for mail in mails:
@@ -68,8 +68,8 @@ def get_html(html_path):
 
 def read(path):
     abs_path = get_abs_path(path)
+    result = []
     with open(abs_path, 'rb') as f:
-        result = []
         for i in f.readlines():
             if i[-2:] == b'\r\n':
                 result.append(i[:-2])
@@ -87,8 +87,7 @@ def save(mail, name=None, path=None):
 
     file_locate = os.path.join(file_path, file_name)
 
-    with open(file_locate, 'wb+') as f:
-        for i in mail['raw']:
-            f.write(i + b'\r\n')
+    with open(file_locate, 'wb') as f:
+        f.write(b'\r\n'.join(mail['raw']))
 
     return True

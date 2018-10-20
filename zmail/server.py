@@ -31,7 +31,7 @@ class MailServer:
                  pop_host: str, pop_port: int,
                  smtp_ssl: bool, pop_ssl: bool,
                  smtp_tls: bool, pop_tls: bool,
-                 debug: bool, log=None, timeout=60,
+                 debug: bool = False, log=None, timeout=60,
                  auto_add_from=True, auto_add_to=True):
         self.username = username
         self.password = password
@@ -55,9 +55,12 @@ class MailServer:
         self.smtp_server = None  # type:SMTPServer
         self.pop_server = None  # type:POPServer
 
-        # Check logger.
+        # Check arguments.
         if not isinstance(self.log, logging.Logger):
             raise InvalidArguments('log excepted type logging.Logger got {}'.format(type(self.log)))
+
+        if not isinstance(self.timeout, (int, tuple)):
+            raise InvalidArguments('timeout excepted type int or float got {}'.format(type(self.timeout)))
 
         self.prepare()
 
@@ -85,7 +88,7 @@ class MailServer:
                                         log=self.log)
 
     def send_mail(self, recipients: List[str], message: dict, timeout=None,
-                  auto_add_from=None, auto_add_to=None) -> bool:
+                  auto_add_from=False, auto_add_to=False) -> bool:
         """"Send email."""
         mail = Mail(message, debug=self.debug, log=self.log)
 

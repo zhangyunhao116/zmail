@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from unittest import mock
 
 import pytest
+
 from zmail.mime import Mail
 
 from .utils import here
@@ -17,7 +18,7 @@ def mail_config():
     mail_as_dict = {
         'subject': '测试邮件',
         'from': '中国<123@test.com>',
-        'date': 'Sun, 25 Aug 2018 08:08:52 +0800',
+        'headers': {'date': 'Sun, 25 Aug 2018 08:08:52 +0800'},
         'content_text': ['xxxxxx', 'yyyyyy'],
         'content_html': ['11111', '22222'],
         'attachments': [os.path.join(here, '图标.ico')]
@@ -49,6 +50,12 @@ def test_mail_make_mime(mail_config):
 
     mail.make_mine()
     assert isinstance(mail.mime, MIMEMultipart)
+
+    # Test headers warning.
+    with pytest.warns(DeprecationWarning):
+        mail_as_dict_with_error_headers = mail_as_dict.copy()
+        mail_as_dict_with_error_headers.update(x='test')
+        Mail(mail_as_dict_with_error_headers).make_mine()
 
 
 def test_get_mime(mail_config):

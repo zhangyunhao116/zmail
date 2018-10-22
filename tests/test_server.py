@@ -119,7 +119,7 @@ def test_send_and_get(mail_server: MailServer, here):
 
     # Test get_mails()
     mail_receive = mail_server.get_mails(subject=mail_as_dict['subject'],
-                                         after='1970-1-1', before='2200-1-1',
+                                         start_time='1970-1-1', end_time='2200-1-1',
                                          sender='ZMAIL测试')[0]
 
     for k in mail_as_dict:
@@ -127,3 +127,28 @@ def test_send_and_get(mail_server: MailServer, here):
             assert mail_receive[k] == mail_receive[k]
         else:
             assert mail_receive[k] == parsed_attachments
+
+    with pytest.raises(InvalidArguments):
+        mail_server.get_mails(start_time=b'test')
+    with pytest.raises(InvalidArguments):
+        mail_server.get_mails(end_time=b'test')
+    with pytest.raises(InvalidArguments):
+        mail_server.get_mails(start_time=b'test', end_time=b'test')
+
+
+def test_all_account_smtp_and_pop_able(accounts):
+    for account in accounts:
+        username = account[0]
+        password = account[1]
+
+        auto_generate_config = get_supported_server_info(username)
+
+        # Ignore IMAP config.
+        auto_generate_config = {k: v for k, v in auto_generate_config.items() if 'imap' not in k}
+
+        auto_generate_config.update(username=username, password=password)
+
+        server = MailServer(**auto_generate_config)
+
+        assert server.smtp_able()
+        assert server.pop_able()

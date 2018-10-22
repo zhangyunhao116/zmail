@@ -15,6 +15,8 @@ def test_convert_date_to_datetime():
     now_month = now.month
     now_day = now.day
 
+    assert now is convert_date_to_datetime(now)
+
     with pytest.raises(InvalidArguments):
         convert_date_to_datetime('test-with-invalidArgs')
 
@@ -105,24 +107,25 @@ def test_match_conditions():
     assert match_conditions(mock_mail_headers, subject='123', sender='zmail') is False
 
     with pytest.raises(InvalidArguments):
-        match_conditions(mock_mail_headers, subject='zmail', after=1)
-        match_conditions(mock_mail_headers, subject='zmail', before=1)
+        match_conditions(mock_mail_headers, subject='zmail', start_time=1)
+        match_conditions(mock_mail_headers, subject='zmail', end_time=1)
 
-    assert match_conditions(mock_mail_headers, before=datetime.datetime.now())
-    assert match_conditions(mock_mail_headers, before='2018-1-1')
-    assert match_conditions(mock_mail_headers, after=datetime.datetime.now()) is False
-    assert match_conditions(mock_mail_headers, after='2018-1-1') is False
+    assert match_conditions(mock_mail_headers, end_time=datetime.datetime.now())
+    assert match_conditions(mock_mail_headers, end_time='2018-1-1')
+    assert match_conditions(mock_mail_headers, start_time=datetime.datetime.now()) is False
+    assert match_conditions(mock_mail_headers, start_time='2018-1-1') is False
 
-    assert match_conditions(mock_mail_headers, after=datetime.datetime(2000, 1, 1), before=datetime.datetime.now())
-    assert match_conditions(mock_mail_headers, after='2000-1-1', before='2018-1-1')
+    assert match_conditions(mock_mail_headers, start_time=datetime.datetime(2000, 1, 1), end_time=datetime.datetime.now())
+    assert match_conditions(mock_mail_headers, start_time='2000-1-1', end_time='2018-1-1')
 
-    assert match_conditions(headers_without_date, after=datetime.datetime.now())
-    assert match_conditions(headers_without_date, before=datetime.datetime.now())
-    assert match_conditions(headers_without_date, after=datetime.datetime(2000, 1, 1), before=datetime.datetime.now())
+    assert match_conditions(headers_without_date, start_time=datetime.datetime.now()) is False
+    assert match_conditions(headers_without_date, end_time=datetime.datetime.now()) is False
+    assert match_conditions(headers_without_date, start_time=datetime.datetime(2000, 1, 1),
+                            end_time=datetime.datetime.now()) is False
 
-    assert match_conditions(headers_without_subject, subject='test')
+    assert match_conditions(headers_without_subject, subject='test') is False
 
-    assert match_conditions(headers_without_from, sender='test')
+    assert match_conditions(headers_without_from, sender='test') is False
 
 
 def test_make_iterable():

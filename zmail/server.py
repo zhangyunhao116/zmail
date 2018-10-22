@@ -131,7 +131,7 @@ class MailServer:
                 end_time = convert_date_to_datetime(end_time)
             else:
                 raise InvalidArguments(
-                    'start_time excepted type str or datetime.datetime, got {} instead.'.format(type(end_time)))
+                    'end_time excepted type str or datetime.datetime, got {} instead.'.format(type(end_time)))
 
         for header in headers:
             if match_conditions(header, subject, start_time, end_time, sender):

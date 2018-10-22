@@ -5,7 +5,7 @@ import pytest
 
 from zmail.exceptions import InvalidArguments
 from zmail.helpers import (convert_date_to_datetime, get_abs_path,
-                           make_iterable, match_conditions)
+                           get_intersection, make_iterable, match_conditions)
 from zmail.structures import CaseInsensitiveDict
 
 
@@ -115,7 +115,8 @@ def test_match_conditions():
     assert match_conditions(mock_mail_headers, start_time=datetime.datetime.now()) is False
     assert match_conditions(mock_mail_headers, start_time='2018-1-1') is False
 
-    assert match_conditions(mock_mail_headers, start_time=datetime.datetime(2000, 1, 1), end_time=datetime.datetime.now())
+    assert match_conditions(mock_mail_headers, start_time=datetime.datetime(2000, 1, 1),
+                            end_time=datetime.datetime.now())
     assert match_conditions(mock_mail_headers, start_time='2000-1-1', end_time='2018-1-1')
 
     assert match_conditions(headers_without_date, start_time=datetime.datetime.now()) is False
@@ -126,6 +127,22 @@ def test_match_conditions():
     assert match_conditions(headers_without_subject, subject='test') is False
 
     assert match_conditions(headers_without_from, sender='test') is False
+
+
+def test_get_intersection():
+    assert get_intersection((1, 5), (1, 5)) == [1, 2, 3, 4, 5]
+    assert get_intersection((1, 5), (None, None)) == [1, 2, 3, 4, 5]
+
+    assert get_intersection((1, 5), (2, 3)) == [2, 3]
+    assert get_intersection((1, 5), (3, None)) == [3, 4, 5]
+    assert get_intersection((1, 5), (None, 3)) == [1, 2, 3]
+
+    assert get_intersection((1, 5), (-3, None)) == [1, 2, 3, 4, 5]
+    assert get_intersection((1, 5), (None, 10)) == [1, 2, 3, 4, 5]
+
+    assert get_intersection((0, 0), (1, 2)) == []
+    assert get_intersection((0, 0), (None, None)) == [0]
+    assert get_intersection((1, 0), (1, 2)) == []
 
 
 def test_make_iterable():

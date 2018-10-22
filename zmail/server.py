@@ -13,7 +13,8 @@ from typing import List, Optional
 
 from .abc import BaseServer
 from .exceptions import InvalidArguments
-from .helpers import convert_date_to_datetime, match_conditions
+from .helpers import (convert_date_to_datetime, get_intersection,
+                      match_conditions)
 from .mime import Mail
 from .parser import parse_headers, parse_mail
 from .settings import __local__
@@ -114,9 +115,10 @@ class MailServer:
             mail = server.get_mail(which)
             return parse_mail(mail, which, self.debug, self.log)
 
-    def get_mails(self, subject=None, start_time=None, end_time=None, sender=None) -> list:
+    def get_mails(self, subject=None, start_time=None, end_time=None, sender=None,
+                  start_index: Optional[int] = None, end_index: Optional[int] = None) -> list:
         """Get a list of mails from mailbox."""
-        headers = self.get_headers()
+        headers = self.get_headers(start_index, end_index)
         mail_id = []
 
         if start_time is not None:
@@ -158,16 +160,19 @@ class MailServer:
         with self.pop_server as server:
             return server.get_headers()
 
-    def get_headers(self) -> List[CaseInsensitiveDict]:
-        """Get all mails headers."""
+    def get_headers(self, start_index: Optional[int] = None, end_index: Optional[int] = None) \
+            -> List[CaseInsensitiveDict]:
+        """Get mails headers."""
         headers = []
 
         with self.pop_server as server:
-            mail_hdrs = server.get_headers()
+            end = server.stat()[0]
+            intersection = get_intersection((1, end), (start_index, end_index))  # type:List[int]
+            mail_hdrs = server.get_headers(intersection)
 
         for index, mail_header in enumerate(mail_hdrs):
             _, _headers, *__ = parse_headers(mail_header)
-            _headers.update(id=index + 1)
+            _headers.update(id=intersection[index])
             headers.append(_headers)
 
         return headers

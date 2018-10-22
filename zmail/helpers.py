@@ -77,6 +77,24 @@ def match_conditions(mail_headers: CaseInsensitiveDict,
     return True
 
 
+def get_intersection(main_range: tuple, sub_range: tuple) -> list:
+    main_start, main_end = main_range
+    sub_start, sub_end = sub_range
+
+    if main_start > main_end:
+        return list()
+
+    if sub_start is None or sub_start < main_start:
+        sub_start = main_start
+    if sub_end is None or sub_end > main_end:
+        sub_end = main_end
+
+    main_set = {i for i in range(main_start, main_end + 1)}
+    sub_set = {i for i in range(sub_start, sub_end + 1)}
+
+    return sorted(tuple((main_set & sub_set)))
+
+
 def make_iterable(obj) -> list or tuple:
     """Get an iterable obj."""
     return obj if isinstance(obj, (tuple, list)) else (obj,)

@@ -122,6 +122,12 @@ def test_send_and_get(mail_server: MailServer, here):
                                          start_time='1970-1-1', end_time='2200-1-1',
                                          sender='ZMAIL测试')[0]
 
+    mail_receive_with_index = mail_server.get_mails(subject=mail_as_dict['subject'],
+                                                    start_time='1970-1-1', end_time='2200-1-1',
+                                                    sender='ZMAIL测试', start_index=now_latest_num)[0]
+
+    assert mail_receive == mail_receive_with_index
+
     for k in mail_as_dict:
         if k != 'attachments':
             assert mail_receive[k] == mail_receive[k]

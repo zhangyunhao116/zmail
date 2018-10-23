@@ -53,25 +53,11 @@ def match_conditions(mail_headers: CaseInsensitiveDict,
             return False
 
     if start_time is not None:
-        if isinstance(start_time, str):
-            start_as_datetime = convert_date_to_datetime(start_time)
-        elif isinstance(start_time, datetime.datetime):
-            start_as_datetime = start_time
-        else:
-            raise InvalidArguments('after excepted type str or datetime.datetime got {}'.format(type(start_time)))
-
-        if mail_date is None or start_as_datetime > mail_date:
+        if mail_date is None or start_time > mail_date:
             return False
 
     if end_time is not None:
-        if isinstance(end_time, str):
-            end_as_datetime = convert_date_to_datetime(end_time)
-        elif isinstance(end_time, datetime.datetime):
-            end_as_datetime = end_time
-        else:
-            raise InvalidArguments('before excepted type str or datetime.datetime got {}'.format(type(end_time)))
-
-        if mail_date is None or end_as_datetime < mail_date:
+        if mail_date is None or end_time < mail_date:
             return False
 
     return True

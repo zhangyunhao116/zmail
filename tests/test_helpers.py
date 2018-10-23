@@ -106,18 +106,15 @@ def test_match_conditions():
     assert match_conditions(mock_mail_headers, subject='123') is False
     assert match_conditions(mock_mail_headers, subject='123', sender='zmail') is False
 
-    with pytest.raises(InvalidArguments):
-        match_conditions(mock_mail_headers, subject='zmail', start_time=1)
-        match_conditions(mock_mail_headers, subject='zmail', end_time=1)
-
     assert match_conditions(mock_mail_headers, end_time=datetime.datetime.now())
-    assert match_conditions(mock_mail_headers, end_time='2018-1-1')
+    assert match_conditions(mock_mail_headers, end_time=datetime.datetime(2018, 1, 1))
     assert match_conditions(mock_mail_headers, start_time=datetime.datetime.now()) is False
-    assert match_conditions(mock_mail_headers, start_time='2018-1-1') is False
+    assert match_conditions(mock_mail_headers, start_time=datetime.datetime(2018, 1, 1)) is False
 
     assert match_conditions(mock_mail_headers, start_time=datetime.datetime(2000, 1, 1),
                             end_time=datetime.datetime.now())
-    assert match_conditions(mock_mail_headers, start_time='2000-1-1', end_time='2018-1-1')
+    assert match_conditions(mock_mail_headers, start_time=datetime.datetime(2000, 1, 1),
+                            end_time=datetime.datetime(2018, 1, 1))
 
     assert match_conditions(headers_without_date, start_time=datetime.datetime.now()) is False
     assert match_conditions(headers_without_date, end_time=datetime.datetime.now()) is False

@@ -61,7 +61,7 @@ class MailServer:
         if not isinstance(self.log, logging.Logger):
             raise InvalidArguments('log excepted type logging.Logger got {}'.format(type(self.log)))
 
-        if not isinstance(self.timeout, (int, tuple)):
+        if not isinstance(self.timeout, (int, float)):
             raise InvalidArguments('timeout excepted type int or float got {}'.format(type(self.timeout)))
 
         self.prepare()

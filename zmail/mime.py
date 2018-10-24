@@ -20,11 +20,14 @@ logger = logging.getLogger('zmail')
 
 
 class Mail:
-    def __init__(self, mail: dict, boundary: Optional[str] = None, debug: bool = False, log: logging.Logger = None):
+    def __init__(self, mail: dict or CaseInsensitiveDict, boundary: Optional[str] = None,
+                 debug: bool = False, log: logging.Logger = None):
         if isinstance(mail, dict):
             self.mail = CaseInsensitiveDict(mail)
+        elif isinstance(mail, CaseInsensitiveDict):
+            self.mail = mail
         else:
-            raise InvalidArguments('mail field excepted type dict got {}'.format(type(mail)))
+            raise InvalidArguments('mail field excepted type dict or CaseInsensitiveDict got {}'.format(type(mail)))
 
         self.boundary = boundary
         self.debug = debug
@@ -69,9 +72,19 @@ class Mail:
         if self.mail.get('attachments'):
             attachments = make_iterable(self.mail['attachments'])
             for attachment in attachments:
-                attachment_abs_path = get_abs_path(attachment)
-                part = make_attachment_part(attachment_abs_path)
-                mime.attach(part)
+                if isinstance(attachment, str):
+                    attachment_abs_path = get_abs_path(attachment)
+                    part = make_attachment_part(attachment_abs_path)
+                    mime.attach(part)
+                elif isinstance(attachment, tuple):
+                    name, raw = attachment
+                    part = MIMEBase('application', 'octet-stream')
+                    part.set_payload(raw)
+                    part['Content-Disposition'] = 'attachment;filename="{}"'.format(name)
+                    encode_base64(part)
+                    mime.attach(part)
+                else:
+                    raise InvalidArguments('Attachments excepted str or tuple got {} instead.'.format(type(attachment)))
 
         self.mime = mime
 

@@ -142,6 +142,42 @@ def test_send_and_get(mail_server: MailServer, here):
         mail_server.get_mails(start_time=b'test', end_time=b'test')
 
 
+def test_resend(mail_server: MailServer, here):
+    mail_as_dict = {'subject': str(datetime.datetime.now()),
+                    'attachments': os.path.join(here, 'favicon.ico'),
+                    'content_text': ['111', '222'],
+                    'content_html': ['222', '333']}
+    # Send first mail.
+    now_latest_num = mail_server.stat()[0]
+    mail_server.send_mail(mail_server.username, mail_as_dict)
+    t = 0
+    while True:
+        if now_latest_num < mail_server.stat()[0]:
+            mail_receive = mail_server.get_mail(now_latest_num + 1)
+            break
+        else:
+            t += 1
+            if t == 120:
+                raise TimeoutError('Test timeout({}s).'.format(t * 0.5))
+            time.sleep(0.5)
+
+    # Send received mail.
+    now_latest_num = mail_server.stat()[0]
+    mail_server.send_mail(mail_server.username, mail_receive)
+    t = 0
+    while True:
+        if now_latest_num < mail_server.stat()[0]:
+            mail_receive_next = mail_server.get_mail(now_latest_num + 1)
+            break
+        else:
+            t += 1
+            if t == 120:
+                raise TimeoutError('Test timeout({}s).'.format(t * 0.5))
+            time.sleep(0.5)
+    for k in ('subject', 'from', 'to', 'content_text', 'content_html', 'attachments'):
+        assert mail_receive[k] == mail_receive_next[k]
+
+
 def test_all_account_smtp_and_pop_able(accounts):
     for account in accounts:
         username = account[0]

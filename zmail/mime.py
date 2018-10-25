@@ -47,9 +47,12 @@ class Mail:
             elif _k == 'headers':
                 pass
             else:
-                warnings.warn("Header '{}' is invalid,"
-                              "if you want to add extra headers"
-                              "use 'headers' instead.".format(str(_k)), DeprecationWarning)
+                if not all([(i in self.mail) for i in
+                            ('from', 'to', 'subject', 'raw_headers', 'charsets',
+                             'date', 'id', 'raw', 'attachments', 'content_text', 'content_html')]):
+                    # Remove resend warnings.
+                    warnings.warn("Header '{}' is invalid and unused,if you want to add extra headers "
+                                  "use 'headers' instead.".format(str(_k)), category=DeprecationWarning, stacklevel=4)
 
         # Set extra headers.
         if self.mail.get('headers') and isinstance(self.mail['headers'], dict):

@@ -141,6 +141,10 @@ def test_send_and_get(mail_server: MailServer, here):
     with pytest.raises(InvalidArguments):
         mail_server.get_mails(start_time=b'test', end_time=b'test')
 
+    # Test delete()
+    assert mail_server.delete(mail_receive['id'])
+    assert mail_server.stat()[0] < mail_receive['id'] or mail_server.get_mail(mail_receive['id']) != mail_receive
+
 
 def test_resend(mail_server: MailServer, here):
     mail_as_dict = {'subject': str(datetime.datetime.now()),
@@ -176,6 +180,10 @@ def test_resend(mail_server: MailServer, here):
             time.sleep(0.5)
     for k in ('subject', 'from', 'to', 'content_text', 'content_html', 'attachments'):
         assert mail_receive[k] == mail_receive_next[k]
+
+    # Delete these mails.
+    mail_server.delete(mail_receive_next['id'])
+    mail_server.delete(mail_receive['id'])
 
 
 def test_all_account_smtp_and_pop_able(accounts):

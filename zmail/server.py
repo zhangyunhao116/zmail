@@ -104,6 +104,12 @@ class MailServer:
 
         return True
 
+    def delete(self, which: int) -> bool:
+        """Delete mail."""
+        with self.pop_server as server:
+            server.delete(which)
+        return True
+
     def stat(self) -> tuple:
         """Get mailbox status."""
         with self.pop_server as server:
@@ -347,3 +353,6 @@ class POPServer(BaseServer):
     def get_mails(self, which_list: list) -> list:
         """Get a list of mails by its id."""
         return [self.server.retr(which)[1] for which in which_list]
+
+    def delete(self, which: int):
+        self.server.dele(which)

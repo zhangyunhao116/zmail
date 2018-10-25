@@ -31,22 +31,7 @@ def server(username: str, password: str,
            config: Optional[str] = None,
            timeout=60, debug=False, log: Optional[logging.Logger] = None,
            auto_add_to=True, auto_add_from=True) -> MailServer:
-    """A wrapper to MailServer.
-
-    SMTP:
-        server.send_mail([recipient,], mail)
-
-    POP3:
-        server.get_mail(which)
-        server.get_mails(subject, sender, after, before)
-        server.get_latest()
-        server.get_headers()
-        server.stat()
-
-    Parse mail:
-        server.show(mail)
-        server.save_attachment(mail, target_path)
-    """
+    """A wrapper for MailServer."""
 
     user_define_config = {
         'smtp_host': smtp_host,

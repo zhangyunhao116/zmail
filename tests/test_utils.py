@@ -58,11 +58,12 @@ def test_save_and_read(accounts):
     try:
         account = accounts[0]
         username, password = account
-        mail = server(username, password).get_latest()
-        save(mail, name='_test.eml')
-        saved_mail = read('_test.eml')
-        saved_mail['id'] = mail.get('id')
-        assert mail == saved_mail
+        if server(username, password).stat()[0]:
+            mail = server(username, password).get_latest()
+            save(mail, name='_test.eml')
+            saved_mail = read('_test.eml')
+            saved_mail['id'] = mail.get('id')
+            assert mail == saved_mail
     except (BaseException, Exception):
         raise
     finally:

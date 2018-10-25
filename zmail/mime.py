@@ -48,7 +48,7 @@ class Mail:
                 pass
             else:
                 if not all([(i in self.mail) for i in
-                            ('from', 'to', 'subject', 'raw_headers', 'charsets',
+                            ('from', 'to', 'subject', 'raw_headers', 'charsets', 'headers',
                              'date', 'id', 'raw', 'attachments', 'content_text', 'content_html')]):
                     # Remove resend warnings.
                     warnings.warn("Header '{}' is invalid and unused,if you want to add extra headers "

@@ -89,18 +89,18 @@ class MailServer:
                                         debug=self.debug,
                                         log=self.log)
 
-    def send_mail(self, recipients: List[str] or str, message: dict or CaseInsensitiveDict, timeout=None,
+    def send_mail(self, recipients: List[str] or str, mail: dict or CaseInsensitiveDict, timeout=None,
                   auto_add_from=False, auto_add_to=False) -> bool:
         """"Send email."""
-        mail = Mail(message, debug=self.debug, log=self.log)
+        _mail = Mail(mail, debug=self.debug, log=self.log)
 
-        if (auto_add_from or self.auto_add_from) and mail.mail.get('From') is None:
-            mail.set_mime_header('From', '{}<{}>'.format(self.username.split("@")[0], self.username))
+        if (auto_add_from or self.auto_add_from) and _mail.mail.get('From') is None:
+            _mail.set_mime_header('From', '{}<{}>'.format(self.username.split("@")[0], self.username))
 
         recipients = recipients if isinstance(recipients, (list, tuple)) else (recipients,)
 
         with self.smtp_server as server:
-            server.send(recipients, mail, timeout or self.timeout, auto_add_to or self.auto_add_to)
+            server.send(recipients, _mail, timeout or self.timeout, auto_add_to or self.auto_add_to)
 
         return True
 

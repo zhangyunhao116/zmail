@@ -30,7 +30,7 @@ def server(username: str, password: str,
            pop_tls: Optional[bool] = None,
            config: Optional[str] = None,
            timeout=60, debug=False, log: Optional[logging.Logger] = None,
-           auto_add_to=True, auto_add_from=True) -> MailServer:
+           auto_add_from=True, auto_add_to=True) -> MailServer:
     """A wrapper for MailServer."""
 
     user_define_config = {

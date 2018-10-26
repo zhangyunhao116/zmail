@@ -6,7 +6,7 @@
 [![platform](https://img.shields.io/badge/python-3.5-green.svg)]()
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)]()
 
-[中文介绍请戳这里(中文新版本介绍尚未更新完成)](https://github.com/ZYunH/zmail/blob/master/README-cn.md)
+[中文介绍请戳这里](https://github.com/ZYunH/zmail/blob/master/README-cn.md)
 
 ## Introduction
 
@@ -68,6 +68,23 @@ zmail.show(latest_mail)
 
 
 
+### Verify SMTP and POP function working correctly
+
+```python
+import zmail
+server = zmail.server('yourmail@example.com’, 'yourpassword')
+
+if server.smtp_able():
+    pass
+    # SMTP function.
+if server.pop_able():
+    pass
+    # POP function.
+
+```
+
+If SMTP and POP are working correctly,the function will return True,else return Fasle.
+
 ### Send your mail
 
 ```python
@@ -94,13 +111,13 @@ server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```python
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content_html': ['HTML CONTENT'], # Absolute path will be better.
+    'content_html': ['HTML CONTENT'], 
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
 ```
 
-OR
+or
 
 ```python
 with open('/Users/example.html','r') as f:
@@ -147,6 +164,12 @@ In the example, if 'GitHub' is in mail's subject, it will be matched, such as ' 
 
 sender is the same way.
 
+You can also specified the range of mails.
+
+```
+mail = server.get_mails(subject='GitHub',start_time='2018-1-1',sender='github',start_index=1,end_index=10)
+```
+
 - ##### Get mailbox info.
 
 ```
@@ -172,7 +195,7 @@ mail = server.get_latest()
 zmail.show(mail)
 ```
 
-OR
+See all contents in mail.
 
 ```python
 import zmail
@@ -190,19 +213,19 @@ for k,v in mail.items():
 
 Return **MailServer** instance, it implements all SMTP and POP functions.
 
-If define any parameters start with `pop` or `smtp`, it wiil replace inner auto-generate config(The config depends on the `username` or `config` you provided).
+If set any arguments which starts with `pop` or `smtp`, it will replace inner auto-generate argument(The arguments depends on the `username` or `config` you provided).
 
-***config*** Shortcut for use enterprise mail,if specified, it will replace all inner auto-generate configs.
+***config*** Shortcut for use enterprise mail,if specified, enterprise mail configs will replace all inner auto-generate configs.
 
 ***timeout*** can either be a float or int number of seconds to wait for.
 
 ***debug*** If is True, server will open debug model and display debug information.
 
-***log*** The log can be None or instance of logging.logger,if is None, the zmail default logeer is used, you can access it by logging.getLogger('zmail')
+***log*** The log can be None or instance of logging.logger,if is None, the zmail default logger is used, you can access it by logging.getLogger('zmail')
 
-***auto_add_to*** If set to True, when the key 'to' (case-insensitive) not in mail-as-dict, the default 'to' will automatically added to mail.
+***auto_add_to*** If set to True, when the key 'to' (case-insensitive) not in mail(For send), the default 'to' will automatically added to mail.
 
-***auto_add_from***  If set to True, when the key ' 'from' (case-insensitive) not in mail-as-dict, the default 'from' will automatically added to mail.
+***auto_add_from***  If set to True, when the key ' 'from' (case-insensitive) not in mail(For send), the default 'from' will automatically added to mail.
 
  
 
@@ -212,7 +235,7 @@ Return True if success.
 
 ***recipients*** can either be str or a list of str.
 
-***mail*** can either be dict or CaseInsensitiveDict(**Mail**).see below for more info.
+***mail*** can either be dict or CaseInsensitiveDict(**Mail**).mail structure see below.
 
 ***timeout*** if is not None, it will replace server's timeout.
 
@@ -232,9 +255,9 @@ Get mailbox status. The result is a tuple of 2 integers: (message count, mailbox
 
 Return **Mail**
 
-***which*** is a int number that represent mail's position in maibox.The which must between 1 and message count(return from MailServer.stat())
+***which*** is a int number that represent mail's position in mailbox.The which must between 1 and message count(return from MailServer.stat())
 
-also set mail's seen flag.
+Also set mail's seen flag.
 
  
 
@@ -244,17 +267,17 @@ Return a list of **Mail**
 
 ***subject*** can either be None or str, if is not None, the subject of every mail must contains ***subject***
 
-***start_time*** can either be None or string or datetime object, if is string,the format is "YYYY-MM-DD HH:MM:SS"(e.g. "2018-1-1 10:10:20").If is not None,the date of every mail must after start_time.
+***start_time*** can either be None or string or datetime object, if is string,the format is "YYYY-MM-DD HH:MM:SS"(e.g. "2018-1-1 10:10:20").If is not None,the date of every mail must greater than start_time.
 
-***end_time*** is same as start_time.If is not None,the date of every mail must before end_time.
+***end_time*** is similar to start_time.If is not None,the date of every mail must smaller than end_time.
 
 ***sender*** can either be None or str, if is not None, the from(header) of every mail must contains ***sender***.
 
 ***start_index*** can either be None or int, if is None or smaller than 1, it is set to 1. if greater than message_count(From MailServer.stat()), it is set to message_count.
 
-***end_index*** same as start_time.The selected range limited from **start_index** to **end_index**.
+***end_index*** similar to start_index.The selected range limited from **start_index** to **end_index**.
 
-also set mail's seen flag.
+lso set mail's seen flag.
 
  
 
@@ -316,7 +339,7 @@ Return True if POP working correctly else False.
 
 - #### zmail.save_attachment(mail,target_path=None,overwrite=False)
 
-  Save mail attachments to target_path.If not specified, target_path is current directory.If overwrite is True,the write process will overwrite exists file if possible.
+  Save mail's attachments to target_path.If not specified, target_path is current directory.If overwrite is True,the write process will overwrite exists file if possible.
 
 - #### zmail.save(mail,name=None,target_path=None,overwrite=False)
 
@@ -328,7 +351,7 @@ Return True if POP working correctly else False.
 
 
 
-## Mail Stuctures
+## Mail Structures
 
  
 
@@ -338,15 +361,15 @@ Can either be dict or CaseInsensitiveDict(Usually from get_mail or get_mails)
 
 ***subject*** The subject of mail.
 
-***from*** The 'from' header, represent the source or name.
+***from*** The 'from' header, represent the mail's source.
 
-***to*** The 'to' header, represent the destination or name.
+***to*** The 'to' header, represent the mail's destination.
 
-***content_text*** The text content.Can either be str or list.
+***content_text*** The text content.Can either be str or a list of str.
 
-***content_html*** The html content.Can either be str or list.
+***content_html*** The html content.Can either be str or a list of str.
 
-***attachments*** Include all attachments.It can either be str or a list of str or a list of tuple.Like '/User/apple/1.txt' or ['/User/apple/1.txt','2.txt'] or [('1.txt',b'...'),('2.txt',b'...')]
+***attachments*** Include all attachments.It can either be str or a list of str or a list of tuple.(e.g. '/User/apple/1.txt' or ['/User/apple/1.txt','2.txt'] or [('1.txt',b'...'),('2.txt',b'...')] )
 
 ***headers*** If you want to add extra headers,you can specified on it.Must be dict.
 
@@ -356,21 +379,19 @@ Can either be dict or CaseInsensitiveDict(Usually from get_mail or get_mails)
 
 ***subject*** The subject of mail.
 
-***from*** The 'from' header, represent the source or name.
+***from*** The 'from' header, represent the mail's source.
 
-***to*** The 'to' header, represent the destination or name.
+***to*** The 'to' header, represent the mail's destination.
 
 ***content_text*** A list of text content.
 
 ***content_html*** A list of html content.
 
-***attachments*** Include all attachments.Like['1.txt',b'...']
-
-***headers*** If you want to add extra headers,you can specified on it.Must be dict.
+***attachments*** Include all attachments.(e.g. ['1.txt',b'...'])
 
 ***raw_headers*** Include all  raw header pairs.
 
-***headers*** Include all parsed headers.
+***headers*** Include all parsed headers.(CaseInsensitiveDict)
 
 ***charsets*** Include all charsets.
 

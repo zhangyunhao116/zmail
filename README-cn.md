@@ -1,4 +1,6 @@
-# zmail
+<div align=center>
+<img src="https://raw.githubusercontent.com/ZYunH/zmail/master/zmail_logo.png"/>
+</div>
 
 [![PyPI](https://img.shields.io/pypi/v/yagmail.svg?style=flat-square)]()
 [![platform](https://img.shields.io/badge/python-3.5-green.svg)]()
@@ -12,28 +14,10 @@ Zmail 允许你发送和接受邮件尽可能的简单。你不需要去检查�
 
 ## 安装
 
-Zmail仅支持python3，不需要任何其他外部依赖. **不支持python2**.
-
-### 选项一：通过pip安装（推荐）
+Zmail仅支持python3，不需要任何外部依赖. **不支持python2**.
 
 ```
 $ pip3 install zmail
-```
-
-或者
-
-```
-$ pip install zmail
-```
-
-这样做也意味着此pip版本是支持python3的。
-
-### 选项二： 从GitHub下载安装
-
-你可以下载Zmail的master分支，将其解压，切换到相应目录，然后
-
-```
-$ python3 setup.py install
 ```
 
 ## 特性
@@ -55,7 +39,30 @@ $ python3 setup.py install
 
 然后，剩下你需要做的就是import zmail即可
 
+
+
+## 快速入门
+
+```python
+import zmail
+server = zmail.server('yourmail@example.com’, 'yourpassword')
+
+# Send mail
+server.send_mail('yourfriend@example.com',{'subject':'Hello!','content_text':'By zmail.'})
+# Or to a list of friends.
+server.send_mail(['friend1@example.com','friend2@example.com'],{'subject':'Hello!','content_text':'By zmail.'})
+
+# Retrieve mail
+latest_mail = server.get_latest()
+zmail.show(latest_mail)
+
+```
+
+
+
 ## 使用示例
+
+
 
 ### 测试SMTP和POP功能是否正常
 
@@ -80,7 +87,7 @@ if server.pop_able():
 import zmail
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content': 'This message from zmail!',  # Anything you want.
+    'content_text': 'This message from zmail!',  # Anything you want.
     'attachments': ['/Users/zyh/Documents/example.zip','/root/1.jpg'],  # Absolute path will be better.
 }
 
@@ -100,7 +107,7 @@ server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```python
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content-html': zmail.get_html('/Users/example.html'), # Absolute path will be better.
+    'content_html': ['HTML CONTENT'], 
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
@@ -113,7 +120,7 @@ with open('/Users/example.html','r') as f:
     content_html = f.read()
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content-html': content_html, 
+    'content_html': content_html, 
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
@@ -153,10 +160,10 @@ mail = server.get_mails(subject='GitHub',after='2018-1-1',sender='github')
 
 sender亦是如此
 
-- ##### 得到所有邮件的头文件信息.一个由字典组成的列表,每个字典包含了所有能够提取的头文件.
+你也可以指定一个范围的邮件
 
 ```
-mail_info = server.get_info()
+mail = server.get_mails(subject='GitHub',start_time='2018-1-1',sender='github',start_index=1,end_index=10)
 ```
 
 - ##### 得到邮箱的信息
@@ -175,7 +182,7 @@ mailbox_info = server.stat()
 subject = mail['subject']
 ```
 
-展示你的邮件，使用 **zmail.show()**
+打印你的邮件，使用 **zmail.show()**
 
 ```
 import zmail
@@ -183,81 +190,214 @@ server = zmail.server('yourmail@example.com‘, 'yourpassword')
 mail = server.get_latest()
 zmail.show(mail)
 ```
-
-输出 :
-
-```
-content-type multipart/mixed
-subject Success!
-to zmail_user
-from zmail<zmail@126.com>
-date 2018-2-3 01:42:29 +0800
-boundary ===============9196441298519098157==
-content ['This message from zmail!']
-content-html ['<HTML EXAMPLE>']
-raw [[b'Content-Type: text/plain; charset="utf-8"', b'MIME-Version: 1.0', b'Content-Transfer-Encoding: base64', b'', b'VGhpcyBtZXNzYWdlIGZyb20gem1haWwh', b'']]
-attachments None
-id 5
-```
-
-#### **邮件的结构**
-
-- content-type: 邮件内容的类型
-- subject: 邮件主题
-- to：收件人
-- from：寄件人
-- date: 年-月-日 时间 时区
-- boundary: 如果邮件为multiple parts，你可以得到其分界线
-- content: 邮件的文本内容（仅在text/plain时可以被解析）
-- content-html:邮件的网页内容（仅在text/html时可以被解析）
-- raw: 邮件的原始数据
-- attachments: None 或者 [['附件名称;编码方式','附件的二进制内容']...]
-- id: 在邮箱中的id
-
-#### **获得附件**
+查看邮件的所有内容
 
 ```python
 import zmail
-server = zmail.server('yourmail@example.com‘, 'yourpassword')
+server = zmail.server('yourmail@example.com’, 'yourpassword')
 mail = server.get_latest()
-zmail.get_attachment(mail)
-```
-
-你可以重命名你的附件，使用
-
-```
-zmail.get_attachment(mail,'example.zip')
-```
-
-#### 保存邮件
-
-```
-import zmail
-server = zmail.server('yourmail@example.com‘, 'yourpassword')
-mail = server.get_latest()
-zmail.save_eml(mail)
-```
-
-你可以重命名或者指定路径，使用
-
-```
-zmail.save_eml(mail,name='hello.eml',path='/usr/home')
-```
-
-#### 读取磁盘上的邮件
-
-```
-import zmail
-mail_as_raw = zmail.read_eml('/usr/home/hello.eml') # Abspath will be better
-```
-
-你可以将读取到的原始邮件解析成zmail格式的邮件
-
-```
-mail = zmail.decode(mail_as_raw)
+for k,v in mail.items():
+	print(k,v)
 ```
 
 
+
+
+## API索引
+
+### zmail.server(username,password,smtp_host,smtp_port,smtp_ssl,smtp_tls,pop_host,pop_port,pop_ssl,pop_tls,config,timeout=60, debug=False, log=None,auto_add_from=True, auto_add_to=True)
+
+返回 **MailServer** 实例, 它实现了所有SMTP和POP的功能
+
+如果设置了任何以 `pop` 或 `smtp` 开头的参数，它将会取代内部自动生成的参数（自动生成的参数取决于你的 `username` 或 `config` 参数）
+
+***config*** 使用企业邮箱的便捷方法，如果被指定，企业邮箱的配置将会取代所有自动生成的配置
+
+***timeout*** 可为整型或者浮点型，指定了最长的等待时长(秒)
+
+***debug*** 如果为True，server将会打开调试模式，并且显示调试信息
+
+***log*** 可为None或者logging.logger的实例，如果为None，将会使用zmail默认的日志记录器，你可以通过logging.getLogger('zmail')来访问默认的日志记录器
+
+***auto_add_to*** 如果为True，当键'to'（不区分大小写）不在发送的邮件中时，默认的'to'将会自动添加到邮件中
+
+***auto_add_from*** 如果为True，当键'from'（不区分大小写）不在发送的邮件中时，默认的'from'将会自动添加到邮件中
+
+
+
+### MailServer.send_mail(recipients, mail, timeout=None,auto_add_from=False, auto_add_to=False)
+
+成功发送时返回True
+
+***recipients*** 可以是字符串或者字符串组成的列表
+
+***mail*** 可以是字典或者 CaseInsensitiveDict(通常是接收到的邮件).邮件的接口位于下方说明
+
+***timeout*** 如果不为None，它将会取代server的超时时间
+
+***auto_add_from*** 如果不为None，它将会取代server的auto_add_from
+
+***auto_add_to*** 如果不为None，它将会取代server的auto_add_to
+
+
+
+### MailServer.stat()
+
+获取邮箱状态. 返回值是两个整型组成的元组: (邮件数量, 邮件大小).
+
+
+
+### MailServer.get_mail(which)
+
+返回 **Mail**
+
+***which*** 是一个整型，代表了邮件在邮箱中的位置。必须位于1至邮件数量（从MailServer.stat()返回）的范围内
+
+同样将邮件设置为已读
+
+
+
+### MailServer.get_mails(subject=None,start_time=None,end_time=None,sender=None,start_index=None,end_index=None)
+
+返回 一个由**Mail**组成的列表
+
+***subject*** 可为None或整型，如果不为None，每个邮件的subject都必须包含***subject***
+
+***start_time*** 可为None或字符串或datetime对象，如果为字符串，它的结构为"年-月-日 时:分:秒"(例如 "2018-1-1 10:10:20") ，如果不为None，每个邮件的时间必须大于start_time
+
+***end_time*** 和start_time类似，如果不为None，每个邮件的时间必须小于end_time
+
+***sender*** 可为None或字符串，如果不为None，每个邮件的'from'头部必须包含***sender***
+
+***start_index*** 可为None或整型，如果为None或者小于1，将会被置为1。如果大于邮件数量（从MailServer.stat()返回），将会被置为邮件数量。
+
+***end_index*** 和start_index类似。选择的邮件范围将会被设置为start_index到end_index之间
+
+同时会将所有取出的邮件置为已读
+
+
+
+### MailServer.get_latest()
+
+返回 **Mail**
+
+返回最新的邮件。等同于MailServer.get_mail(message_count)。message_count从MailServer.stat()中可得到。
+
+同时会将邮件置为已读
+
+
+
+### MailServer.~~get_info()~~
+
+返回有原始头部组成的列表
+
+使用MailServer.get_headers代替它
+
+在0.2.0版本被移除
+
+
+
+### MailServer.get_headers(start_index=None,end_index=None)
+
+返回一个由邮件头部组成的列表（一个CaseInsensitiveDict组成的列表）
+
+取回邮件头的范围将会被限制在start_index至end_index。和它们在MailServer.get_mails()中的表现形式相同
+
+在0.2.0版本中新增
+
+
+
+### MailServer.delete(which)
+
+***which*** 表明了那封邮件应该被删除
+
+在0.2.0版本中新增
+
+
+
+### MailServer.smtp_able()
+
+返回True如果SMTP工作正常否则返回False
+
+
+
+### MailServer.pop_able()
+
+返回True如果POP工作正常否则返回False
+
+
+
+### Utils
+
+- #### zmail.show(mails)
+
+  你可以是用这个函数来打印一个或多个邮件
+
+- #### zmail.save_attachment(mail,target_path=None,overwrite=False)
+
+  将邮件的附件存储到target_path。如果不指定，target_path将会是当前目录。如果overwrite为True，写入过程将会覆盖可能存在的同名文件
+
+- #### zmail.save(mail,name=None,target_path=None,overwrite=False)
+
+  保存邮件
+
+- #### zmail.read(file_path,SEP=b'\r\n')
+
+  读取邮件
+
+
+
+## Mail 结构
+
+
+
+### Mail (用于发送)
+
+可为dict或者CaseInsensitiveDict(一般从get_mail or get_mails获得)
+
+***subject*** 邮件的标题
+
+***from*** 'from'头部，表明了邮件的来源
+
+***to*** 'to'头部，表明了邮件的目的地
+
+***content_text*** 邮件的文本内容，可为字符串或者一个由字符串组成的列表
+
+***content_html*** 邮件的HTML内容，可为字符串或者一个由字符串组成的列表
+
+***attachments*** 包含了所有附件。可为 字符串 或者 一个由字符串组成的列表 或者 一个由元组组成的列表。(例如 '/User/apple/1.txt' or ['/User/apple/1.txt','2.txt'] or [('1.txt',b'...'),('2.txt',b'...')] )
+
+***headers*** 如果你想要为邮件添加额外的头文件，你可以在这指定。必须为dict。
+
+
+
+### Mail(从 get_mail 或 get_mails获得)
+
+***subject*** 邮件的标题
+
+***from*** 'from'头部，表明了邮件的来源
+
+***to*** 'to'头部，表明了邮件的目的地
+
+***content_text*** 邮件的文本内容，可为字符串或者一个由字符串组成的列表
+
+***content_html*** 邮件的HTML内容，可为字符串或者一个由字符串组成的列表
+
+***attachments*** 包含了所有附件。(例如['1.txt',b'...'])
+
+***raw_headers*** 包含了所有原生头部键值对
+
+***headers*** 包含了所有解析过的头部（为大小写不敏感字典）
+
+***charsets*** 包含了所有编码类型
+
+***date*** 邮件时间
+
+***id*** 邮件的id。用于定位在邮箱中位置
+
+***raw*** 原始的邮件信息。由bytes组成的列表
+
+​    
 
 ## 支持的邮件服务商
 
@@ -284,6 +424,7 @@ mail = zmail.decode(mail_as_raw)
 | ------------ | ------------------------------------------- |
 | 腾讯企业邮箱 | zmail.server('username','psw',config='qq')  |
 | 阿里企业邮箱 | zmail.server('username','psw',config='ali') |
+| 网易企业邮箱 | zmail.server('username','psw',config='163') |
 
 
 
@@ -296,39 +437,3 @@ mail = zmail.decode(mail_as_raw)
   - SMTP：server = zmail.server('user','psw',smtp_host = 'xxx',smtp_port = 'yyyyy',smtp_ssl=True)
   - POP3：server = zmail.server('user','psw',pop_host = 'xxx',pop_port = 'yyyyy',pop_ssl=True)
 
-- 为了统一API,content_html将于0.2版本消失,在此之前你仍可使用content_html作为发送或解析邮件的关键字,但是更建议使用content-html
-
-## API
-
-server = zmail.server('user@example','password')
-
-#### SMTP
-
-- server.smtp_able()
-- server.send_mail([recipient,], mail)
-
-#### POP3
-
-- server.pop_able() 
-
-- server.get_mail(which)
-- server.get_mails(subject, sender, after, before)
-- server.get_latest()
-- server.get_info()
-- server.stat()
-
-#### Parse mail
-
-- server.get_attachment(mail)
-
-### Mail(For send)
-
-- subject
-- content
-- content_html
-- from
-- to
-
-#### Other
-
-- zmail.show()

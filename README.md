@@ -344,7 +344,7 @@ Can either be dict or CaseInsensitiveDict(Usually from get_mail or get_mails)
 
 ***content_text*** The text content.Can either be str or list.
 
-***content_text*** The html content.Can either be str or list.
+***content_html*** The html content.Can either be str or list.
 
 ***attachments*** Include all attachments.It can either be str or a list of str or a list of tuple.Like '/User/apple/1.txt' or ['/User/apple/1.txt','2.txt'] or [('1.txt',b'...'),('2.txt',b'...')]
 
@@ -362,7 +362,7 @@ Can either be dict or CaseInsensitiveDict(Usually from get_mail or get_mails)
 
 ***content_text*** A list of text content.
 
-***content_text*** A list of html content.
+***content_html*** A list of html content.
 
 ***attachments*** Include all attachments.Like['1.txt',b'...']
 

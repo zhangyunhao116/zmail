@@ -94,7 +94,7 @@ server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```python
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content-html': ['HTML CONTENT'], # Absolute path will be better.
+    'content_html': ['HTML CONTENT'], # Absolute path will be better.
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
@@ -107,7 +107,7 @@ with open('/Users/example.html','r') as f:
     content_html = f.read()
 mail = {
     'subject': 'Success!',  # Anything you want.
-    'content-html': content_html, 
+    'content_html': content_html, 
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)

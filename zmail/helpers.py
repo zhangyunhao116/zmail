@@ -10,7 +10,7 @@ DATETIME_PATTERN = re.compile(r'([0-9]+)?-?([0-9]{1,2})?-?([0-9]+)?\s*([0-9]{1,2
 
 
 def convert_date_to_datetime(_date: str or datetime.datetime) -> datetime.datetime:
-    """Convert date like '2018-1-1 12:00:00 to datetime object.'"""
+    """Convert date like '2018-1-1 12:00:00' to datetime object."""
     if isinstance(_date, datetime.datetime):
         # Shortcut
         return _date

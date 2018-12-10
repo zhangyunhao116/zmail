@@ -3,7 +3,7 @@ import os
 import re
 from typing import Optional
 
-from .exceptions import InvalidArguments
+from .exceptions import InvalidArguments, ZmailInternalError
 from .structures import CaseInsensitiveDict
 
 DATETIME_PATTERN = re.compile(r'([0-9]+)?-?([0-9]{1,2})?-?([0-9]+)?\s*([0-9]{1,2})?:?([0-9]{1,2})?:?([0-9]{1,2})?\s*')
@@ -84,6 +84,14 @@ def get_intersection(main_range: tuple, sub_range: tuple) -> list:
 def make_iterable(obj) -> list or tuple:
     """Get an iterable obj."""
     return obj if isinstance(obj, (tuple, list)) else (obj,)
+
+
+def first_not_none(*args):
+    """Return first arguments which is not None."""
+    for k in args:
+        if k is not None:
+            return k
+    raise ZmailInternalError('All arguments is None!')
 
 
 def get_abs_path(file: str) -> str:

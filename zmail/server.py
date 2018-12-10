@@ -9,12 +9,12 @@ import logging
 import poplib
 import smtplib
 import warnings
-from typing import List, Optional
+from typing import Iterable, List, Optional
 
 from .abc import BaseServer
 from .exceptions import InvalidArguments
-from .helpers import (convert_date_to_datetime, get_intersection,
-                      match_conditions)
+from .helpers import (convert_date_to_datetime, first_not_none,
+                      get_intersection, make_iterable, match_conditions)
 from .mime import Mail
 from .parser import parse_headers, parse_mail
 from .settings import __local__
@@ -90,17 +90,19 @@ class MailServer:
                                         log=self.log)
 
     def send_mail(self, recipients: List[str] or str, mail: dict or CaseInsensitiveDict, timeout=None,
-                  auto_add_from=False, auto_add_to=False) -> bool:
+                  auto_add_from=True, auto_add_to=True) -> bool:
         """"Send email."""
         _mail = Mail(mail, debug=self.debug, log=self.log)
 
-        if (auto_add_from or self.auto_add_from) and _mail.mail.get('From') is None:
+        if first_not_none(auto_add_from, self.auto_add_from) and _mail.mail.get('From') is None:
             _mail.set_mime_header('From', '{}<{}>'.format(self.username.split("@")[0], self.username))
 
-        recipients = recipients if isinstance(recipients, (list, tuple)) else (recipients,)
+        recipients = make_iterable(recipients)
 
         with self.smtp_server as server:
-            server.send(recipients, _mail, timeout or self.timeout, auto_add_to or self.auto_add_to)
+            server.send(recipients, _mail,
+                        first_not_none(timeout, self.timeout),
+                        first_not_none(auto_add_to, self.auto_add_to))
 
         return True
 
@@ -257,7 +259,7 @@ class SMTPServer(BaseServer):
         self.server.ehlo()
 
     # Methods
-    def send(self, recipients: List[str], mail: Mail,
+    def send(self, recipients: Iterable[str], mail: Mail,
              timeout: int or float or None, auto_add_to: bool):
 
         if timeout is not None:

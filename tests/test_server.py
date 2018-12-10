@@ -4,7 +4,6 @@ import os
 import time
 
 import pytest
-
 from zmail.exceptions import InvalidArguments
 from zmail.info import get_supported_server_info
 from zmail.server import MailServer, POPServer, SMTPServer

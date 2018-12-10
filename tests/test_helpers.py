@@ -2,10 +2,10 @@ import datetime
 import os
 
 import pytest
-
-from zmail.exceptions import InvalidArguments
-from zmail.helpers import (convert_date_to_datetime, get_abs_path,
-                           get_intersection, make_iterable, match_conditions)
+from zmail.exceptions import InvalidArguments, ZmailInternalError
+from zmail.helpers import (convert_date_to_datetime, first_not_none,
+                           get_abs_path, get_intersection, make_iterable,
+                           match_conditions)
 from zmail.structures import CaseInsensitiveDict
 
 
@@ -151,6 +151,15 @@ def test_make_iterable():
 
     assert make_iterable([1, 2, 3]) == [1, 2, 3]
     assert make_iterable((1, 2, 3)) == (1, 2, 3)
+
+
+def test_first_not_none():
+    with pytest.raises(ZmailInternalError):
+        first_not_none()
+        first_not_none(None)
+    assert first_not_none(True) is True
+    assert first_not_none(None, False, True) is False
+    assert first_not_none(True, None) is True
 
 
 def test_get_abs_path():

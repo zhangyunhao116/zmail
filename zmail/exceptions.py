@@ -19,3 +19,7 @@ class ParseError(ZmailException):
 
 class InvalidArguments(ZmailException):
     """Invalid arguments."""
+
+
+class ZmailInternalError(ZmailException):
+    """Internal error."""

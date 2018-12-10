@@ -2,7 +2,6 @@ import os
 from contextlib import suppress
 
 import pytest
-
 from zmail.api import server
 from zmail.structures import CaseInsensitiveDict
 from zmail.utils import read, save, save_attachment

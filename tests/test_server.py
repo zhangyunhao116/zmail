@@ -4,6 +4,7 @@ import os
 import time
 
 import pytest
+
 from zmail.exceptions import InvalidArguments
 from zmail.info import get_supported_server_info
 from zmail.server import MailServer, POPServer, SMTPServer
@@ -143,6 +144,32 @@ def test_send_and_get(mail_server: MailServer, here):
     # Test delete()
     assert mail_server.delete(mail_receive['id'])
     assert mail_server.stat()[0] < mail_receive['id'] or mail_server.get_mail(mail_receive['id']) != mail_receive
+
+
+def test_send_cc(mail_server: MailServer):
+    mail_as_dict = {
+        'subject': 'test_cc',
+        'content_text': ['测试内容1_1\r\n', '测试内容1_2'],
+    }
+
+    now_latest_num = mail_server.stat()[0]
+    mail_server.send_mail(mail_server.username, mail_as_dict, cc=mail_server.username)
+    t = 0
+    while True:
+        if now_latest_num < mail_server.stat()[0]:
+            mail_receive = mail_server.get_mail(now_latest_num + 1)
+            break
+        else:
+            t += 1
+            if t == 120:
+                raise TimeoutError('Test timeout({}s).'.format(t * 0.5))
+            time.sleep(0.5)
+
+    for k in mail_as_dict:
+        assert mail_receive[k] == mail_receive[k]
+
+    assert mail_receive['headers']['Cc'] == '<{}>'.format(mail_server.username)
+    mail_server.delete(mail_receive['id'])
 
 
 def test_resend(mail_server: MailServer, here):

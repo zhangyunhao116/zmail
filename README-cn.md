@@ -102,7 +102,13 @@ server.send_mail('yourfriend@example.com', mail)
 server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```
 
-- ##### **发送HTML作为邮件内容**
+你还可以为收件人定义名字(使用元组，第一个为其命名，第二个为其地址)
+
+```
+server.send_mail([('Boss','yourfriend@example.com'),'12345@example.com'], mail)
+```
+
+- ##### 发送HTML作为邮件内容
 
 ```python
 mail = {
@@ -124,6 +130,18 @@ mail = {
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
+```
+
+- ##### 使用抄送
+
+```
+server.send_mail(['foo@163.com','foo@126.com'],mail,cc=['bar@163.com'])
+```
+
+同样，你也可以为他们命名(使用元组，第一个为其命名，第二个为其地址)
+
+```
+server.send_mail(['foo@163.com','foo@126.com'],mail,cc=[('Boss','bar@163.com'),'bar@126.com'])
 ```
 
 - ##### 自定义你的server

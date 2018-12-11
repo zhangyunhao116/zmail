@@ -106,7 +106,13 @@ server.send_mail('yourfriend@example.com', mail)
 server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```
 
-- ##### **Send HTML content**
+you can also name them(Use tuple, first is its name, next is its address)
+
+```
+server.send_mail([('Boss','yourfriend@example.com'),'12345@example.com'], mail)
+```
+
+- ##### Send HTML content
 
 ```python
 mail = {
@@ -128,6 +134,18 @@ mail = {
     'attachments': '/Users/zyh/Documents/example.zip',  # Absolute path will be better.
 }
 server.send_mail('yourfriend@example.com',mail)
+```
+
+- ##### Use carbon copy
+
+```
+server.send_mail(['foo@163.com','foo@126.com'],mail,cc=['bar@163.com'])
+```
+
+samely, you can also name them(Use tuple, first is its name, next is its address)
+
+```
+server.send_mail(['foo@163.com','foo@126.com'],mail,cc=[('Boss','bar@163.com'),'bar@126.com'])
 ```
 
 - ##### Customize your server

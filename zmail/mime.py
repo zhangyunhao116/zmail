@@ -12,7 +12,7 @@ from email.mime.text import MIMEText
 from typing import List, Optional
 
 from .exceptions import InvalidArguments
-from .helpers import get_abs_path, make_iterable
+from .helpers import get_abs_path, make_list
 from .parser import parse
 from .structures import CaseInsensitiveDict
 
@@ -32,7 +32,7 @@ class Mail:
         self.boundary = boundary
         self.debug = debug
         self.log = log or logger
-        self.mime = None
+        self.mime = None  # type:MIMEMultipart
 
     def make_mine(self) -> None:
         mime = MIMEMultipart(boundary=self.boundary)
@@ -61,19 +61,19 @@ class Mail:
 
         # Set HTML content.
         if self.mail.get('content_html') is not None:
-            _htmls = make_iterable(self.mail['content_html'])
+            _htmls = make_list(self.mail['content_html'])
             for _html in _htmls:
                 mime.attach(MIMEText('{}'.format(_html), 'html', 'utf-8'))
 
         # Set TEXT content.
         if self.mail.get('content_text') is not None:
-            _messages = make_iterable(self.mail['content_text'])
+            _messages = make_list(self.mail['content_text'])
             for _message in _messages:
                 mime.attach(MIMEText('{}'.format(_message), 'plain', 'utf-8'))
 
         # Set attachments.
         if self.mail.get('attachments'):
-            attachments = make_iterable(self.mail['attachments'])
+            attachments = make_list(self.mail['attachments'])
             for attachment in attachments:
                 if isinstance(attachment, str):
                     attachment_abs_path = get_abs_path(attachment)

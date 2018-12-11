@@ -7,7 +7,7 @@ This module contains some useful function power zmail.
 import os
 from typing import Optional
 
-from .helpers import get_abs_path, make_iterable
+from .helpers import get_abs_path, make_list
 from .parser import parse_mail
 from .structures import CaseInsensitiveDict
 
@@ -30,7 +30,7 @@ def save_attachment(mail: CaseInsensitiveDict, target_path: Optional[str] = None
 
 def show(mails: list or CaseInsensitiveDict) -> None:
     """Show mail or mails."""
-    mails = make_iterable(mails)
+    mails = make_list(mails)
     for mail in mails:
         print('-------------------------')
         for k in ('subject', 'id', 'from', 'to', 'date', 'content_text', 'content_html', 'attachments'):

@@ -14,7 +14,8 @@ from typing import Iterable, List, Optional
 from .abc import BaseServer
 from .exceptions import InvalidArguments
 from .helpers import (convert_date_to_datetime, first_not_none,
-                      get_intersection, make_iterable, match_conditions)
+                      get_intersection, make_address_header, make_list,
+                      match_conditions)
 from .mime import Mail
 from .parser import parse_headers, parse_mail
 from .settings import __local__
@@ -90,19 +91,30 @@ class MailServer:
                                         log=self.log)
 
     def send_mail(self, recipients: List[str] or str, mail: dict or CaseInsensitiveDict, timeout=None,
-                  auto_add_from=True, auto_add_to=True) -> bool:
+                  auto_add_from=True, auto_add_to=True, cc=None) -> bool:
         """"Send email."""
         _mail = Mail(mail, debug=self.debug, log=self.log)
 
         if first_not_none(auto_add_from, self.auto_add_from) and _mail.mail.get('From') is None:
-            _mail.set_mime_header('From', '{}<{}>'.format(self.username.split("@")[0], self.username))
+            _mail.set_mime_header('From', make_address_header([self.username]))
 
-        recipients = make_iterable(recipients)
+        recipients = make_list(recipients)
+        if first_not_none(auto_add_to, self.auto_add_to) and _mail.mail.get('To') is None:
+            _mail.set_mime_header('To', make_address_header(recipients))
+
+        # Add Carbon Copy address.
+        cc = make_list(cc) if cc is not None else None
+        if cc is not None:
+            for address in cc:
+                recipients.append(address)
+            _mail.set_mime_header('Cc', make_address_header(cc))
+
+        # Remove tuple format in recipients.
+        recipients = [i if not isinstance(i, tuple) else i[1] for i in recipients]
 
         with self.smtp_server as server:
             server.send(recipients, _mail,
-                        first_not_none(timeout, self.timeout),
-                        first_not_none(auto_add_to, self.auto_add_to))
+                        first_not_none(timeout, self.timeout))
 
         return True
 
@@ -260,15 +272,12 @@ class SMTPServer(BaseServer):
 
     # Methods
     def send(self, recipients: Iterable[str], mail: Mail,
-             timeout: int or float or None, auto_add_to: bool):
+             timeout: int or float or None):
 
         if timeout is not None:
             self.server.timeout = timeout
 
-        for recipient in recipients:
-            if auto_add_to and mail.mail.get('To') is None:
-                mail.set_mime_header('To', '{}<{}>'.format(recipient.split("@")[0], recipient))
-            self.server.sendmail(self.username, recipient, mail.get_mime_as_string())
+        self.server.sendmail(self.username, recipients, mail.get_mime_as_string())
 
 
 class POPServer(BaseServer):

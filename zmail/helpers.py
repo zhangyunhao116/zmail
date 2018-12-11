@@ -1,12 +1,15 @@
 import datetime
 import os
 import re
+from base64 import b64encode
 from typing import Optional
 
 from .exceptions import InvalidArguments, ZmailInternalError
 from .structures import CaseInsensitiveDict
 
 DATETIME_PATTERN = re.compile(r'([0-9]+)?-?([0-9]{1,2})?-?([0-9]+)?\s*([0-9]{1,2})?:?([0-9]{1,2})?:?([0-9]{1,2})?\s*')
+HDR_PREV = '=?utf-8?b?'
+HDR_END = '?='
 
 
 def convert_date_to_datetime(_date: str or datetime.datetime) -> datetime.datetime:
@@ -81,9 +84,30 @@ def get_intersection(main_range: tuple, sub_range: tuple) -> list:
     return sorted(tuple((main_set & sub_set)))
 
 
-def make_iterable(obj) -> list or tuple:
-    """Get an iterable obj."""
-    return obj if isinstance(obj, (tuple, list)) else (obj,)
+def encode_mail_header(s: str) -> str:
+    if not s:
+        return ''
+    return HDR_PREV + b64encode(s.encode('utf-8')).decode('ascii') + HDR_END
+
+
+def make_list(obj) -> list:
+    return obj if isinstance(obj, list) else [obj]
+
+
+def make_address_header(address_list: list) -> str:
+    """Used for make 'To' 'Cc' 'From' header."""
+    res = []
+    for address in address_list:
+        if isinstance(address, tuple):
+            assert len(address) == 2, 'Only two arguments!'
+            name, rel_address = address
+            res.append(encode_mail_header(name) + ' ' + '<{}>'.format(rel_address))
+        elif isinstance(address, str):
+            res.append('<{}>'.format(address))
+        else:
+            raise InvalidArguments('Email address can only be tuple or str.Get {} instead.'.format(type(address)))
+
+    return ', '.join(res)
 
 
 def first_not_none(*args):

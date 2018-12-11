@@ -3,9 +3,9 @@ import os
 
 import pytest
 from zmail.exceptions import InvalidArguments, ZmailInternalError
-from zmail.helpers import (convert_date_to_datetime, first_not_none,
-                           get_abs_path, get_intersection, make_iterable,
-                           match_conditions)
+from zmail.helpers import (convert_date_to_datetime, encode_mail_header,
+                           first_not_none, get_abs_path, get_intersection,
+                           make_address_header, make_list, match_conditions)
 from zmail.structures import CaseInsensitiveDict
 
 
@@ -142,15 +142,36 @@ def test_get_intersection():
     assert get_intersection((1, 0), (1, 2)) == []
 
 
-def test_make_iterable():
-    assert make_iterable('') == ('',)
-    assert make_iterable(1) == (1,)
+def test_encode_mail_header():
+    assert encode_mail_header('') == ''
+    assert encode_mail_header('你好') == '=?utf-8?b?5L2g5aW9?='
+    assert encode_mail_header('123') == '=?utf-8?b?MTIz?='
 
-    assert make_iterable(list()) == list()
-    assert make_iterable(tuple()) == tuple()
 
-    assert make_iterable([1, 2, 3]) == [1, 2, 3]
-    assert make_iterable((1, 2, 3)) == (1, 2, 3)
+def test_make_list():
+    assert make_list('') == ['']
+    assert make_list(1) == [1]
+    assert make_list((1,)) == [(1,)]
+
+    assert make_list(list()) == list()
+
+    assert make_list([1, 2, 3]) == [1, 2, 3]
+
+
+def test_make_address_header():
+    assert make_address_header([]) == ''
+
+    t = ['123@123.com']
+    assert make_address_header(t) == '<123@123.com>'
+
+    t = [('你好', '123@123.com')]
+    assert make_address_header(t) == '=?utf-8?b?5L2g5aW9?= <123@123.com>'
+
+    t = ['123@123.com', ('你好', '123@123.com')]
+    assert make_address_header(t) == '<123@123.com>, =?utf-8?b?5L2g5aW9?= <123@123.com>'
+
+    t = t[::-1]
+    assert make_address_header(t) == '=?utf-8?b?5L2g5aW9?= <123@123.com>, <123@123.com>'
 
 
 def test_first_not_none():

@@ -100,6 +100,8 @@ server = zmail.server('yourmail@example.com‘, 'yourpassword')
 server.send_mail('yourfriend@example.com', mail)
 ```
 
+You can define sender's name by add `'from':'Boss <mymail@foo.com>'`  in your mail.
+
 - ##### To a list of recipients
 
 ```python
@@ -381,7 +383,7 @@ Can either be dict or CaseInsensitiveDict(Usually from get_mail or get_mails)
 
 ***from*** The 'from' header, represent the mail's source.
 
-***to*** The 'to' header, represent the mail's destination.
+***to*** **(Not used)**.You can use tuple (name,address) to define the name of recipient.(Used for To and Cc)
 
 ***content_text*** The text content.Can either be str or a list of str.
 

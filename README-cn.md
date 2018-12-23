@@ -96,6 +96,8 @@ server = zmail.server('yourmail@example.com’, 'yourpassword')
 server.send_mail('yourfriend@example.com', mail)
 ```
 
+你也可以自定义发送者的名字，具体的做法是在在mail中加入`'from':'Boss <mymail@foo.com>'`
+
 - ##### 给一个列表的收件人发件
 
 ```
@@ -377,7 +379,7 @@ for k,v in mail.items():
 
 ***from*** 'from'头部，表明了邮件的来源
 
-***to*** 'to'头部，表明了邮件的目的地
+***to*** **(不在使用)** 你可以使用一个元组(name,address)来指定接收人的名字，适用于抄送和发送。
 
 ***content_text*** 邮件的文本内容，可为字符串或者一个由字符串组成的列表
 

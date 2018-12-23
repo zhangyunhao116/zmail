@@ -40,16 +40,19 @@ class Mail:
         # Set basic email elements.
         for k, v in self.mail.items():
             _k = k.lower()
-            if _k in ('from', 'to', 'subject') and v is not None:
-                mime[_k.capitalize()] = v
-            elif _k in ('attachments', 'content_text', 'content_html'):
-                pass
-            elif _k == 'headers':
+            if _k in ('subject', 'from'):
+                if isinstance(v, str):
+                    mime[_k.capitalize()] = v
+                else:
+                    raise InvalidArguments('{} can only be str! Got {} instead.'.format(_k.capitalize(), type(v)))
+            elif _k == 'to':
+                if not self._is_resend_mail():
+                    warnings.warn("Header 'to' is invalid and unused,if you want to add address name "
+                                  "use tuple (address,name) instead.", category=DeprecationWarning, stacklevel=4)
+            elif _k in ('attachments', 'content_text', 'content_html', 'headers'):
                 pass
             else:
-                if not all([(i in self.mail) for i in
-                            ('from', 'to', 'subject', 'raw_headers', 'charsets', 'headers',
-                             'date', 'id', 'raw', 'attachments', 'content_text', 'content_html')]):
+                if not self._is_resend_mail():
                     # Remove resend warnings.
                     warnings.warn("Header '{}' is invalid and unused,if you want to add extra headers "
                                   "use 'headers' instead.".format(str(_k)), category=DeprecationWarning, stacklevel=4)
@@ -115,6 +118,11 @@ class Mail:
 
     def get_mime_as_bytes_list(self) -> List[bytes]:
         return self.get_mime_as_string().encode('utf-8').split(b'\n')
+
+    def _is_resend_mail(self) -> bool:
+        return all([(i in self.mail) for i in
+                    ('from', 'to', 'subject', 'raw_headers', 'charsets', 'headers',
+                     'date', 'id', 'raw', 'attachments', 'content_text', 'content_html')])
 
 
 def make_attachment_part(file_path) -> MIMEBase:

@@ -90,8 +90,8 @@ class MailServer:
                                         debug=self.debug,
                                         log=self.log)
 
-    def send_mail(self, recipients: List[str] or str, mail: dict or CaseInsensitiveDict, timeout=None,
-                  auto_add_from=True, auto_add_to=True, cc=None) -> bool:
+    def send_mail(self, recipients: List[str] or str, mail: dict or CaseInsensitiveDict, cc=None,
+                  timeout=None, auto_add_from=True, auto_add_to=True) -> bool:
         """"Send email."""
         _mail = Mail(mail, debug=self.debug, log=self.log)
 

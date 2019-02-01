@@ -1,5 +1,4 @@
 import pytest
-
 from zmail.info import (DEFAULT_SERVER_CONFIG,
                         SUPPORTED_ENTERPRISE_SERVER_CONFIG, SUPPORTED_SERVER,
                         get_supported_server_info)

@@ -4,7 +4,6 @@ import os
 import time
 
 import pytest
-
 from zmail.exceptions import InvalidArguments
 from zmail.info import get_supported_server_info
 from zmail.server import MailServer, POPServer, SMTPServer
@@ -204,8 +203,8 @@ def test_resend(mail_server: MailServer, here):
             if t == 120:
                 raise TimeoutError('Test timeout({}s).'.format(t * 0.5))
             time.sleep(0.5)
-    for k in ('subject', 'from', 'to', 'content_text', 'content_html', 'attachments'):
-        assert mail_receive[k] == mail_receive_next[k]
+    for k in ('subject', 'from', 'content_text', 'content_html', 'attachments'):
+        assert mail_receive[k] == mail_receive_next[k], k  # TODO:Add 'to'
 
     # Delete these mails.
     mail_server.delete(mail_receive_next['id'])

@@ -11,6 +11,7 @@ from base64 import b64decode
 from email.header import decode_header
 from quopri import decodestring
 from typing import List
+from urllib.parse import unquote
 
 from .exceptions import ParseError
 from .structures import CaseInsensitiveDict
@@ -20,6 +21,7 @@ TYPE_TEXT_PLAIN = ('text', 'plain')
 TYPE_TEXT_HTML = ('text', 'html')
 DATE_PATTERN_1 = re.compile(r'(\w+),\s+([0-9]+)\s+(\w+)\s+([0-9]+)\s+([0-9]+):([0-9]+):([0-9]+)\s+(.+)')
 DATE_PATTERN_2 = re.compile(r'([0-9]+)\s+([\w]+)\s+([0-9]+)\s+([0-9]+):([0-9]+):([0-9]+)\s+(.+)')
+FILENAME_PATTERN = re.compile(re.compile(r"([^']+)'([^']*)'(.+)"))
 MONTH_TO_INT = CaseInsensitiveDict({
     'Jan': 1,
     'Feb': 2,
@@ -297,6 +299,11 @@ def parse_one_part_body(headers: CaseInsensitiveDict, body: List[bytes], main_ty
                         log.warning('Can not decode Content-Disposition extra part:' + part + ' reason:' + str(e))
                     continue
             filename = _extra_kv.get('filename')
+            if filename is None and _extra_kv.get('filename*'):  # RFC5987 and ignore language tags
+                match = FILENAME_PATTERN.fullmatch(_extra_kv.get('filename*'))
+                if match:
+                    _encoding, _language_tags, _name = match.groups()
+                    filename = unquote(_name, _encoding)
         else:
             filename = None
         attachment_name = filename or extra_kv.get('name') or headers.get('subject') or 'Untitled'
@@ -330,6 +337,11 @@ def parse_one_part_body(headers: CaseInsensitiveDict, body: List[bytes], main_ty
                         log.warning('Can not decode Content-Disposition extra part:' + part + ' reason:' + str(e))
                     continue
             filename = _extra_kv.get('filename')
+            if filename is None and _extra_kv.get('filename*'):  # RFC5987 and ignore language tags
+                match = FILENAME_PATTERN.fullmatch(_extra_kv.get('filename*'))
+                if match:
+                    _encoding, _language_tags, _name = match.groups()
+                    filename = unquote(_name, _encoding)
         else:
             filename = None
         attachment_name = filename or extra_kv.get('name') or headers.get('subject') or 'Untitled'

@@ -8,6 +8,7 @@ from .exceptions import InvalidArguments, ZmailInternalError
 from .structures import CaseInsensitiveDict
 
 DATETIME_PATTERN = re.compile(r'([0-9]+)?-?([0-9]{1,2})?-?([0-9]+)?\s*([0-9]{1,2})?:?([0-9]{1,2})?:?([0-9]{1,2})?\s*')
+LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 HDR_PREV = '=?utf-8?b?'
 HDR_END = '?='
 
@@ -34,7 +35,8 @@ def convert_date_to_datetime(_date: str or datetime.datetime) -> datetime.dateti
         minute = minute or 0
         second = second or 0
 
-    return datetime.datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=second)
+    return datetime.datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=second,
+                             tzinfo=LOCAL_TIMEZONE)
 
 
 def match_conditions(mail_headers: CaseInsensitiveDict,

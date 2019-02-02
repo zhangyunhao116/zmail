@@ -8,6 +8,7 @@ import logging
 import re
 import warnings
 from base64 import b64decode
+from datetime import timedelta, timezone, tzinfo
 from email.header import decode_header
 from quopri import decodestring
 from typing import List
@@ -21,6 +22,8 @@ TYPE_TEXT_PLAIN = ('text', 'plain')
 TYPE_TEXT_HTML = ('text', 'html')
 DATE_PATTERN_1 = re.compile(r'(\w+),\s+([0-9]+)\s+(\w+)\s+([0-9]+)\s+([0-9]+):([0-9]+):([0-9]+)\s+(.+)')
 DATE_PATTERN_2 = re.compile(r'([0-9]+)\s+([\w]+)\s+([0-9]+)\s+([0-9]+):([0-9]+):([0-9]+)\s+(.+)')
+TIMEZONE_PATTERN = re.compile(re.compile(r"([+\-])([0-9])?([0-9])?([0-9])?([0-9])?"))
+TIMEZONE_MINUTE_OFFSET = (600, 60, 10, 1)
 FILENAME_PATTERN = re.compile(re.compile(r"([^']+)'([^']*)'(.+)"))
 MONTH_TO_INT = CaseInsensitiveDict({
     'Jan': 1,
@@ -84,6 +87,25 @@ def parse_header_value(bvalue, encodings) -> str or None:
     return None
 
 
+def _fmt_date_tz(tz: str) -> tzinfo or None:
+    match_groups = TIMEZONE_PATTERN.match(tz).groups()
+    _minute_offset = 0
+    if match_groups[0] == '+':
+        for i, v in enumerate(match_groups[1:]):
+            if v is None:
+                continue
+            _minute_offset += int(TIMEZONE_MINUTE_OFFSET[i] * int(v))
+        return timezone(timedelta(minutes=_minute_offset))
+    elif match_groups[0] == '-':
+        for i, v in enumerate(match_groups[1:]):
+            if v is None:
+                continue
+            _minute_offset += int(TIMEZONE_MINUTE_OFFSET[i] * int(v))
+        return timezone(-timedelta(minutes=_minute_offset))
+    else:
+        return None
+
+
 def fmt_date(date_as_string: str) -> datetime.datetime or None:
     """Convert mail header Date to datetime object."""
     match_one = DATE_PATTERN_1.fullmatch(date_as_string)
@@ -91,13 +113,15 @@ def fmt_date(date_as_string: str) -> datetime.datetime or None:
     if match_one:
         week, day, month_as_string, year, hour, minute, second, time_zone = match_one.groups()
         month = MONTH_TO_INT[month_as_string]
+        tz = _fmt_date_tz(time_zone)
         return datetime.datetime(int(year), month, int(day),
-                                 int(hour), int(minute), int(second))
+                                 int(hour), int(minute), int(second), tzinfo=tz)
     elif match_two:
         day, month_as_string, year, hour, minute, second, time_zone = match_two.groups()
         month = MONTH_TO_INT[month_as_string]
+        tz = _fmt_date_tz(time_zone)
         return datetime.datetime(int(year), month, int(day),
-                                 int(hour), int(minute), int(second))
+                                 int(hour), int(minute), int(second), tzinfo=tz)
     else:
         warnings.warn('Can not parse Date:{}'.format(date_as_string))
         return None

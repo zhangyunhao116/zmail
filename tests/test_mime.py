@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+from datetime import timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from unittest import mock
 
@@ -68,8 +69,9 @@ def test_get_mime(mail_config):
 def test_mail_decode(mail_config):
     mail_as_dict, boundary = mail_config
     mail = Mail(mail_as_dict, boundary)
+    mail_decoded = mail.decode()
 
-    assert mail.decode() == {
+    mail_decoded_demo = {
         'content_text': ['xxxxxx', 'yyyyyy'],
         'content_html': ['11111', '22222'],
         'attachments': [('图标.ico',
@@ -78,16 +80,18 @@ def test_mail_decode(mail_config):
                     'MIME-Version': '1.0',
                     'Subject': '测试邮件',
                     'From': '中国<123@test.com>',
-                    'date': datetime.datetime(2018, 8, 25, 8, 8, 52)},
+                    'date': datetime.datetime(2018, 8, 25, 8, 8, 52, tzinfo=timezone(timedelta(hours=8)))},
         'raw_headers': [(b'Content-Type', b'multipart/mixed; boundary="===============0242955124569473489=="'),
                         (b'MIME-Version', b'1.0'), (b'Subject', b'=?utf-8?b?5rWL6K+V6YKu5Lu2?='),
                         (b'From', b'=?utf-8?b?5Lit5Zu9PDEyM0B0ZXN0LmNvbT4=?='),
                         (b'date', b'Sun, 25 Aug 2018 08:08:52 +0800')],
         'charsets': ['utf-8'],
         'subject': '测试邮件',
-        'date': datetime.datetime(2018, 8, 25, 8, 8, 52),
+        'date': datetime.datetime(2018, 8, 25, 8, 8, 52, tzinfo=timezone(timedelta(hours=8))),
         'from': '中国<123@test.com>',
         'to': None}
+    for k, v in mail_decoded_demo.items():
+        assert mail_decoded[k] == v, k
 
 
 def test_mail_set_header(mail_config):
@@ -95,8 +99,9 @@ def test_mail_set_header(mail_config):
     mail = Mail(mail_as_dict, boundary)
 
     mail.set_mime_header('to', '中国<123@test.com>')
+    mail_decoded = mail.decode()
 
-    assert mail.decode() == {
+    mail_decoded_demo = {
         'content_text': ['xxxxxx', 'yyyyyy'],
         'content_html': ['11111', '22222'],
         'attachments': [('图标.ico',
@@ -105,7 +110,7 @@ def test_mail_set_header(mail_config):
                     'MIME-Version': '1.0',
                     'Subject': '测试邮件',
                     'From': '中国<123@test.com>',
-                    'date': datetime.datetime(2018, 8, 25, 8, 8, 52),
+                    'date': datetime.datetime(2018, 8, 25, 8, 8, 52, tzinfo=timezone(timedelta(hours=8))),
                     'to': '中国<123@test.com>'},
         'raw_headers': [(b'Content-Type', b'multipart/mixed; boundary="===============0242955124569473489=="'),
                         (b'MIME-Version', b'1.0'), (b'Subject', b'=?utf-8?b?5rWL6K+V6YKu5Lu2?='),
@@ -114,6 +119,8 @@ def test_mail_set_header(mail_config):
                         (b'to', b'=?utf-8?b?5Lit5Zu9PDEyM0B0ZXN0LmNvbT4=?=')],
         'charsets': ['utf-8'],
         'subject': '测试邮件',
-        'date': datetime.datetime(2018, 8, 25, 8, 8, 52),
+        'date': datetime.datetime(2018, 8, 25, 8, 8, 52, tzinfo=timezone(timedelta(hours=8))),
         'from': '中国<123@test.com>',
         'to': '中国<123@test.com>', }
+    for k, v in mail_decoded_demo.items():
+        assert mail_decoded[k] == v, k

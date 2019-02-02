@@ -35,7 +35,7 @@ if sys.argv[-1] in ('flake8', 'flake'):
 
 setup(
     name='zmail',
-    version='0.2.2',
+    version='0.2.3',
 
     author='ZYunH',
     author_email='zyunhjob@163.com',

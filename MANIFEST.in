@@ -4,5 +4,6 @@ include setup.py
 include *.md
 
 exclude test/*
+exclude tests/*
 exclude test.py
 exclude *.pyc

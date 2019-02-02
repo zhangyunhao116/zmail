@@ -60,6 +60,12 @@ zmail.show(latest_mail)
 
 
 
+## 应用示例
+
+请看 [zmail_demos](https://github.com/ZYunH/zmail_demos)
+
+
+
 ## 使用示例
 
 

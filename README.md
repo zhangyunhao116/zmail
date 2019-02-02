@@ -64,6 +64,12 @@ zmail.show(latest_mail)
 
 
 
+## Demos
+
+see [zmail_demos](https://github.com/ZYunH/zmail_demos)
+
+
+
 ## Examples
 
 

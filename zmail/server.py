@@ -90,7 +90,7 @@ class MailServer:
                                         debug=self.debug,
                                         log=self.log)
 
-    def send_mail(self, recipients: List[str] or str, mail: dict or CaseInsensitiveDict, cc=None,
+    def send_mail(self, recipients: List[str] or str, mail: dict or CaseInsensitiveDict, cc=None, bcc=None,
                   timeout=None, auto_add_from=True, auto_add_to=True) -> bool:
         """"Send email."""
         _mail = Mail(mail, debug=self.debug, log=self.log)
@@ -108,6 +108,13 @@ class MailServer:
             for address in cc:
                 recipients.append(address)
             _mail.set_mime_header('Cc', make_address_header(cc))
+
+        # Add bcc address.
+        bcc = make_list(bcc) if bcc is not None else None
+        if bcc is not None:
+            for address in bcc:
+                recipients.append(address)
+            _mail.set_mime_header('Bcc', make_address_header(bcc))
 
         # Remove tuple format in recipients.
         recipients = [i if not isinstance(i, tuple) else i[1] for i in recipients]

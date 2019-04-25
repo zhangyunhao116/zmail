@@ -4,6 +4,7 @@ zmail.__init__
 Zmail allows you to send and get email as possible as it can be.
 """
 import logging
+
 from .api import *  # noqa
 from .settings import __level__  # noqa
 

@@ -3,10 +3,10 @@ zmail.structures
 ~~~~~~~~~~~~~~~~
 Data structures that power zmail.
 """
-import collections
+from .compat import Mapping, MutableMapping, OrderedDict
 
 
-class CaseInsensitiveDict(collections.MutableMapping):
+class CaseInsensitiveDict(MutableMapping):
     """A case-insensitive ``dict``-like object.
     Inspired by requests.structures
 
@@ -14,7 +14,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
     """
 
     def __init__(self, data=None, **kwargs):
-        self._store = collections.OrderedDict()
+        self._store = OrderedDict()
         if data is None:
             data = {}
         self.update(data, **kwargs)
@@ -43,7 +43,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
         )
 
     def __eq__(self, other):
-        if isinstance(other, collections.Mapping):
+        if isinstance(other, Mapping):
             other = CaseInsensitiveDict(other)
         else:
             return NotImplemented

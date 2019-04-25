@@ -2,6 +2,7 @@ import datetime
 import os
 
 import pytest
+
 from zmail.exceptions import InvalidArguments, ZmailInternalError
 from zmail.helpers import (convert_date_to_datetime, encode_mail_header,
                            first_not_none, get_abs_path, get_intersection,

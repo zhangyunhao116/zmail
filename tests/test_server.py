@@ -4,6 +4,7 @@ import os
 import time
 
 import pytest
+
 from zmail.exceptions import InvalidArguments
 from zmail.info import get_supported_server_info
 from zmail.server import MailServer, POPServer, SMTPServer
@@ -13,6 +14,9 @@ logger = logging.getLogger('zmail')
 
 @pytest.fixture
 def mail_server_config(accounts) -> dict:
+    if not accounts:
+        pytest.skip('Can not get accounts')
+
     account = accounts[0]
     username = account[0]
     password = account[1]
@@ -212,6 +216,9 @@ def test_resend(mail_server: MailServer, here):
 
 
 def test_all_account_smtp_and_pop_able(accounts):
+    if not accounts:
+        pytest.skip('Can not get accounts')
+
     for account in accounts:
         username = account[0]
         password = account[1]

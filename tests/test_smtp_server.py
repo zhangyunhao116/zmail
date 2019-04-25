@@ -3,12 +3,16 @@ import smtplib
 from unittest import mock
 
 import pytest
+
 from zmail.info import get_supported_server_info
 from zmail.server import SMTPServer
 
 
 @pytest.fixture
 def smtp_server(accounts):
+    if not accounts:
+        pytest.skip('Can not get accounts')
+
     account = accounts[0]
     username = account[0]
     password = account[1]
@@ -24,6 +28,9 @@ def smtp_server(accounts):
 
 @pytest.fixture
 def smtp_server_config(accounts):
+    if not accounts:
+        pytest.skip('Can not get accounts')
+
     account = accounts[0]
     username = account[0]
     password = account[1]

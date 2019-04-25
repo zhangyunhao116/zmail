@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from unittest import mock
 
 import pytest
+
 from zmail.mime import Mail
 
 logger = logging.getLogger('zmail')

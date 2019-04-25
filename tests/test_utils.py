@@ -2,6 +2,7 @@ import os
 from contextlib import suppress
 
 import pytest
+
 from zmail.api import server
 from zmail.structures import CaseInsensitiveDict
 from zmail.utils import read, save, save_attachment
@@ -54,6 +55,9 @@ def test_save_attachment(here):
 
 
 def test_save_and_read(accounts):
+    if not accounts:
+        pytest.skip('Can not get accounts')
+
     try:
         account = accounts[0]
         username, password = account

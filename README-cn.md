@@ -446,11 +446,12 @@ for k,v in mail.items():
 
 ## 支持的企业邮箱
 
-| 名称         | 使用示例                                    |
-| ------------ | ------------------------------------------- |
-| 腾讯企业邮箱 | zmail.server('username','psw',config='qq')  |
-| 阿里企业邮箱 | zmail.server('username','psw',config='ali') |
-| 网易企业邮箱 | zmail.server('username','psw',config='163') |
+| 名称         | 使用示例                                       |
+| ------------ | ---------------------------------------------- |
+| 腾讯企业邮箱 | zmail.server('username','psw',config='qq')     |
+| 阿里企业邮箱 | zmail.server('username','psw',config='ali')    |
+| 网易企业邮箱 | zmail.server('username','psw',config='163')    |
+| 谷歌企业邮箱 | zmail.server('username','psw',config='google') |
 
 
 

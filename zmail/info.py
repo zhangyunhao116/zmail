@@ -136,6 +136,16 @@ SUPPORTED_ENTERPRISE_SERVER_CONFIG = {
         'pop_ssl': True,
         'pop_tls': False
     },
+    'google': {
+        'smtp_host': 'smtp.gmail.com',
+        'smtp_port': 587,
+        'smtp_ssl': False,
+        'smtp_tls': True,
+        'pop_host': 'pop.gmail.com',
+        'pop_port': 995,
+        'pop_ssl': True,
+        'pop_tls': False,
+    },
 
 }
 

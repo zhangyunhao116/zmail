@@ -450,11 +450,12 @@ The mail server in this list has been tested and approved.
 
 ## Supported enterprise mail server
 
-| Name                    | Usage                                       |
-| ----------------------- | ------------------------------------------- |
-| Tencent enterprise mail | zmail.server('username','psw',config='qq')  |
-| Ali enterprise mail     | zmail.server('username','psw',config='ali') |
-| Netease enterprise mail | zmail.server('username','psw',config='163') |
+| Name                    | Usage                                          |
+| ----------------------- | ---------------------------------------------- |
+| Tencent enterprise mail | zmail.server('username','psw',config='qq')     |
+| Ali enterprise mail     | zmail.server('username','psw',config='ali')    |
+| Netease enterprise mail | zmail.server('username','psw',config='163')    |
+| Google enterprise mail  | zmail.server('username','psw',config='google') |
 
 
 

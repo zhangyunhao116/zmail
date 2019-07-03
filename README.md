@@ -10,7 +10,7 @@
 
 ## Introduction
 
-Zmail allows you to send and get emails as possible as it can be in python.There is no need to check server address or make your own MIME object.With zmail, you only need to care about your mail content.
+Zmail makes it easier to send and retrieve emails in python3. There's no need to manually add—server address, port, suitable protocol, and so on—zmaill will do it for you. Besides, use a python dict as a mail is also more intuitive.
 
 ## Installation 
 
@@ -89,7 +89,7 @@ if server.pop_able():
 
 ```
 
-If SMTP and POP are working correctly,the function will return True,else return Fasle.
+If SMTP and POP are working correctly, the function will return True, else return Fasle.
 
 ### Send your mail
 
@@ -114,7 +114,7 @@ You can define sender's name by add `'from':'Boss <mymail@foo.com>'`  in your ma
 server.send_mail(['yourfriend@example.com','12345@example.com'], mail)
 ```
 
-you can also name them(Use tuple, first is its name, next is its address)
+you can also name them (use tuple, first is its name, next is its address).
 
 ```
 server.send_mail([('Boss','yourfriend@example.com'),'12345@example.com'], mail)
@@ -150,7 +150,7 @@ server.send_mail('yourfriend@example.com',mail)
 server.send_mail(['foo@163.com','foo@126.com'],mail,cc=['bar@163.com'])
 ```
 
-samely, you can also name them(Use tuple, first is its name, next is its address)
+Again, you can also name them (use tuple, first is its name, next is its address).
 
 ```
 server.send_mail(['foo@163.com','foo@126.com'],mail,cc=[('Boss','bar@163.com'),'bar@126.com'])
@@ -158,7 +158,7 @@ server.send_mail(['foo@163.com','foo@126.com'],mail,cc=[('Boss','bar@163.com'),'
 
 - ##### Customize your server
 
-If zmail not working correctly, you can customize your server config by yourself.
+If zmail is not working correctly, you can customize your server config yourself.
 
 ```
 server = zmail.server('username','password',smtp_host='smtp.163.com',smtp_port=994,smtp_ssl=True,pop_host='pop.163.com',pop_port=995,pop_tls=True)
@@ -186,11 +186,11 @@ mail = server.get_mail(2)
 mail = server.get_mails(subject='GitHub',start_time='2018-1-1',sender='github')
 ```
 
-In the example, if 'GitHub' is in mail's subject, it will be matched, such as '  [GitHub] Your password has changed'
+In this example, if 'GitHub' in mail's subject, it will be matched, as in '[GitHub] Your password has changed'
 
-sender is the same way.
+Sender is the same way.
 
-You can also specified the range of mails.
+You can also assign the range of mails.
 
 ```
 mail = server.get_mails(subject='GitHub',start_time='2018-1-1',sender='github',start_index=1,end_index=10)
@@ -206,13 +206,13 @@ The result is a tuple of 2 integers: `(message count, mailbox size)`.
 
 ### Parse your mail
 
-In zmail, all mails will be mapped to a python dictionary, you can access your mail by
+In zmail, each mail will be mapped to a python dictionary, you can access your mail by
 
 ```
 subject = mail['subject']
 ```
 
-Show you mail, use **zmail.show()**
+Show your mail's base information, use **zmail.show()**
 
 ```python
 import zmail
@@ -239,7 +239,7 @@ for k,v in mail.items():
 
 Return **MailServer** instance, it implements all SMTP and POP functions.
 
-If set any arguments which starts with `pop` or `smtp`, it will replace inner auto-generate argument(The arguments depends on the `username` or `config` you provided).
+If set any arguments which starts with `pop` or `smtp`, it will replace inner auto-generate argument (the arguments depends on the `username` or `config` you provide).
 
 ***config*** Shortcut for use enterprise mail,if specified, enterprise mail configs will replace all inner auto-generate configs.
 
@@ -462,7 +462,7 @@ The mail server in this list has been tested and approved.
 ## Q&A
 
 - Can not send or retrieve
-  - ensure your smtp&pop3 function is open
-  - according to smtp or pop protocol provided by your mail server to define zmail.server 
+  - Ensure your smtp&pop3 function is open
+  - Use smtp or pop protocol settings provided by your mail server to config zmail.server, like following
   - SMTP：server = zmail.server('user','psw',smtp_host = 'xxx',smtp_port = 'yyyyy',smtp_ssl=True)
   - POP3：server = zmail.server('user','psw',pop_host = 'xxx',pop_port = 'yyyyy',pop_ssl=True)

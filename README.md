@@ -239,7 +239,7 @@ for k,v in mail.items():
 
 Return **MailServer** instance, it implements all SMTP and POP functions.
 
-If set any arguments which starts with `pop` or `smtp`, it will replace inner auto-generate argument (the arguments depends on the `username` or `config` you provide).
+If set any arguments which starts with `pop` or `smtp`, it will replace inner auto-generate argument (the arguments depend on the `username` or `config` you provide).
 
 ***config*** Shortcut for use enterprise mail,if specified, enterprise mail configs will replace all inner auto-generate configs.
 

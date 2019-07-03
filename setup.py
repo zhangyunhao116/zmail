@@ -40,10 +40,10 @@ setup(
     author='ZYunH',
     author_email='zyunhjob@163.com',
 
-    description='Zmail allows you to send and get emails as possible as it can be in python',
-    long_description='Zmail allows you to send and get emails as possible as it can be in python.'
-                     'There is no need to check server address or make your own MIME string.With zmail, '
-                     'you only need to care about your mail content.',
+    description='Zmail makes it easier to send and retrieve emails in python3.',
+    long_description="Zmail makes it easier to send and retrieve emails in python3."
+                     " There's no need to manually add—server address, port, suitable protocol, and so on—"
+                     "Zmail will do it for you. Besides, use a python dict as a mail is also more intuitive.",
     keywords='email python3 package',
 
     url='https://github.com/ZYunH/zmail',

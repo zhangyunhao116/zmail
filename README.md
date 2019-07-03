@@ -10,7 +10,7 @@
 
 ## Introduction
 
-Zmail makes it easier to send and retrieve emails in python3. There's no need to manually add—server address, port, suitable protocol, and so on—zmaill will do it for you. Besides, use a python dict as a mail is also more intuitive.
+Zmail makes it easier to send and retrieve emails in python3. There's no need to manually add—server address, port, suitable protocol, and so on—Zmail will do it for you. Besides, use a python dict as a mail is also more intuitive.
 
 ## Installation 
 

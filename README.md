@@ -49,7 +49,7 @@ Then, all you need to do is just import zmail.
 
 ```python
 import zmail
-server = zmail.server('yourmail@example.com’, 'yourpassword')
+server = zmail.server('yourmail@example.com', 'yourpassword')
 
 # Send mail
 server.send_mail('yourfriend@example.com',{'subject':'Hello!','content_text':'By zmail.'})

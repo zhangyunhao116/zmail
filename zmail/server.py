@@ -55,8 +55,8 @@ class MailServer:
         self.auto_add_from = auto_add_from
         self.auto_add_to = auto_add_to
 
-        self.smtp_server = None  # type:SMTPServer
-        self.pop_server = None  # type:POPServer
+        self.smtp_server = None  # type:SMTPServer or None
+        self.pop_server = None  # type:POPServer or None
 
         # Check arguments.
         if not isinstance(self.log, logging.Logger):
@@ -216,6 +216,15 @@ class SMTPServer(BaseServer):
     def _make_server(self):
         """Init Server if possible."""
         if self.server is None:
+            if self.ssl:
+                self.server = smtplib.SMTP_SSL(self.host, self.port, __local__, timeout=self.timeout)
+            else:
+                self.server = smtplib.SMTP(self.host, self.port, __local__, timeout=self.timeout)
+
+        # If connection is closed, we create a new one.
+        try:
+            self.server.noop()
+        except (smtplib.SMTPException, IOError):
             if self.ssl:
                 self.server = smtplib.SMTP_SSL(self.host, self.port, __local__, timeout=self.timeout)
             else:

@@ -221,7 +221,7 @@ class SMTPServer(BaseServer):
             else:
                 self.server = smtplib.SMTP(self.host, self.port, __local__, timeout=self.timeout)
 
-        # If connection is closed, we create a new one.
+        # If connection is closed, create a new one.
         try:
             self.server.noop()
         except (smtplib.SMTPException, IOError):
@@ -295,6 +295,15 @@ class POPServer(BaseServer):
     def _make_server(self):
         """Init Server."""
         if self.server is None:
+            if self.ssl:
+                self.server = poplib.POP3_SSL(self.host, self.port, timeout=self.timeout)
+            else:
+                self.server = poplib.POP3(self.host, self.port, timeout=self.timeout)
+
+        # If connection is closed, create a new one.
+        try:
+            self.server.noop()
+        except IOError:
             if self.ssl:
                 self.server = poplib.POP3_SSL(self.host, self.port, timeout=self.timeout)
             else:

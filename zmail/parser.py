@@ -102,8 +102,7 @@ def _fmt_date_tz(tz: str) -> tzinfo or None:
                 continue
             _minute_offset += int(TIMEZONE_MINUTE_OFFSET[i] * int(v))
         return timezone(-timedelta(minutes=_minute_offset))
-    else:
-        return None
+    return None
 
 
 def fmt_date(date_as_string: str) -> datetime.datetime or None:
@@ -122,9 +121,8 @@ def fmt_date(date_as_string: str) -> datetime.datetime or None:
         tz = _fmt_date_tz(time_zone)
         return datetime.datetime(int(year), month, int(day),
                                  int(hour), int(minute), int(second), tzinfo=tz)
-    else:
-        warnings.warn('Can not parse Date:{}'.format(date_as_string))
-        return None
+    warnings.warn('Can not parse Date:{}'.format(date_as_string))
+    return None
 
 
 def _get_sub_charset(raw_headers: list) -> list:
@@ -255,7 +253,7 @@ def parse_headers(lines: List[bytes], debug=False, log=None):
         else:
             if debug:
                 logger.warning('Can not decode bytes-value' + str(bvalue))
-    # Parse Date and convert Date to DateTimeObject
+    # Parse Date and convert Date to DateTimeObject.
     if headers.get('date'):
         headers['date'] = fmt_date(headers['date'])
     return raw_headers, headers, lines_idx, main_type, sub_type, charsets, extra_kv
@@ -464,5 +462,4 @@ def parse_mail(lines: List[bytes], which: int, debug=False, log=None) -> CaseIns
     parsed_mail = parse(lines, debug, log)
     parsed_mail['id'] = which
     parsed_mail['raw'] = lines
-
     return parsed_mail

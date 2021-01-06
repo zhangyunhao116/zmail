@@ -83,7 +83,7 @@ class Mail:
                     name, raw = attachment
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload(raw)
-                    part['Content-Disposition'] = 'attachment;filename="{}"'.format(name)
+                    part.add_header("Content-Disposition", "attachment", filename=("gbk", "", name))
                     encode_base64(part)
                     mime.attach(part)
                 else:

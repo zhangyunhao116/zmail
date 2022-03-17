@@ -12,6 +12,10 @@
 
 Zmail makes it easier to send and retrieve emails in python3. There's no need to manually add—server address, port, suitable protocol, and so on—Zmail will do it for you. Besides, use a python dict as a mail is also more intuitive.
 
+> WARNING: This project is no longer maintained. The original goal of `zmail` was to provide a simple way to send e-mail in python3. 
+Unfortunately I am no longer have the time to continue to maintain this project. Feel free to fork if you want some features.
+
+
 ## Installation 
 
 Zmail only running in python3 without third-party modules required. **Do not support python2**.
